@@ -8,6 +8,8 @@
 
 ---
 ![Screenshot](en-home.png)
+![Screenshot](ar-home.png)
+![Screenshot](game.png)
 
 ---
 
