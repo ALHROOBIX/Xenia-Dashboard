@@ -15,7 +15,7 @@
 
 ## Credits & Special Thanks
 
-The **Xenia Dashboard & Manager** stands on the shoulders of giants. This project is made possible thanks to the hard work of these communities:
+The **Xenia Dashboard** stands on the shoulders of giants. This project is made possible thanks to the hard work of these communities:
 
 ### **The Emulation Pioneers**
 
