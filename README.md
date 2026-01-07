@@ -169,8 +169,8 @@ Once your paths are set, return to the **Game Library**. The dashboard will auto
 
 | Build   | Releases      |
 |:------- |:------------- |
-| Windows | [download](https://github.com/ALHROOBIX/Xenia-Dashboard/releases/tag/v1.0) |
-| Linux   | [download](https://github.com/ALHROOBIX/Xenia-Dashboard/releases/tag/v1.0) |
+| Windows | [download](https://github.com/ALHROOBIX/Xenia-Dashboard/releases/) |
+| Linux   | [download](https://github.com/ALHROOBIX/Xenia-Dashboard/releases/) |
 
 ---
 
