@@ -22,7 +22,7 @@ The **Xenia Dashboard** stands on the shoulders of giants. This project is made 
 1. [Xenia Project](https://github.com/xenia-project/xenia): The mainline Xbox 360 Emulator Research Project.
 2. [Xenia Canary](https://github.com/xenia-canary/xenia-canary): The experimental fork that pushes the boundaries of performance and features.
 3. [Game Patches](https://github.com/xenia-canary/game-patches): The community repository for vital game fixes and enhancements.
-4. [xenia manager](https://github.com/xenia-manager/x360db) Thanks to the x360db and Xenia Manager teams for providing the essential metadata and interface that power this project.
+4. [xenia-manager/x360db](https://github.com/xenia-manager/x360db) Thanks to the x360db and Xenia Manager teams for providing the essential metadata that power this project.
 
 ### **Core Libraries & Tools**
 
