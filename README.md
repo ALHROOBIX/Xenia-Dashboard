@@ -23,12 +23,16 @@ The **Xenia Dashboard** stands on the shoulders of giants. This project is made 
 2. [Xenia Canary](https://github.com/xenia-canary/xenia-canary): The experimental fork that pushes the boundaries of performance and features.
 3. [Game Patches](https://github.com/xenia-canary/game-patches): The community repository for vital game fixes and enhancements.
 4. [xenia-manager/x360db](https://github.com/xenia-manager/x360db) Thanks to the x360db and Xenia Manager teams for providing the essential metadata that power this project.
+5. [steamgriddb](https://www.steamgriddb.com/) Special thanks to SteamGridDB for their API contribution in providing the high-quality game covers for this project.
+6. [Electron](https://www.electronjs.org/) Grateful for Electron's contribution in providing the core framework for this software's GUI.
+7. [Alpinejs](https://github.com/alpinejs/alpine) Grateful for Alpine.js for providing the rugged, minimal framework used to compose JavaScript behavior directly within this project's markup.
 
 ### **Core Libraries & Tools**
 
 1. [SDL (Simple DirectMedia Layer)](https://www.libsdl.org/): Used for high-performance controller input and hardware abstraction.
 
-2. [abgx360](https://github.com/BakasuraRCE/abgx360): Used for low-level binary scanning and Title ID verification.  
+2. [abgx360](https://github.com/BakasuraRCE/abgx360): Used for low-level binary scanning and Title ID verification.
+3. [TOMKit](https://github.com/python-poetry/tomlkit) Grateful for tomkit's contribution as the style-preserving TOML library used to manage Xenia Canary configuration files in this project.
       
 
 > **Note:** The **abgx360** tool is an external, independent utility and is not affiliated with this project. It is used solely as a third-party scanning engine to improve the accuracy of game identification.
@@ -140,8 +144,8 @@ Follow these steps to set up the **Xenia Dashboard** and transform your emulatio
 
 The application is built for portability. Simply download the version corresponding to your operating system:
 
-* **Windows:** Download the `Xenia Dashboard Portable.exe`.
-* **Linux:** Download the `Xenia Dashboard Portable.AppImage`.
+* **Windows:** Download the `Xenia Dashboard.exe`.
+* **Linux:** Download the `Xenia Dashboard.AppImage`.
 * **Location:** Place the file in a dedicated folder (e.g., `your/path\XeniaDashboard`). Avoid restricted system folders like *Program Files* to ensure the app has full write permissions.
 
 ### 2. Core Configuration
