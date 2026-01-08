@@ -30,7 +30,6 @@ The **Xenia Dashboard** stands on the shoulders of giants. This project is made 
 ### **Core Libraries & Tools**
 
 1. [SDL (Simple DirectMedia Layer)](https://www.libsdl.org/): Used for high-performance controller input and hardware abstraction.
-
 2. [abgx360](https://github.com/BakasuraRCE/abgx360): Used for low-level binary scanning and Title ID verification.
 3. [TOMKit](https://github.com/python-poetry/tomlkit) Grateful for tomkit's contribution as the style-preserving TOML library used to manage Xenia Canary configuration files in this project.
       
