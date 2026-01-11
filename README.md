@@ -128,10 +128,11 @@ sudo make install
 | **(A) / Enter**        | Select / Launch Game                                  |
 | **(B) / Backspace**    | Go Back / Close Panel                                 |
 | **(X)**                | Save Config / Manage Patches                          |
-| **(Y)**                | Delete Selection / Reset Settings / Check for Updates |
+| **(Y)**                | Delete Selection / Reset Settings / Check for Updates / Change profile picture |
 | **(LB) / (L)**         | Open Per-Game Configuration                           |
-| **(RB) / (R)**         | Toggle Detailed Game Information                      |
+| **(RB) / (R)**         | Toggle Detailed Game Information / and close          |
 | **Tab / (Start + LB)** | Open Xenia Guide Overlay                              |
+| **LT**                 | Translate description game to arabic                  | 
 
 ---
 
