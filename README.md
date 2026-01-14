@@ -174,8 +174,8 @@ Once your paths are set, return to the **Game Library**. The dashboard will auto
 
 | Build   | Releases      |
 |:------- |:------------- |
-| Windows | [download](https://github.com/ALHROOBIX/Xenia-Dashboard/releases/) |
-| Linux   | [download](https://github.com/ALHROOBIX/Xenia-Dashboard/releases/) |
+| Windows | [download](https://github.com/ALHROOBIX/Xenia-Dashboard/releases/latest) |
+| Linux   | [download](https://github.com/ALHROOBIX/Xenia-Dashboard/releases/latest) |
 
 ---
 
@@ -186,6 +186,3 @@ If you enjoy using the Xenia Dashboard, consider supporting development via Ko-f
 [![Support me on Ko-fi](https://img.shields.io/badge/Support%20me%20on%20Ko--fi-F16061?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/alhroobixi)
 
 ---
-
-> **Author:** ALHROOBIX  
-> **License:** MIT
