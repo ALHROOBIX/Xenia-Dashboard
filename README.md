@@ -1,3 +1,10 @@
+<p align="center">
+  <img src="https://img.shields.io/github/downloads/ALHROOBIX/Xenia-Dashboard/total?style=social&label=Total%20Downloads&logo=github" height="40">
+  </br>
+  </br>
+  <img src="https://img.shields.io/github/v/release/ALHROOBIX/Xenia-Dashboard?style=social&label=Latest%20Release&logo=github" height="40">
+</p>
+
 <img title="logo" src="icon.png" alt="" align="left" width="100" height="100" style="margin-right: 15px;" data-align="center">
 
 ---
