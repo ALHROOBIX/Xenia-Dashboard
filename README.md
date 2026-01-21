@@ -7,8 +7,8 @@
 > An advanced, feature-rich frontend for the **Xenia Xbox 360 Emulator**, designed to provide a nostalgic, console-grade experience on modern PCs. This dashboard bridges the gap between raw emulation and a polished media library.
 
 <p align="center">
-  <a href ="https://github.com/ALHROOBIX/Xenia-Dashboard/releases/latest"> <img src= "https://img.shields.io/github/downloads/ALHROOBIX/Xenia-Dashboard/total?style=social&label=Total%20Downloads&logo=github" height="40"></a>
-  <a href ="https://github.com/ALHROOBIX/Xenia-Dashboard/releases/latest"> <img src="https://img.shields.io/github/v/release/ALHROOBIX/Xenia-Dashboard?style=social&label=Latest%20Release&logo=github" height="40"></a>
+  <a href ="https://github.com/ALHROOBIX/Xenia-Dashboard/releases/latest"> <img src= "https://img.shields.io/github/downloads/ALHROOBIX/Xenia-Dashboard/total?style=social&label=Total%20Downloads&logo=github" height="80"></a>
+  <a href ="https://github.com/ALHROOBIX/Xenia-Dashboard/releases/latest"> <img src="https://img.shields.io/github/v/release/ALHROOBIX/Xenia-Dashboard?style=social&label=Latest%20Release&logo=github" height="80"></a>
   </p>
 
 ---
