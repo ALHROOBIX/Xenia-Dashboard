@@ -7,9 +7,9 @@
 > An advanced, feature-rich frontend for the **Xenia Xbox 360 Emulator**, designed to provide a nostalgic, console-grade experience on modern PCs. This dashboard bridges the gap between raw emulation and a polished media library.
 
 <p align="center">
-  <img src="https://img.shields.io/github/downloads/ALHROOBIX/Xenia-Dashboard/total?style=social&label=Total%20Downloads&logo=github" height="40">
-  <img src="https://img.shields.io/github/v/release/ALHROOBIX/Xenia-Dashboard?style=social&label=Latest%20Release&logo=github" height="40">
-</p>
+  <a href ="https://github.com/ALHROOBIX/Xenia-Dashboard/releases/latest"> <img src= "https://img.shields.io/github/downloads/ALHROOBIX/Xenia-Dashboard/total?style=social&label=Total%20Downloads&logo=github" height="40"></a>
+  <a href ="https://github.com/ALHROOBIX/Xenia-Dashboard/releases/latest"> <img src="https://img.shields.io/github/v/release/ALHROOBIX/Xenia-Dashboard?style=social&label=Latest%20Release&logo=github" height="40"></a>
+  </p>
 
 ---
 ![Screenshot](en-home.png)
@@ -57,7 +57,7 @@ The **Xenia Dashboard** stands on the shoulders of giants. This project is made 
 
 ### **1. Intelligent Library Management**
 
-* **Automated Game Scanning:** Automatically detects and catalogs `.iso` and `.xex` files from your designated game folder.
+* **Automated Game Scanning:** Automatically detects and catalogs `.iso`,`.xex`,`.zar`,`GOD`and`XBLA` files from your designated game folder.
 
 * **abgx360 Integration:** Utilizes the `abgx360` binary to perform low-level analysis for accurate Title ID identification.
 
@@ -131,6 +131,7 @@ sudo make install
 |:---------------------- |:----------------------------------------------------- |
 | **D-Pad / Sticks**     | Navigate Menus and Virtual Keyboard                   |
 | **(A) / Enter**        | Select / Launch Game                                  |
+| **R3**                 | Search filter games                                   |
 | **(B) / Backspace**    | Go Back / Close Panel                                 |
 | **(X)**                | Save Config / Manage Patches                          |
 | **(Y)**                | Delete Selection / Reset Settings / Check for Updates / Change profile picture |
@@ -138,6 +139,7 @@ sudo make install
 | **(RB) / (R)**         | Toggle Detailed Game Information / and close          |
 | **Tab / (Start + LB)** | Open Xenia Guide Overlay                              |
 | **LT**                 | Translate description game to arabic                  | 
+| **L3** or **Z**        | scan `.zar` game to find Title ID.                    |
 
 ---
 
