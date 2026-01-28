@@ -65,7 +65,7 @@
       "shutdown": "Shutdown System",
       "coming_soon": "(coming soon)",
       "exit_app": "(Exit App)",
-      "no_games": "No games found",
+      "no_games": "No games found"
     },
     "settings": {
       "title": "Settings",
@@ -334,7 +334,7 @@
       "shutdown": "إيقاف النظام",
       "coming_soon": "(قريباً)",
       "exit_app": "(خروج من التطبيق)",
-      "no_games": "لم يتم العثور على ألعاب",
+      "no_games": "لم يتم العثور على ألعاب"
     },
     "settings": {
       "title": "الإعدادات",
