@@ -1,0 +1,146 @@
+<section class="page" id="settings-config" x-data x-init="if($store.app.configMode !== 'game') await $store.actions.loadXeniaConfig()">
+    
+    <div class="nxe-settings-wrapper">
+
+        <h1 class="nxe-settings-title">
+            <template x-if="$store.app.configMode !== 'game'">
+                <span>Xenia Canary <span x-text="$store.app.t('core_config.config_file')">Config</span></span>
+            </template>
+
+            <template x-if="$store.app.configMode === 'game'">
+                <div style="display: flex; flex-direction: column; line-height: 1.2;">
+                    <span x-text="$store.app.editingGameInfo ? $store.app.editingGameInfo.name : 'Game Config'"></span>
+                    <span style="font-size: 0.5em; opacity: 0.7; margin-top: 5px;" 
+                          x-text="$store.app.editingGameInfo ? ('ID: ' + $store.app.editingGameInfo.titleID) : ''">
+                    </span>
+                </div>
+            </template>
+        </h1>
+        
+        <div class="nxe-settings-container">
+            
+            <nav 
+                class="nxe-settings-menu config-editor-menu"
+                :class="{'config-panel-unfocused': $store.app.configFocusedPanel === 'options'}"
+            >
+                <template x-for="(category, index) in $store.app.configCategories" :key="category">
+                    <div 
+                        :id="'config-category-' + index"
+                        class="nxe-settings-item"
+                        :class="{'focused': $store.app.focusedConfigCategoryIndex === index}"
+                        @click="$store.app.focusedConfigCategoryIndex = index; $store.app.configFocusedPanel = 'categories'"
+                    >
+                        <span x-text="`[ ${category} ]`"></span>
+                    </div>
+                </template>
+            </nav>
+            
+            <div class="nxe-settings-description config-editor-options">
+                
+                <template x-if="$store.app.xeniaConfigError">
+                    <div class="config-error-message">
+                        <h3 x-text="$store.app.t('generic.error')">Error</h3>
+                        <p x-text="$store.app.xeniaConfigError"></p>
+                        <p>Please ensure 'Xenia Path' is set correctly in 'Core Configuration' and the config file exists.</p>
+                    </div>
+                </template>
+
+                <template x-if="!$store.app.xeniaConfigError && $store.app.configCategories.length > 0">
+                    <div class="config-options-wrapper" :key="$store.app.focusedConfigCategoryIndex">
+                        
+                        <h3 class="config-category-title" x-text="$store.app.configCategories[$store.app.focusedConfigCategoryIndex]"></h3>
+
+                        <template x-for="(option, index) in $store.app.currentConfigOptions" :key="option.key">
+                            
+                            <div 
+                                :id="'config-option-' + index"
+                                class="config-option"
+                                :class="{'focused': $store.app.configOptionIndex === index && $store.app.configFocusedPanel === 'options'}"
+                            >
+                                
+                                <label :for="$store.app.configCategories[$store.app.focusedConfigCategoryIndex] + '_' + option.key" x-text="option.key"></label>
+                                
+                                <div class="config-input-wrapper">
+                                    
+                                    <template x-if="option.type === 'boolean'">
+                                        <label class="nxe-toggle-switch">
+                                            <input 
+                                                type="checkbox" 
+                                                :id="$store.app.configCategories?.[$store.app.focusedConfigCategoryIndex] + '_' + option.key"
+                                                :checked="$store.app.xeniaConfig?.[$store.app.configCategories?.[$store.app.focusedConfigCategoryIndex]]?.[option.key]"
+                                                @change="$store.app.xeniaConfig[$store.app.configCategories[$store.app.focusedConfigCategoryIndex]][option.key] = !$store.app.xeniaConfig?.[$store.app.configCategories?.[$store.app.focusedConfigCategoryIndex]]?.[option.key]"
+                                            >
+                                            <span class="slider"></span>
+                                        </label>
+                                    </template>
+
+                                    <template x-if="option.type === 'number'">
+                                        <input 
+                                            type="number" 
+                                            class="nxe-config-input"
+                                            :id="$store.app.configCategories?.[$store.app.focusedConfigCategoryIndex] + '_' + option.key"
+                                            x-model.number="$store.app.xeniaConfig[$store.app.configCategories[$store.app.focusedConfigCategoryIndex]][option.key]"
+                                        >
+                                    </template>
+
+                                    <template x-if="option.type === 'string'">
+                                        <input 
+                                            type="text" 
+                                            class="nxe-config-input"
+                                            :id="$store.app.configCategories?.[$store.app.focusedConfigCategoryIndex] + '_' + option.key"
+                                            x-model="$store.app.xeniaConfig?.[$store.app.configCategories?.[$store.app.focusedConfigCategoryIndex]]?.[option.key]"
+                                        >
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </div>
+            
+        </div>
+    </div>
+
+    <footer class="nxe-footer-left">
+        <div class="footer-button" id="btn-a" @click.prevent="($store.app.configFocusedPanel === 'options') ? $store.actions.selectConfigOption() : ($store.app.configFocusedPanel = 'options', $store.actions.playSound('focus'))">
+            <span class="button-icon a">A</span> 
+            <span x-text="($store.app.configFocusedPanel === 'options') ? $store.app.t('generic.select') + '/' + $store.app.t('generic.edit') : $store.app.t('generic.select')">Select</span>
+        </div>
+        
+        <div class="footer-button" id="btn-b" @click.prevent="($store.app.configFocusedPanel === 'options') ? ($store.app.configFocusedPanel = 'categories', $store.actions.playSound('back')) : $store.actions.goBack()">
+            <span class="button-icon b">B</span> 
+            <span x-text="$store.app.t('generic.back')">Back</span>
+        </div>
+
+        <div class="footer-button" id="btn-x" @click.prevent="$store.actions.saveXeniaConfig()">
+            <span class="button-icon x">X</span> 
+            
+            <span 
+                x-text="
+                    $store.app.configSaveStatus === 'saved' ? $store.app.t('generic.saved') :
+                    ($store.app.configSaveStatus === 'saving' ? $store.app.t('generic.saving') : $store.app.t('generic.save'))
+                "
+            >Save</span>
+        </div>
+    </footer>
+    
+    <footer class="nxe-footer-right">
+        <div class="footer-guide-button" @click="$store.actions.toggleGuide()">
+            <div class="scene-3d">
+                <div class="guide-icon">
+                    <img src="assets/icons/xbox-25912.png" alt="Xbox Guide">
+                </div>
+                
+            <div class="ground-surface">
+                <div class="icon-ground-shadow"></div>
+                <div class="ripple-wave"></div>
+                <div class="ripple-wave"></div>
+                <div class="ripple-wave"></div>
+                <div class="ripple-wave"></div>
+                <div class="ripple-wave"></div>
+            </div>
+
+            </div>
+        </div>
+        </footer>
+</section>

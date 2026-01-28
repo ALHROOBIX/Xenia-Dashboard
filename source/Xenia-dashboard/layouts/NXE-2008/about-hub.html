@@ -1,0 +1,301 @@
+<div class="nxe-view-container" x-init="
+    $store.app.focusedCollection = 'aboutMenu';
+    $store.app.focusedIndex = 0;
+">
+    <div class="nxe-header-panel">
+        <div class="nxe-header-text">
+            <h2 x-text="$store.app.t('about.title')">ABOUT</h2>
+        </div>
+    </div>
+
+    <div class="nxe-main-layout" x-data="{ 
+        aboutMenu: [
+            { id: 'app_info', name: $store.app.t('about.app_info'), icon: 'assets/icons/icon.png' },
+            { id: 'developer', name: $store.app.t('about.developer'), icon: 'assets/icons/Dev.webp' },
+            { id: 'help', name: $store.app.t('about.help'), icon: 'assets/icons/Help.webp' },
+            { id: 'legal', name: $store.app.t('about.legal'), icon: 'assets/icons/Legal.webp' }
+        ]
+    }">
+        <div class="nxe-list-panel">
+            <div class="nxe-list-container">
+                <template x-for="(item, index) in $store.app.aboutMenu" :key="item.id">
+                    <div class="nxe-list-item" 
+                        :id="'about-item-' + index" 
+                        :class="{ 'active': $store.app.focusedIndex === index }"
+                        @mouseenter="$store.app.focusedIndex = index">
+                        <div class="nxe-item-icon">
+                            <img :src="item.icon" :alt="item.name">
+                        </div>
+                        <div class="nxe-item-label" x-text="$store.app.t('about.' + item.id)"></div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <div class="nxe-details-panel">
+            <div class="nxe-details-content">
+                
+                <div x-show="$store.app.focusedIndex === 0" class="nxe-fade-in">
+                    <h3 class="details-title">Xenia Dashboard</h3>
+                    <p class="details-desc" x-text="$store.app.language === 'ar' ? 'تجربة NXE أصلية لجهاز Xbox 360 مخصصة لمحاكي Xenia. تم بناؤه باستخدام Electron للأنظمة الحديثة مع الحفاظ على روح واجهة الكونسول الذهبية لعام 2008.' : 'An authentic Xbox 360 NXE experience for the Xenia Emulator. Built with Electron for modern systems while preserving the golden era of console interfaces.'"></p>
+                    <div class="info-grid">
+                        <div class="info-row"><span x-text="$store.app.t('about.v_label')">Version:</span> <span class="val">1.1.3 Stable</span></div>
+                        <br/>
+                        <div class="info-row"><span x-text="$store.app.t('about.a_label')">Architecture:</span> <span class="val">Electron / Node.js</span></div>
+                        <br/>
+                        <div class="info-row"><span x-text="$store.app.t('about.f_label')">Framework:</span> <span class="val">Alpinejs</span></div>
+                        <br/>
+                        <div class="info-row"><span x-text="$store.app.t('about.s_label')">Status:</span> <span class="val" x-text="$store.app.language === 'ar' ? 'البناء النهائي' : 'Final Build'">Final Build</span></div>
+                        <br/>
+                        <div class="info-row"><span x-text="$store.app.t('about.e_label')">Environment:</span> <span class="val" x-text="$store.app.language === 'ar' ? 'ويندوز ولينكس' : 'Windows and Linux'">Windows and Linux</span></div>
+                        <br/>
+                        <div class="info-row"><span x-text="$store.app.t('about.k_label')">Kernel:</span> <span class="val">Xenia Canary Core</span></div>
+                    </div>
+                </div>
+
+                <div x-show="$store.app.focusedIndex === 1" class="nxe-fade-in">
+                    <h3 class="details-title" x-text="$store.app.t('about.credits_title')">Credits & Special Thanks</h3>
+                    
+                    <div class="dev-card">
+                        <img src="https://avatars.githubusercontent.com/u/79133885?v=4" alt="ALHROOBIX" class="dev-avatar">
+                        <div>
+                            <p class="dev-name">ALHROOBIX</p>
+                            <p class="dev-role" x-text="$store.app.t('about.dev_role')">Software Architect & UI Designer</p>
+                        </div>
+                    </div>
+
+                    <div class="dev-card">
+                        <img src="https://avatars.githubusercontent.com/u/253755038?v=4" alt="0xErrorVoid" class="dev-avatar">
+                        <div>
+                            <p class="dev-name">0xErrorVoid</p>
+                            <p class="dev-role" x-text="$store.app.t('about.dev_role')">Software Architect & UI Designer</p>
+                        </div>
+                    </div>
+
+                    <hr class="nxe-divider">
+                    <p class="details-desc" style="font-size: 14px; margin-bottom: 5px;" x-text="$store.app.language === 'ar' ? 'مشروع مخصص لإعادة إحياء نوستالجيا واجهة Xbox 360 لعام 2008 لمجتمع المحاكاة الحديث.' : 'Devoted to recreating the nostalgia of the 2008 Xbox 360 interface for the modern emulation community.'"></p>
+                    <p class="details-desc" style="font-size: 14px; margin-bottom: 10px;" x-text="$store.app.t('about.thanks_msg')">This project wouldn't be possible without these incredible open-source tools and communities:</p>
+                    
+                    <div class="credits-list-container">
+                        <div class="credit-item">
+                            <strong>Xenia Project Team</strong>
+                            <span x-text="$store.app.language === 'ar' ? 'فريق بحث المحاكاة الرئيسي لجهاز Xbox 360.' : 'The mainline Xbox 360 Emulator Research Project.'"></span>
+                        </div>
+                        <br/>
+                        <div class="credit-item">
+                            <strong>Xenia Canary Team</strong>
+                            <span x-text="$store.app.language === 'ar' ? 'فريق المحاكاة التجريبية الذي يدفع حدود الأداء والميزات.' : 'The experimental fork that pushes the boundaries of performance and features.'"></span>
+                        </div>
+                        <br/>
+                        <div class="credit-item">
+                            <strong>xenia-manager/x360db</strong>
+                            <span x-text="$store.app.language === 'ar' ? 'فريق x360db و Xenia Manager لتوفير البيانات الوصفية الأساسية التي تدعم هذا المشروع.' : 'Thanks to the x360db and Xenia Manager teams for providing the essential metadata that power this project.'"></span>
+                        </div>
+                        <br/>
+                        <div class="credit-item">
+                            <strong>Game Patches</strong>
+                            <span x-text="$store.app.language === 'ar' ? 'فريق التصحيح المجتمعي الذي يوفر إصلاحات وتحسينات حيوية للألعاب.' : 'The community repository for vital game fixes and enhancements.'"></span>
+                        </div>
+                        <br/>
+                        <div class="credit-item">
+                            <strong>abgx360</strong>
+                            <span x-text="$store.app.language === 'ar' ? 'استخدام الفحص الدقيق للملفات الثنائية واستخراج معرف اللعبة.' : 'Used for low-level binary scanning and Title ID verification.'"></span>
+                        </div>
+                        <br/>
+                        <div class="credit-item">
+                            <strong>SDL (Simple DirectMedia Layer)</strong>
+                            <span x-text="$store.app.language === 'ar' ? 'دعم قوي لذراع التحكم والوسائط المتعددة.' : 'Robust cross-platform controller and media support.'"></span>
+                        </div>
+                        <br/>
+                        <div class="credit-item">
+                            <strong>SteamGridDB Contributors</strong>
+                            <span x-text="$store.app.language === 'ar' ? 'صور ألعاب وبيانات وصفية عالية الجودة.' : 'High-quality game artwork and metadata.'"></span>
+                        </div>
+                        <br/>
+                        <div class="credit-item">
+                            <strong>tomlkit</strong>
+                            <span x-text="$store.app.language === 'ar' ? 'مكتبة بايثون لتحليل ملفات toml.' : 'Python library for parsing toml files.'"></span>
+                        </div>
+                        <br/>
+                        <div class="credit-item">
+                            <strong>Electron</strong>
+                            <span x-text="$store.app.language === 'ar' ? 'إطار عمل سطح المكتب متعدد المنصات لتطبيقات الويب.' : 'Cross-platform desktop framework for web applications.'"></span>
+                        </div>
+                        <br/>
+                        <div class="credit-item">
+                            <strong>Alpinejs</strong>
+                            <span x-text="$store.app.language === 'ar' ? 'إطار عمل جافا سكريبت خفيف لبناء واجهات تفاعلية.' : 'Lightweight JavaScript framework for building interactive interfaces.'"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div x-show="$store.app.focusedIndex === 2" class="nxe-fade-in help-guide-container">
+                    <h3 class="details-title" x-text="$store.app.t('about.guide_title')">Guide</h3>
+                    <div class="help-steps" style="overflow-y: auto; max-height: 330px; padding-right: 15px;">
+                        <div class="help-step">
+                            <span class="step-num">1</span>
+                            <div class="step-text">
+                                <strong x-text="$store.app.language === 'ar' ? 'الإعداد:' : 'Setup:'"></strong> 
+                                <span x-text="$store.app.language === 'ar' ? 'انتقل إلى إعدادات النظام > الإعدادات الأساسية > مسار Xenia ومجلد الألعاب. قم بتعيين مسار ملف xenia_canary.exe ومجلد الألعاب.' : 'Go to System Settings > Core Configuration > Xenia Path and Game Folder. Set the path to xenia_canary.exe and your Games folder.'"></span>
+                            </div>
+                        </div>
+                        <div class="help-step">
+                            <span class="step-num">2</span>
+                            <div class="step-text">
+                                <strong x-text="$store.app.language === 'ar' ? 'البيانات الوصفية:' : 'Metadata:'"></strong> 
+                                <span x-text="$store.app.language === 'ar' ? 'اضغط على (M) في لوحة المفاتيح أو (RT) في ذراع التحكم داخل المكتبة لفتح مدير الصور للأغلفة والخلفيات.' : 'Press (M) on keyboard or (RT) on gamepad in the Library to open the Art Manager for covers and backgrounds.'"></span>
+                            </div>
+                        </div>
+                        <div class="help-step">
+                            <span class="step-num">3</span>
+                            <div class="step-text">
+                                <strong x-text="$store.app.language === 'ar' ? 'الفحص العميق:' : 'Deep Scan:'"></strong> 
+                                <span x-text="$store.app.language === 'ar' ? 'إذا كان للعبة معرف خاطئ، اضغط على (BACK) في ذراع التحكم لبدء فحص ثنائي عميق للتصحيح.' : 'If a game has the wrong ID, press (BACK) on the gamepad to trigger a Deep Binary Scan for correction.'"></span>
+                            </div>
+                        </div>
+                        <div class="help-step">
+                            <span class="step-num">4</span>
+                            <div class="step-text">
+                                <strong x-text="$store.app.language === 'ar' ? 'الدليل:' : 'Guide:'"></strong> 
+                                <span x-text="$store.app.language === 'ar' ? 'اضغط على (TAB) لفتح دليل Xbox. استخدم (LB + START) في ذراع التحكم لنفس الغرض.' : 'Press (TAB) to open the Xbox Guide. Use Gamepad (LB + START) to same Xbox Guide.'"></span>
+                            </div>
+                        </div>
+                        <div class="help-step">
+                            <span class="step-num">5</span>
+                            <div class="step-text">
+                                <strong x-text="$store.app.language === 'ar' ? 'إعدادات لكل لعبة:' : 'Per-Game Config:'"></strong> 
+                                <span x-text="$store.app.language === 'ar' ? 'اضغط على (L) أو (LB) في المكتبة لإنشاء ملف تكوين مخصص لهذه اللعبة فقط.' : 'Press (L) or (LB) in the library to create a custom configuration file specific to that game.'"></span>
+                            </div>
+                        </div>
+                        <div class="help-step">
+                            <span class="step-num">6</span>
+                            <div class="step-text">
+                                <strong x-text="$store.app.language === 'ar' ? 'إجراءات متقدمة:' : 'Advanced Actions:'"></strong> 
+                                <span x-text="$store.app.language === 'ar' ? 'اضغط على (RB) في المكتبة لعرض حالة التوافق والمعلومات التقنية. اضغط على (BACK) للفحص العميق إذا كان المعرف غير صحيح.' : 'Press (RB) in the Library to view compatibility status and technical info. Press (BACK) for a Deep Scan if the Title ID is incorrect.'"></span>
+                            </div>
+                        </div>
+                        <div class="help-step">
+                            <span class="step-num">7</span>
+                            <div class="step-text">
+                                <strong x-text="$store.app.language === 'ar' ? 'الإعداد:' : 'Setup:'"></strong> 
+                                <span x-text="$store.app.language === 'ar' ? 'انتقل إلى إعدادات النظام > الإعدادات الأساسية > Steamgriddb لإضافة مفتاح API للبيانات الوصفية.' : 'Go To System Settings > Core Configuration > Steamgriddb to add api key for metadata.'"></span>
+                            </div>
+                        </div>
+                        <div class="help-step">
+                            <span class="step-num">8</span>
+                            <div class="step-text">
+                                <strong x-text="$store.app.language === 'ar' ? 'الإعداد:' : 'Setup:'"></strong> 
+                                <span x-text="$store.app.language === 'ar' ? 'انتقل إلى إعدادات النظام > الإعدادات الأساسية > مصدر البيانات للتغيير من SteamGridDB إلى LocalDB.' : 'Go To System Settings > Core Configuration > Metadata to change from SteamGridDB to LocalDB.'"></span>
+                            </div>
+                        </div>
+                        <div class="help-step">
+                            <span class="step-num">9</span>
+                            <div class="step-text">
+                                <strong x-text="$store.app.language === 'ar' ? 'بيئة لينكس:' : 'Linux Environment:'"></strong> 
+                                <span x-text="$store.app.language === 'ar' ? 'لمستخدمي لينكس، اختر طريقة التشغيل (Native, Wine, Proton) من الإعدادات الأساسية. في حال اختيار Proton، يجب تحديد مسار ملف proton التنفيذي (غالباً داخل مجلد Steam) لضمان عمل المحاكي.' : 'For Linux users, select the launch method (Native, Wine, Proton) in Core Configuration. If Proton is selected, you must set the path to the proton executable (usually inside the Steam folder) to ensure the emulator runs.'"></span>
+                            </div>
+                        </div>
+                        <div class="help-step">
+                            <span class="step-num">10</span>
+                            <div class="step-text">
+                                <strong x-text="$store.app.language === 'ar' ? 'إعدادات المحاكي العامة:' : 'Global Xenia Config:'"></strong> 
+                                <span x-text="$store.app.language === 'ar' ? 'من خلال إعدادات النظام > الإعدادات الأساسية > ملف الإعدادات، يمكنك تعديل ملف xenia-canary.config.toml بشكل كامل. هذا يتيح لك تغيير خيارات الرسوميات (مثل الدقة)، الصوت، والتحكم في خصائص المحاكي المتقدمة.' : 'Through System Settings > Core Configuration > Config File, you can fully edit the xenia-canary.config.toml file. This allows you to change graphics options (like resolution), audio, and manage advanced emulator features.'"></span>
+                            </div>
+                        </div>
+                        <div class="help-step">
+                            <span class="step-num">11</span>
+                            <div class="step-text">
+                                <strong x-text="$store.app.language === 'ar' ? 'تخصيص الأصوات والموسيقى:' : 'Audio & Music Customization:'"></strong> 
+                                <span x-text="$store.app.language === 'ar' ? 'من إعدادات النظام > إعدادات الصوت، يمكنك تغيير المؤثرات الصوتية للواجهة أو إضافة موسيقى خلفية (BGM) مخصصة من جهازك. استخدم زر (Y) لاستعادة الأصوات الافتراضية في أي وقت.' : 'From System Settings > Audio Settings, you can change the UI sound effects or add custom background music (BGM) from your device. Use the (Y) button to restore default sounds at any time.'"></span>
+                            </div>
+                        </div>
+
+                        <div class="help-step">
+                            <span class="step-num">12</span>
+                            <div class="step-text">
+                                <strong x-text="$store.app.language === 'ar' ? 'الثيمات والواجهة البصرية:' : 'Themes & Visuals:'"></strong> 
+                                <span x-text="$store.app.language === 'ar' ? 'يمكنك تغيير مظهر الداشبورد بالكامل من إعدادات الألوان أو خلفيات الشاشة. يدعم التطبيق تغيير الـ Stage (الأرضية) والـ Flourish (التأثيرات الضوئية) لخلق تجربة NXE فريدة.' : 'You can change the entire dashboard look from Color Settings or Wallpaper Settings. The app supports changing the Stage (floor) and Flourish (lighting effects) to create a unique NXE experience.'"></span>
+                            </div>
+                        </div>
+
+                        <div class="help-step">
+                            <span class="step-num">13</span>
+                            <div class="step-text">
+                                <strong x-text="$store.app.language === 'ar' ? 'نظام البحث والكيبورد:' : 'Search & Keyboard:'"></strong> 
+                                <span x-text="$store.app.language === 'ar' ? 'اضغط على (R3) أو زر الإبهام الأيمن في المكتبة لفتح لوحة المفاتيح. استخدم (LB/RB) لتحريك مؤشر الكتابة، و (X) للمسح، و (Start) للتأكيد. يمكنك البحث عن الألعاب بالاسم أو الـ Title ID.' : 'Press (R3) or Right Thumbstick in the Library to open the keyboard. Use (LB/RB) to move the text cursor, (X) to backspace, and (Start) to confirm. You can search for games by name or Title ID.'"></span>
+                            </div>
+                        </div>
+                        <div class="help-step">
+                            <span class="step-num">3</span>
+                            <div class="step-text">
+                                <strong x-text="$store.app.language === 'ar' ? 'الفحص العميق:' : 'Deep Scan:'"></strong> 
+                                <span x-text="$store.app.language === 'ar' ? 'يتطلب أداة abgx360. حمل نسخة CLI لويندوز من GBAtemp أو لينكس من موقع المشروع ووضعها في assets/bin.' : 'Requires abgx360. Download CLI for Windows (GBAtemp) or Linux (Official Site) and place it in assets/bin.'"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div x-show="$store.app.focusedIndex === 3" class="nxe-fade-in">
+                    <h3 class="details-title" x-text="$store.app.t('about.legal')">Legal & Licenses</h3>
+                    <div class="mit-license-container" style="background: rgba(0,0,0,0.3); padding: 25px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); max-height: 310px; overflow-y: auto;">
+                        <h4 style="color: rgb(255, 255, 255); margin-top: 0; font-weight: 800;" x-text="$store.app.language === 'ar' ? ' MITالترخيص' : 'MIT License'">License</h4>
+                        <pre style="white-space: pre-wrap; font-family: 'Consolas', monospace; font-size: 11px; color: #bbb; line-height: 1.5; margin-bottom: 20px; direction: ltr;">
+Copyright (c) 2026 ALHROOBIX
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+                        </pre>
+                        <hr class="nxe-divider" style="opacity: 0.2; margin: 15px 0;">
+                        <p class="legal-text" style="font-size: 11px; opacity: 0.6;" x-text="$store.app.language === 'ar' ? 'Xenia و Xenia Canary هي علامات تجارية لأصحابها. هذا المشروع واجهة من صنع المعجبين وغير تابع لشركة Microsoft.' : 'Xenia and Xenia Canary are trademarks of their respective authors. This project is a fan-made interface and is not affiliated with Microsoft.'">
+                        <p class="legal-text" style="font-size: 11px; margin-top: 10px; color: #888;">
+                            <span x-show="$store.app.language === 'ar'">
+                                هذا التطبيق يتكامل مع أداة abgx360 (مرخصة تحت GPL). أداة abgx360 منفصلة تماماً ولا يتم حزمها أو توزيعها أو تضمينها مع هذا البرنامج.
+                            </span>
+                            <span x-show="$store.app.language === 'en'">
+                                This application can interface with abgx360, a separate GPL-licensed tool. abgx360 is not bundled, distributed, or included with this software.
+                            </span>
+                        </p>
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="nxe-footer-guide">
+        <div class="guide-item">
+            <span class="button-icon a">A</span> 
+            <span x-text="$store.app.t('generic.select')">SELECT</span>
+        </div>
+        <div class="guide-item">
+            <span class="button-icon b">B</span> 
+            <span x-text="$store.app.t('generic.back')">BACK</span>
+        </div>
+    </div>
+    <style>
+    .dev-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ccc;
+}
+    </style>
+</div>
+

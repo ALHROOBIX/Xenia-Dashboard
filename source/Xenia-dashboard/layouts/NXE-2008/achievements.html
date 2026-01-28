@@ -1,0 +1,433 @@
+<section 
+    class="page" 
+    id="achievements-page" 
+    x-data 
+    x-init="$store.actions.setFocusContext('achievements'); $store.actions.loadAchievementsData()"
+>
+<style>
+    .achievements-frame {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        overflow: hidden;
+        background: rgba(0,0,0,0.3);
+        position: relative;
+    }
+
+
+   .achievements-track {
+    display: flex;
+    gap: 50px;
+    min-width: max-content; 
+    transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+    will-change: transform;
+}
+
+    .ach-card {
+        flex: 0 0 400px; 
+        height: 550px;
+        background: linear-gradient(180deg, #2a2a2a 0%, #121212 100%);
+        border: 2px solid rgba(255,255,255,0.1);
+        border-radius: 12px;
+        position: relative;
+        padding: 25px;
+        opacity: 0.3;
+        transform: scale(0.85);
+        transition: all 0.5s ease;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+        overflow: hidden;
+    }
+
+    .game-info-wrapper {
+    height: 70px;
+    margin-bottom: 10px;
+}
+
+.game-title-fixed {
+    color: #fff;
+    margin: 0;
+    font-size: 20px;
+    line-height: 1.2;
+    height: 48px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.score-stats-wrapper {
+    height: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+    .ach-card.focused {
+        opacity: 1;
+        transform: scale(1.05);
+        border-color: var(--nxe-brand-primary, #90c31d);
+        box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 20px rgba(144, 195, 29, 0.3);
+    }
+
+    .ach-card.focused::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 50%;
+        background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+        border-radius: 12px 12px 0 0;
+        pointer-events: none;
+    }
+
+    .game-icon-large {
+        width: 100%;
+        height: 160px;
+        background-color: #000;
+        background-size: cover;
+        background-position: center;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .g-score-box {
+        font-size: 32px;
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .g-circle {
+        width: 28px; height: 28px;
+        background: #fff; color: #000;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 14px; font-weight: 900;
+    }
+
+    .achievement-mini-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin-top: 10px;
+    height: 150px;
+    overflow-y: auto;
+    padding-right: 5px;
+    align-content: start;
+}
+
+    .mini-icon {
+        width: 100%;
+        aspect-ratio: 1/1;
+        background: #000;
+        border-radius: 6px;
+        border: 1px solid rgba(255,255,255,0.05);
+        overflow: hidden;
+    }
+
+    .mini-icon img { width: 100%; height: 100%; object-fit: cover; }
+    .mini-icon.locked { filter: grayscale(1); opacity: 0.2; }
+
+    .progress-track-nxe {
+        width: 100%; height: 10px;
+        background: #000; border-radius: 5px;
+        margin-top: auto; border: 1px solid #333;
+        overflow: hidden;
+    }
+
+    .progress-bar-nxe {
+        height: 100%;
+        background: linear-gradient(90deg, #7db30d, #90c31d);
+        transition: width 0.8s ease-in-out;
+    }
+
+    .hide-scroll {
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .hide-scroll::-webkit-scrollbar {
+        display: none;
+    }
+
+    .hide-scroll {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+.ach-modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+}
+
+.ach-modal-content {
+    width: 1100px;
+    height: 780px;
+    background: linear-gradient(145deg, #1a1a1a, #0a0a0a);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+    overflow: hidden;
+}
+
+.ach-modal-header {
+    padding: 30px;
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    gap: 25px;
+    align-items: center;
+}
+
+.ach-header-img {
+    width: 120px; height: 120px;
+    border-radius: 12px;
+    border: 3px solid #fff;
+    object-fit: cover;
+}
+
+.ach-grid-container {
+    flex: 1;
+    padding: 25px;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 15px;
+    overflow-y: auto;
+    align-content: start;
+}
+
+.ach-grid-slot {
+    aspect-ratio: 1/1;
+    background: #000;
+    border: 3px solid transparent;
+    border-radius: 10px;
+    position: relative;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.ach-grid-slot.focused {
+    border-color: #fff;
+    transform: scale(1.15);
+    box-shadow: 0 0 25px var(--nxe-brand-primary);
+    z-index: 5;
+}
+
+.ach-grid-slot img {
+    width: 100%; height: 100%;
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+
+.locked-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    z-index: 2;
+}
+
+.locked-overlay img {
+    width: 40%;
+    height: auto;
+    opacity: 0.9;
+    filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.8));
+    pointer-events: none;
+}
+
+.ach-grid-slot.focused .locked-overlay {
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.ach-grid-slot.focused .locked-overlay img {
+    transform: scale(1.1);
+    transition: transform 0.2s ease-in-out;
+}
+
+
+.unlock-status-box {
+    position: absolute;
+    bottom: 5px; right: 5px;
+    width: 22px; height: 22px;
+    background: rgba(0,0,0,0.8);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.ach-detail-popup {
+    height: 180px;
+    background: #000;
+    border-top: 2px solid rgba(255,255,255,0.05);
+    padding: 25px 45px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.ach-popup-title {
+    color: #fff; font-size: 30px; margin: 0; font-weight: 800;
+}
+
+.ach-popup-score {
+    color: #ffd700; font-size: 26px; font-weight: 900;
+}
+</style>
+
+    <div class="achievements-frame">
+        <div class="achievements-track" :style="'transform: translateX(calc(50vw - 200px - (' + ($store.app.focusedIndex * 450) + 'px)))'">
+            
+            <template x-for="(game, index) in $store.app.achievementsGamesList" :key="game.titleID">
+                <div 
+                    :id="'ach-card-' + index"
+                    class="ach-card"
+                    :class="{'focused': $store.app.focusedIndex === index}"
+                >
+                    <div class="game-icon-large" :style="'background-image: url(' + (game.coverUrl || 'assets/icons/placeholder.png') + ')'"></div>
+                    
+                    <div class="game-info-wrapper">
+                        <h2 class="game-title-fixed" x-text="game.name"></h2>
+                        <p style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px;" x-text="'Title ID: ' + game.titleID"></p>
+                    </div>
+
+                    <div class="score-stats-wrapper">
+                        <div class="g-score-box">
+                            <div class="g-circle">G</div>
+                            <span x-text="game.earnedScore || '0'"></span>
+                        </div>
+                        <div style="color: #aaa; font-size: 13px;">
+                            <span x-text="game.earnedCount || '0'"></span> / <span x-text="game.totalAchCount || '0'"></span> Achievements
+                        </div>
+                    </div>
+
+                    <div class="achievement-mini-grid hide-scroll">
+                        <template x-for="ach in (game.realAchievements || [])" :key="ach.id">
+                            <div class="mini-icon" :class="{'locked': !ach.unlocked}" :title="ach.name">
+                                <img :src="ach.full_image" x-show="ach.full_image">
+                                
+                                <template x-if="!ach.full_image">
+                                    <div style="font-size: 10px; color: #444; text-align: center; margin-top: 15px;">🔒</div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+
+                    <div class="progress-track-nxe" style="margin-top: auto;">
+                        <div class="progress-bar-nxe" :style="'width: ' + Math.min(((game.earnedScore || 0) / 10), 100) + '%'"></div>
+                    </div>
+                </div>
+            </template>
+
+            <template x-if="!$store.app.achievementsGamesList || $store.app.achievementsGamesList.length === 0">
+                <div style="
+                    display: flex; 
+                    flex-direction: column; 
+                    align-items: center; 
+                    justify-content: center; 
+                    min-height: 70vh; 
+                    width: 100%; 
+                    color: #fff; 
+                    text-align: center;
+                ">  
+                    <div style="font-size: 80px; margin-bottom: 20px; opacity: 0.8;"><img src="assets/icons/achievements.png" style="width: 80px; height: 80px;"></div>
+                    <p style="font-size: 24px; margin: 0; opacity: 0.8;" 
+                    x-text="$store.app.t('achievements.NoAchievements') || 'No Achievement History Found In This Profile'">
+                    </p>
+                </div>
+            </template>
+
+        </div>
+    </div>
+
+    <footer class="nxe-footer-left">
+        <div class="footer-button" @click="$store.actions.goBack()">
+            <span class="button-icon b">B</span> 
+            <span x-text="$store.app.t('generic.back')">Back</span>
+        </div>
+
+        <div class="footer-button" @click="$store.actions.openAchievementOverlay()" style="margin-left: 20px;">
+            <span class="button-icon a">A</span> 
+            <span x-text="$store.app.t('generic.details')">Details</span>
+        </div>
+
+        <div class="footer-button" @click="$store.actions.refreshCurrentGame()" style="margin-left: 20px;">
+        <span class="button-icon y">Y</span> 
+        <span x-text="$store.app.t('generic.refresh')">Refresh</span>
+        </div>
+
+
+    </footer>
+
+<div class="ach-modal-overlay" x-show="$store.app.isAchievementOverlayOpen" x-transition:enter="nxe-scale-in">
+    <div class="ach-modal-content">
+        
+        <div class="ach-modal-header">
+            <img :src="$store.app.selectedAchievementGame?.coverUrl" class="ach-header-img">
+            <div style="flex: 1;">
+                <h1 x-text="$store.app.selectedAchievementGame?.name" style="color: #fff; font-size: 36px; margin: 0;"></h1>
+                <div style="display: flex; gap: 20px; margin-top: 10px;">
+                    <span style="color: var(--nxe-brand-primary); font-weight: bold;" x-text="'Title ID: ' + $store.app.selectedAchievementGame?.titleID"></span>
+                    <span style="color: #ffd700; font-weight: bold;">G <span x-text="$store.app.selectedAchievementGame?.earnedScore"></span></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="ach-grid-container hide-scroll">
+            <template x-for="(ach, idx) in ($store.app.selectedAchievementGame?.realAchievements || [])" :key="ach.id">
+                <div 
+                    :id="'ach-slot-' + idx"
+                    class="ach-grid-slot"
+                    :class="{'focused': $store.app.focusedAchievementIndex === idx}"
+                >
+                    <img :src="ach.full_image" x-show="ach.full_image" :style="!ach.unlocked ? 'filter: grayscale(1) opacity(0.3);' : ''">
+                    <div class="locked-overlay" x-show="!ach.unlocked"><img src="assets/icons/lock.webp"alt="Locked"/></div>
+                    <div class="unlock-status-box">
+                        <span x-show="ach.unlocked" style="color: var(--nxe-brand-primary); font-weight: bold;">✓</span>
+                    </div>
+                </div>
+            </template>
+        </div>
+        <div class="ach-detail-popup">
+            <template x-if="$store.app.selectedAchievementGame?.realAchievements[$store.app.focusedAchievementIndex]">
+                <div :key="$store.app.focusedAchievementIndex">
+                    <div style="display: flex; justify-content: space-between;">
+                        <h2 class="ach-popup-title" x-text="$store.app.selectedAchievementGame.realAchievements[$store.app.focusedAchievementIndex].name"></h2>
+                        <div class="ach-popup-score">G <span x-text="$store.app.selectedAchievementGame.realAchievements[$store.app.focusedAchievementIndex].score"></span></div>
+                    </div>
+                    <p x-text="$store.app.selectedAchievementGame.realAchievements[$store.app.focusedAchievementIndex].description" style="color: #bbb; font-size: 20px; margin-top: 10px;"></p>
+                    
+                    <div style="margin-top: 10px; font-weight: bold; font-size: 13px; text-transform: uppercase;">
+                        <span :style="$store.app.selectedAchievementGame.realAchievements[$store.app.focusedAchievementIndex].unlocked ? 'color: var(--nxe-brand-primary)' : 'color: #555'" 
+                            x-text="$store.app.selectedAchievementGame.realAchievements[$store.app.focusedAchievementIndex].unlocked ? 'Status: Unlocked' : 'Status: Locked'"></span>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+</div>
+
+</section>

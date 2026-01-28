@@ -1,0 +1,70 @@
+<section class="page" id="settings-system" x-data x-init="$store.actions.scanForThemes()">
+    
+    <div class="nxe-settings-wrapper">
+
+        <h1 class="nxe-settings-title" x-text="$store.app.t('settings.system_title')">System Settings</h1> 
+        
+        <div class="nxe-settings-container">
+            
+            <nav class="nxe-settings-menu">
+                <template x-for="(item, index) in $store.app.themesList" :key="item.name">
+                    <div 
+                        class="nxe-settings-item"
+                        :class="{'focused': $store.app.focusedIndex === index && $store.app.focusedCollection === 'themesList'}"
+                        :data-theme-name="item.name"
+                        @click.prevent="$store.actions.selectFocusedItem()"
+                    >
+                        <img class="nxe-settings-icon" :src="item.icon" alt="Theme">
+                        
+                        <span x-text="item.name" style="flex-grow: 1;"></span>
+                        
+                        <span class="nxe-settings-value" 
+                              x-show="item.name === $store.app.currentTheme" 
+                              x-text="$store.app.t('colors.active')">Active</span>
+                    </div>
+                </template>
+            </nav>
+            
+            <div class="nxe-settings-description">
+                <h3 x-text="$store.app.t('system.themes') || 'Themes'">Themes</h3>
+                
+                <p x-text="$store.app.t('settings.system_desc')">Select a new visual theme for the application. The new theme will be applied immediately.</p>
+                
+                <h3 style="margin-top: 30px;" x-text="$store.app.t('display.current')">Current Selection</h3>
+                <p x-text="$store.app.currentTheme" style="color: var(--nxe-green-light); font-weight: bold;"></p>
+            </div>
+            
+        </div> 
+    </div> 
+
+    <footer class="nxe-footer-left">
+        <div class="footer-button" id="btn-a">
+            <span class="button-icon a">A</span> 
+            <span x-text="$store.app.t('generic.apply')">Apply</span>
+        </div>
+        <div class="footer-button" id="btn-b" @click.prevent="$store.actions.goBack()">
+            <span class="button-icon b">B</span> 
+            <span x-text="$store.app.t('generic.back')">Back</span>
+        </div>
+    </footer>
+    
+    <footer class="nxe-footer-right">
+        <div class="footer-guide-button" @click="$store.actions.toggleGuide()">
+            <div class="scene-3d">
+                <div class="guide-icon">
+                    <img src="assets/icons/xbox-25912.png" alt="Xbox Guide">
+                </div>
+                
+            <div class="ground-surface">
+                <div class="icon-ground-shadow"></div>
+                <div class="ripple-wave"></div>
+                <div class="ripple-wave"></div>
+                <div class="ripple-wave"></div>
+                <div class="ripple-wave"></div>
+                <div class="ripple-wave"></div>
+            </div>
+
+            </div>
+        </div>
+        </footer>
+</section>

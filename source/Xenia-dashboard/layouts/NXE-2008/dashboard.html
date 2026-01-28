@@ -1,0 +1,575 @@
+<section 
+    class="page" 
+    id="dashboard" 
+    x-data 
+    x-init="$store.actions.loadDashboardData()"
+>
+
+<style>
+
+.nxe-blade .nxe-blade-content,
+.nxe-blade .nxe-blade-icon-wrapper,
+.nxe-blade .nxe-blade-logo-container {
+    transition: opacity 0.25s ease-out, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    will-change: transform, opacity;
+}
+
+.nxe-blade.out .nxe-blade-content,
+.nxe-blade.out .nxe-blade-icon-wrapper,
+.nxe-blade.out .nxe-blade-logo-container {
+    opacity: 0;
+    transform: scale(0.9) translateY(10px);
+}
+
+.nxe-blade.in .nxe-blade-content,
+.nxe-blade.in .nxe-blade-icon-wrapper,
+.nxe-blade.in .nxe-blade-logo-container {
+    opacity: 0;
+    transform: scale(0.9) translateY(10px);
+}
+
+.nxe-blade.idle .nxe-blade-content,
+.nxe-blade.idle .nxe-blade-icon-wrapper,
+.nxe-blade.idle .nxe-blade-logo-container {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+}
+
+
+.dashboard-drawer {
+    position: fixed; top: 0; right: -420px; width: 400px; height: 100%;
+    background: rgba(18, 18, 18, 0.95);
+    border-left: 1px solid rgba(255,255,255,0.1);
+    box-shadow: -20px 0 50px rgba(0,0,0,0.8);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 9000;
+    display: flex; flex-direction: column;
+    backdrop-filter: blur(10px);
+}
+.dashboard-drawer.open { transform: translateX(-420px); }
+
+.drawer-header { padding: 25px; border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2); }
+.drawer-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
+.drawer-title h3 { margin: 0; font-size: 16px; letter-spacing: 1px; color: #fff; }
+.live-indicator { width: 8px; height: 8px; background: #00ff88; border-radius: 50%; box-shadow: 0 0 10px #00ff88; }
+
+.drawer-list { flex: 1; overflow-y: auto; padding: 20px; }
+
+.queue-item { 
+    display: flex; gap: 15px; padding: 12px; margin-bottom: 12px;
+    background: rgba(255,255,255,0.05); border-radius: 8px;
+    border: 1px solid transparent; transition: all 0.2s;
+}
+.queue-item.active-queue { background: rgba(0, 120, 242, 0.2); border-color: #0078f2; transform: scale(1.02); }
+
+.queue-thumb-wrapper { width: 45px; height: 65px; border-radius: 4px; overflow: hidden; background: #000; flex-shrink: 0; }
+.queue-thumb { width: 100%; height: 100%; object-fit: cover; }
+
+.queue-content { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+.q-top { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 13px; font-weight: 600; color: #fff; }
+.q-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+.q-state { font-size: 10px; text-transform: uppercase; color: #aaa; }
+.q-state.downloading { color: #00ff88; }
+.q-state.extracting { color: #f2c40e; }
+
+.progress-track { height: 4px; background: #333; border-radius: 2px; margin-bottom: 6px; position: relative; overflow: hidden; }
+.progress-fill { height: 100%; background: #0078f2; width: 0%; transition: width 0.3s; position: relative; }
+.progress-fill.extracting { background: #f2c40e; }
+
+.q-meta { display: flex; justify-content: space-between; font-size: 11px; color: #888; }
+.empty-state { text-align: center; padding-top: 100px; color: #666; }
+
+
+.download-status-widget {
+    position: fixed;
+    bottom: 50px;
+    right: 300px;
+    background: rgba(10, 10, 10, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 30px;
+    padding: 8px 16px;
+    display: flex; align-items: center; gap: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(15px);
+    z-index: 9999;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: slideInWidget 0.5s ease-out;
+}
+
+.download-status-widget:hover {
+    transform: scale(1.05);
+    border-color: #00ff88;
+    background: rgba(20, 20, 20, 0.95);
+}
+
+.widget-spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-top-color: #00ff88;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.widget-info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.widget-count {
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.widget-status {
+    font-size: 9px;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+@keyframes slideInWidget {
+    from { transform: translateY(50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+
+.profile-selector-overlay {
+    position: fixed;
+    top: 0; 
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.profile-modal {
+    background: linear-gradient(180deg, #2a2a2a 0%, #161616 100%);
+    width: 580px;
+    padding: 30px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8), 
+                inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-modal::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 40%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 100%);
+    pointer-events: none;
+}
+
+.profile-modal h2 {
+    color: #eee;
+    font-size: 22px;
+    margin-bottom: 25px;
+    font-weight: 300;
+    letter-spacing: 1px;
+    text-align: center;
+}
+
+.profile-grid {
+    display: grid;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.profile-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 15px 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    position: relative;
+}
+
+.profile-card:hover, .profile-card.focused {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #fff;
+    transform: scale(1.03);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+}
+
+.profile-card.active {
+    border-left: 5px solid var(--nxe-brand-primary);
+    background: linear-gradient(90deg, rgba(144, 195, 29, 0.1) 0%, rgba(255, 255, 255, 0.03) 100%);
+}
+
+.p-score::before {
+    content: "G";
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    color: #000;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 18px;
+    font-size: 12px;
+    font-weight: 900;
+    margin-right: 8px;
+    box-shadow: 0 0 5px rgba(255,255,255,0.5);
+}
+
+.profile-avatar-small {
+    width: 55px;
+    height: 55px;
+    background: #000;
+    border-radius: 50%;
+    padding: 2px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    flex-shrink: 0;
+}
+
+.profile-avatar-small img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.profile-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.p-name {
+    font-size: 19px;
+    font-weight: 500;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.p-score {
+    color: var(--nxe-brand-primary);
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.p-slot {
+    font-size: 11px;
+    color: #888;
+    background: rgba(0,0,0,0.3);
+    padding: 2px 8px;
+    border-radius: 20px;
+    align-self: flex-start;
+}
+
+.active-indicator {
+    margin-left: auto;
+    background: var(--nxe-brand-primary);
+    color: #000;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    box-shadow: 0 0 10px var(--nxe-brand-primary);
+}
+
+.modal-footer {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    padding-top: 20px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(1.05); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.back {
+    background: linear-gradient(to bottom, #444, #222);
+    color: #fff;
+    border: 1px solid #111;
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-family: 'Segoe UI', sans-serif;
+    font-weight: bold;
+    font-size: 13px;
+    box-shadow: 0 3px 0 #000;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+}
+
+</style>
+
+        <header class="nxe-player-header" @click="$store.app.isProfileSelectorOpen = true; $store.actions.playSound('panelUnfold')">
+            <div class="player-info-box">
+                <span class="player-tag" x-text="$store.app.playerTag"></span>
+                <span class="gamerscore" x-text="$store.app.gamerscore + ' G'"></span>
+            </div>
+            <div class="avatar-container">
+                <template x-if="$store.app.userAvatar">
+                    <img :src="$store.app.userAvatar" class="player-avatar-img">
+                </template>
+                <template x-if="!$store.app.userAvatar">
+                    <div class="avatar-placeholder-icon">☺</div>
+                </template>
+            </div>
+        </header>
+
+    <nav>
+        <ul class="nxe-master-menu" :class="{'list-unfocused': $store.app.focusedList === 'detail'}">
+            <template x-for="(item, index) in $store.app.masterMenu" :key="item.id">
+                <li 
+                    :class="{'focused': $store.app.masterIndex === index}"
+                    @click="$store.app.masterIndex = index; $store.actions.updateDetailMenu()"
+                >
+                    <span x-text="$store.app.t('dashboard_menu.' + item.id) !== ('dashboard_menu.' + item.id) ? $store.app.t('dashboard_menu.' + item.id) : item.name"></span>
+                </li>
+            </template>
+        </ul>
+    </nav>
+
+    <main class="nxe-detail-container" :style="`--active-index: ${$store.app.detailIndex};`">
+        
+        <template x-for="(item, index) in $store.app.detailMenu" :key="item.id">
+            <div 
+                class="nxe-blade"
+                
+                :class="[
+                    {'focused': $store.app.detailIndex === index && $store.app.focusedList === 'detail'},
+                    item.id === 'opentray' ? item.animationState : ''
+                ]"
+                :style="`
+                    --index: ${index}; 
+                    ${ item.isGame || item.isGameIcon ? 
+                       (item.heroUrl && item.heroUrl !== 'none' ? `--blade-img: url(${item.heroUrl}); background-image: var(--blade-img); background-size: cover; background-position: center;` : '--blade-img: var(--nxe-user-flourish); background-image: var(--blade-img);') 
+                       : '' }
+                `"
+                
+                @click="$store.app.detailIndex = index; $store.actions.selectDetailItem()"
+            >
+                <div class="nxe-blade-gloss"></div>
+                
+                <div 
+                    class="nxe-blade-content" 
+                    :class="{'game-blade-content': item.isGame || item.isGameIcon}"
+                >
+                    
+                    <div class="nxe-blade-icon-wrapper">
+                        <template x-if="item.isGame">
+                            <div 
+                                class="nxe-blade-icon"  :style="`background-image: url('${item.icon}')`"
+                                style="width: 80px; height: 80px; background-size: cover; background-position: center; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.4);"
+                            ></div>
+                        </template>
+                        
+                        <template x-if="item.isGameIcon">
+                            <img :src="item.icon" class="nxe-blade-icon" :alt="item.name" style="width: 80px; height: 80px; bottom: -75px; border-radius: 20px;">
+                        </template>
+                    </div>
+
+                    <template x-if="!item.isGame && !item.isGameIcon">
+                        <img :src="item.icon" class="nxe-blade-icon" :alt="item.name">
+                    </template>
+                    
+                    
+                    <template x-if="item.isGame || item.isGameIcon">
+                        <div class="nxe-blade-logo-container">
+                            <template x-if="item.logoUrl">
+                                <img :src="item.logoUrl" class="nxe-blade-logo" :alt="item.name">
+                            </template>
+                            <template x-if="!item.logoUrl">
+                                <h1 class="nxe-blade-logo-fallback"><span x-text="item.name"></span></h1>
+                            </template>
+                        </div>
+                    </template>
+                    
+                    <template x-if="!item.isGame && !item.isGameIcon">
+                        <h1>
+                            <span x-text="$store.app.t('dashboard_menu.' + item.id) !== ('dashboard_menu.' + item.id) ? $store.app.t('dashboard_menu.' + item.id) : ($store.app.t('settings.' + item.id + '_title') !== ('settings.' + item.id + '_title') ? $store.app.t('settings.' + item.id + '_title') : item.name)"></span>
+                        </h1>
+                    </template>
+                    
+                    <template x-if="!item.isGame && !item.isGameIcon">
+                        <div 
+                            class="nxe-blade-reflection" 
+                            :style="`background-image: url('${item.icon}')`"
+                        ></div>
+                    </template>
+                </div>
+            </div>
+        </template>
+        
+        <div 
+            class="nxe-avatar-preview" 
+            x-show="$store.app.focusedList === 'detail' && $store.app.detailMenu[$store.app.detailIndex]?.id === 'gamelibrary'"
+        >
+            </div>
+    </main>
+
+    <footer class="nxe-footer-left">
+        <div class="footer-button" id="btn-a">
+            <span class="button-icon a">A</span> 
+            <span x-text="$store.app.focusedList === 'master' ? $store.app.t('generic.select') : ($store.app.detailMenu[$store.app.detailIndex]?.isGame || $store.app.detailMenu[$store.app.detailIndex]?.isGameIcon ? $store.app.t('dashboard.play') : $store.app.t('generic.select'))"></span>
+        </div>
+        <div class="footer-button" id="btn-y" @click.prevent="$store.actions.changeUserAvatar()">
+            <span class="button-icon y">Y</span>
+            <span x-text="$store.app.t('dashboard.change_avatar') || 'Change Gamerpic'"></span>
+        </div>
+        <div class="footer-button" id="btn-menu">
+            <span class="button-icon menu">LB+Start</span> 
+            <span x-text="$store.app.t('dashboard.menu')"></span>
+        </div>
+    </footer>
+    
+    <footer class="nxe-footer-right">
+        <div class="footer-guide-button" @click="$store.actions.toggleGuide()">
+            <div class="scene-3d">
+                <div class="guide-icon">
+                    <img src="assets/icons/xbox-25912.png" alt="Xbox Guide">
+                </div>
+                
+            <div class="ground-surface">
+                <div class="icon-ground-shadow"></div>
+                <div class="ripple-wave"></div>
+                <div class="ripple-wave"></div>
+                <div class="ripple-wave"></div>
+                <div class="ripple-wave"></div>
+                <div class="ripple-wave"></div>
+            </div>
+
+            </div>
+        </div>
+        </footer>
+
+        <div class="profile-selector-overlay" x-show="$store.app.isProfileSelectorOpen" x-transition.opacity x-cloak>
+            <div class="profile-modal" @click.away="$store.app.isProfileSelectorOpen = false">
+                <h2 x-text="$store.app.isCreatingProfile ? ($store.app.t('profile.create_title') || 'Create New Profile') : ($store.app.t('profile.switch_user') || 'Switch User Profile')"></h2>
+                                    
+                    <template x-if="$store.app.isCreatingProfile">
+                        <div style="margin: 30px 0; text-align: center; animation: fadeIn 0.3s;">
+                            <p style="color: #aaa; font-size: 14px; margin-bottom: 15px;" x-text="$store.app.t('profile.enter_name_msg') || 'Enter your new gamertag'"></p>
+                            
+                            <div style="position: relative; display: flex; justify-content: center;">
+                                <input 
+                                    id="new-profile-input"
+                                    type="text" 
+                                    x-model="$store.app.newProfileName"
+                                    @keydown.enter="$store.actions.submitNewProfile()"
+                                    @keydown.escape="$store.actions.cancelCreateProfile()"
+                                    placeholder="........"
+                                    maxlength="15"
+                                    autofocus
+                                    style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 12px; border: 2px solid var(--nxe-brand-primary); font-size: 28px; color: #fff; width: 80%; text-align: center; outline: none; font-family: inherit;"
+                                >
+                            </div>
+
+                            <div style="margin-top: 25px; display: flex; justify-content: center; gap: 20px;">
+                                <div class="footer-button" @click="$store.actions.submitNewProfile()" style="cursor: pointer;">
+                                    <span class="button-icon a">A</span> 
+                                    <span x-text="$store.app.t('generic.done') || 'Done'"></span>
+                                </div>
+
+                                <div class="footer-button" @click="$store.actions.cancelCreateProfile()" style="cursor: pointer;">
+                                    <span class="button-icon b">B</span> 
+                                    <span x-text="$store.app.t('generic.cancel') || 'Cancel'"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                <template x-if="!$store.app.isCreatingProfile">
+                    <div class="profile-grid">
+                        <template x-for="(profile, index) in $store.app.profilesList" :key="profile.xuid">
+                            <div :id="'profile-item-' + index" 
+                                class="profile-card" 
+                                :class="{
+                                    'active': profile.slot === $store.app.activeProfileSlot,
+                                    'focused': $store.app.focusedProfileIndex === index
+                                }"
+                                @click="$store.actions.switchActiveProfile(profile.slot)">
+                                
+                                <div class="profile-avatar-small">
+                                    <template x-if="profile.avatar">
+                                        <img :src="profile.avatar + '?update=' + $store.app.activeProfileSlot">
+                                    </template>
+                                    <template x-if="!profile.avatar">
+                                        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 30px;">☺</div>
+                                    </template>
+                                </div>
+                                
+                                <div class="profile-details">
+                                    <div class="p-name" x-text="profile.gamertag"></div>
+                                    <div class="p-score" x-text="(profile.total_gamerscore || 0) + ' G'"></div>
+                                    <div class="p-slot" x-text="profile.slot !== null ? 'Slot ' + profile.slot : 'Unassigned'"></div>
+                                </div>
+                                
+                                <template x-if="profile.slot === $store.app.activeProfileSlot">
+                                    <div class="active-indicator">✔</div>
+                                </template>
+                            </div>
+                        </template>
+
+                        <div class="profile-card add-new-user-btn" 
+                            :class="{'focused': $store.app.focusedProfileIndex === $store.app.profilesList.length}"
+                            @click="$store.actions.createNewProfilePrompt()"
+                            style="cursor: pointer; border: 2px dashed rgba(144, 195, 29, 0.4); background: rgba(255,255,255,0.02); margin-top: 10px;">
+                            
+                            <div class="profile-avatar-small" style="display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3);">
+                                <span style="font-size: 30px; color: #90c31d;">+</span>
+                            </div>
+                            
+                            <div class="profile-details">
+                                <div class="p-name">Create New Profile</div>
+                                <div class="p-slot" x-text="$store.app.t('profile.local_creation') || 'Scan & Add to content/'"></div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <template x-if="!$store.app.isCreatingProfile">
+                    <div class="modal-footer">
+                        <div class="footer-button">
+                            <span class="button-icon y">Y</span>
+                            <span x-text="$store.app.t('generic.Create')">Create</span>
+                        </div>
+
+                        <div class="footer-button" @click.stop="$store.actions.changeFocusedProfileAvatar()">
+                            <span class="button-icon x">X</span> 
+                            <span x-text="$store.app.t('profile.change_photo')">Change Photo</span>
+                        </div>
+
+                        <div class="footer-button" @click="$store.app.isProfileSelectorOpen = false">
+                            <span class="button-icon b">B</span> 
+                            <span x-text="$store.app.t('generic.back')">Back</span>
+                        </div>
+
+                    </div>
+                </template>
+            </div>
+        </div>
+</section>

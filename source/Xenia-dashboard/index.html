@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr"> <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xenia Dashboard</title>
+    
+    <link id="theme-stylesheet" rel="stylesheet" href=""> 
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body, html {
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'XBOX', 'Source Sans 3', 'Segoe UI', Tahoma, sans-serif;
+            position: relative;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="nxe-dashboard" x-data x-cloak>
+        <div id="view-host" x-html="$store.app.currentViewHTML">
+        </div>
+    </div>
+    
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+
+    <audio id="select-sound" src="assets/audio/select.wav" preload="auto"></audio>
+    <audio id="back-sound" src="assets/audio/back.wav" preload="auto"></audio>
+    <audio id="focus-sound" src="assets/audio/focus.wav" preload="auto"></audio>
+    <audio id="channel-up-sound" src="assets/audio/channel-up.wav" preload="auto"></audio>
+    <audio id="channel-down-sound" src="assets/audio/channel-down.wav" preload="auto"></audio>
+    <audio id="panel-left-sound" src="assets/audio/panel-left.wav" preload="auto"></audio>
+    <audio id="panel-right-sound" src="assets/audio/panel-right.wav" preload="auto"></audio>
+    <audio id="panel-unfold-sound" src="assets/audio/panel-unfold.wav" preload="auto"></audio>
+    <audio id="bgm-player" loop></audio>
+
+    <script src="core.js"></script>
+    
+    <script src="cdn.min.js"></script>
+
+    <div id="guide-overlay" 
+     class="guide-overlay" 
+     x-show="$store.app.isGuideOpen" 
+     x-transition:enter="transition ease-out duration-200"
+     x-transition:enter-start="opacity-0 scale-90"
+     x-transition:enter-end="opacity-100 scale-100"
+     x-transition:leave="transition ease-in duration-150"
+     x-transition:leave-start="opacity-100 scale-100"
+     x-transition:leave-end="opacity-0 scale-90"
+     style="display: none;">
+
+    <div class="guide-backdrop"></div>
+
+    <div class="guide-container">
+        
+        <div class="guide-header-profile">
+            <div class="gamerscore" x-text="$store.app.gamerscore + ' G'"></div>
+            <div class="guide-gamerpic">
+                <img :src="$store.app.userAvatar" class="player-avatar-img">
+            </div>
+            <div class="guide-clock" x-text="$store.app.systemTime"></div>
+        </div>
+
+        <div class="guide-body">
+            
+            <div class="guide-blade side left">
+                <span x-text="$store.app.t('guide.xbox_guide')"></span>
+            </div>
+
+            <div class="guide-blade center">
+                
+                <div class="blade-spine">
+                    <span x-text="$store.app.t('guide.' + $store.app.guideTabs[$store.app.guideTabIndex].id) || $store.app.guideTabs[$store.app.guideTabIndex].name"></span>
+                </div>
+
+                <div class="blade-content">
+                    
+                    <ul class="guide-menu" x-show="$store.app.guideTabs[$store.app.guideTabIndex].id === 'home'">
+                        <li id="guide-home-0" :class="{'selected': $store.app.guideMenuIndex === 0}">
+                            <span class="label" x-text="$store.app.t('guide.dashboard')">Xbox Dashboard</span>
+                            <span class="hint" x-text="$store.app.t('guide.coming_soon')">(coming soon)</span>
+                        </li>
+                        
+                        <li id="guide-home-1" :class="{'selected': $store.app.guideMenuIndex === 1}">
+                            <span class="label" x-text="$store.app.t('guide.quick_launch')">Quick Launch</span>
+                            <span class="hint" x-text="$store.app.t('guide.coming_soon')">(coming soon)</span>
+                        </li>
+                        
+                        <li id="guide-home-2" :class="{'selected': $store.app.guideMenuIndex === 2}">
+                            <span class="label" x-text="$store.app.t('guide.shutdown')">Shutdown System</span>
+                            <span class="hint" x-text="$store.app.t('guide.exit_app')">(Exit App)</span>
+                        </li>
+                    </ul>
+
+                    <ul class="guide-menu scrollable" x-show="$store.app.guideTabs[$store.app.guideTabIndex].id === 'games'">
+                        <template x-for="(game, index) in $store.app.gamesList" :key="game.path">
+                            
+                            <li :id="'guide-game-' + index" :class="{'selected': $store.app.guideMenuIndex === index}">
+                                
+                                <div class="guide-game-logo-container">
+                                    <template x-if="game.logoUrl && game.logoUrl !== ''">
+                                        <img :src="game.logoUrl" class="guide-game-logo" :alt="game.name">
+                                    </template>
+                                    
+                                    <template x-if="!game.logoUrl || game.logoUrl === ''">
+                                        <span class="guide-game-text-fallback" x-text="game.name"></span>
+                                    </template>
+                                </div>
+
+                            </li>
+                        </template>
+                        <li x-show="$store.app.gamesList.length === 0" class="empty-msg" x-text="$store.app.t('guide.no_games')">No games found</li>
+                    </ul>
+
+                </div>
+            </div>
+
+            <div class="guide-blade side right">
+                <span x-text="$store.app.t('guide.games')"></span>
+            </div>
+
+        </div>
+
+        <div class="guide-footer">
+            <div class="footer-btn"><span class="icon-a">A</span> <span x-text="$store.app.t('generic.select')">Select</span></div>
+            <div class="footer-btn"><span class="icon-b">B</span> <span x-text="$store.app.t('generic.close')">Close</span></div>
+        </div>
+
+    </div>
+
+</div>
+
+<style>
+    .shutdown-crt {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: black;
+        opacity: 0;
+        pointer-events: none;
+        z-index: 9999;
+        transition: opacity 0.1s;
+    }
+
+    .shutdown-active {
+        opacity: 1;
+        animation: turn-off 0.7s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+    }
+
+    @keyframes turn-off {
+        0% {
+            transform: scale(1, 1.3) translate3d(0, 0, 0);
+            -webkit-filter: brightness(1);
+            filter: brightness(1);
+            opacity: 1;
+        }
+        60% {
+            transform: scale(1, 0.001) translate3d(0, 0, 0);
+            -webkit-filter: brightness(10);
+            filter: brightness(10);
+        }
+        100% {
+            animation-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
+            transform: scale(0, 0.001) translate3d(0, 0, 0);
+            -webkit-filter: brightness(0);
+            filter: brightness(0);
+        }
+    }
+
+    @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
+
+    html[dir="rtl"] body {
+        font-family: 'Tajawal', 'Segoe UI', sans-serif !important;
+    }
+
+    html[dir="rtl"] .nxe-settings-wrapper,
+    html[dir="rtl"] .marketplace-header,
+    html[dir="rtl"] .info-card-header {
+        flex-direction: row-reverse;
+    }
+
+    html[dir="rtl"] .nxe-footer-left {
+        right: 50px; left: auto; flex-direction: row-reverse;
+    }
+    html[dir="rtl"] .nxe-footer-right {
+        left: 50px; right: auto;
+    }
+    html[dir="rtl"] .footer-button {
+        flex-direction: row-reverse;
+    }
+    html[dir="rtl"] .button-icon {
+        margin-right: 0; margin-left: 10px;
+    }
+
+    html[dir="rtl"] .dashboard-drawer,
+    html[dir="rtl"] .download-drawer {
+        left: -420px; right: auto;
+        border-left: none; border-right: 1px solid rgba(255,255,255,0.1);
+    }
+    html[dir="rtl"] .dashboard-drawer.open,
+    html[dir="rtl"] .download-drawer.open {
+        transform: translateX(420px);
+    }
+
+    html[dir="rtl"] .nxe-settings-icon {
+        margin-right: 0; margin-left: 15px;
+    }
+
+    html[dir="rtl"] .search-icon {
+        right: 12px; left: auto;
+    }
+    html[dir="rtl"] .search-box-wrapper input {
+        padding: 10px 35px 10px 15px;
+    }
+    html[dir="rtl"] .rb-hint {
+        left: 15px; right: auto;
+    }
+</style>
+
+<div x-data x-show="$store.app.showAbgxNotify" 
+     class="nxe-global-overlay" 
+     style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9999; width: auto; height: auto;">
+    
+    <div class="nxe-alert-box" style="background: #111; border: 2px solid #ff4444; width: 600px; padding: 30px; border-radius: 20px; box-shadow: 0 0 50px rgba(0, 0, 0, 1); animation: nxe-page-slide-in 0.3s; color: white;">
+        
+        <h2 style="color: #ff4444; margin-top: 0; display: flex; align-items: center; gap: 12px; justify-content: center;">
+            <span style="font-size: 2rem;">⚠</span>
+            <span x-text="$store.app.language === 'ar' ? 'تنبيه: مطلوب نسخة CLI' : 'Warning: CLI Version Required'"></span>
+        </h2>
+        
+        <div style="background: rgba(255, 68, 58, 0.1); border-radius: 10px; padding: 15px; margin-bottom: 20px; border: 1px dashed #ff4444;">
+            <p style="margin: 0; font-weight: bold; color: #ff8c00; font-size: 1.1rem; text-align: center;" 
+               x-text="$store.app.language === 'ar' ? 'هام جداً: حمل نسخة CLI فقط' : 'Very Important: Download CLI Version ONLY'"></p>
+            <p style="margin: 10px 0 0 0; font-size: 0.9rem; color: #ccc; text-align: center;"
+               x-text="$store.app.language === 'ar' ? 'هذا التطبيق لا يدعم نسخة الواجهة (GUI). يجب تحميل ملف الأوامر المباشر ليعمل الفحص.' : 'This app does not support the GUI version. You must download the direct Command Line tool for the scan to work.'"></p>
+        </div>
+
+        <p style="color: #eee; margin-bottom: 15px; text-align: center;" 
+           x-text="$store.app.language === 'ar' ? 'قم بوضع الملف في المسار التالي بجانب أيقونة تشغيل التطبيق:' : 'Place the file in the following path next to the app executable:'"></p>
+
+        
+        <div style="background: #000; color: #59c853; padding: 15px; border-radius: 10px; font-family: 'Consolas', monospace; font-size: 0.9rem; border: 1px solid #333; margin: 15px 0; text-align: left;">
+            <div style="color: #888;">📂 assets/bin/</div>
+            <div style="margin-inline-start: 20px;">
+                ├── 📂 win <span style="color: #555;">&lt;--</span> <span style="color: #ffb347;" x-text="$store.app.language === 'ar' ? 'ضع abgx360.exe هنا' : 'Place abgx360.exe here'"></span>
+                <div style="margin-inline-start: 25px; color: #444; font-size: 0.8rem;" x-text="$store.app.language === 'ar' ? '(تأكد أنه ملف واحد فقط وليس مجلد)' : '(Make sure it is a single file, not a folder)'"></div>
+            </div>
+            <div style="margin-inline-start: 20px; margin-top: 5px;">
+                └── 📂 linux <span style="color: #555;">&lt;--</span> <span style="color: #ffb347;" x-text="$store.app.language === 'ar' ? 'ضع ملف abgx360 هنا' : 'Place abgx360 file here'"></span>
+            </div>
+        </div>
+        
+        <div style="margin: 15px 0; background: #080808; padding: 12px; border-radius: 8px; border: 1px solid #222;">
+            <label style="color: #777; font-size: 0.75rem;">Copy Link Download Windows CLI:</label>
+            <input type="text" readonly :value="$store.app.abgxStatus.winUrl" style="width: 100%; background: transparent; border: none; color: #3a82e5; font-size: 0.85rem; padding: 5px 0; outline: none; cursor: text;">
+            <hr style="border: 0.1px solid #1a1a1a; margin: 8px 0;">
+            <label style="color: #777; font-size: 0.75rem;">Copy Link Download Linux CLI:</label>
+            <input type="text" readonly :value="$store.app.abgxStatus.linuxUrl" style="width: 100%; background: transparent; border: none; color: #3a82e5; font-size: 0.85rem; padding: 5px 0; outline: none; cursor: text;">
+        </div>
+
+        <div style="display: flex; justify-content: center; margin-top: 25px;">
+            <button @click="$store.app.showAbgxNotify = false" 
+                    style="background: #e5443a; color: white; border: none; padding: 12px 40px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 1rem; box-shadow: 0 4px 15px rgba(229, 68, 58, 0.3);">
+                <span x-text="$store.app.language === 'ar' ? 'فهمت، سأحمل نسخة CLI' : 'I understand, downloading CLI'"></span>
+            </button>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

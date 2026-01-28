@@ -1,0 +1,1177 @@
+<section class="page" id="game-library" x-data>
+    
+    <div class="nxe-hero-background-dynamic" :style="{ backgroundImage: $store.app.gameDetails.heroUrl }"></div>
+
+    <header class="nxe-player-header">
+        <div class="library-search-capsule liquid-glass" 
+            @click="$store.actions.toggleKeyboard()"
+            :class="{'active': $store.app.librarySearch && $store.app.librarySearch.length > 0}">
+            
+            <div class="search-icon-glass"><img src="assets/icons/search.webp" alt="Search"></div>
+            
+            <div class="search-text-content">
+                <span class="placeholder" x-show="!$store.app.librarySearch" x-text="$store.app.t('library.search_placeholder')"></span>
+                <span class="actual-text" x-show="$store.app.librarySearch" x-text="$store.app.librarySearch"></span>
+            </div>
+
+            <div class="r3-indicator">
+                <div class="stick-visual"></div>
+                <span>R3</span>
+            </div>
+        </div>
+
+    </header>
+    
+    <main class="nxe-detail-container" :style="`--active-index: ${$store.app.focusedIndex};`">
+        
+        <template x-for="(game, index) in $store.app.filteredLibraryGames" :key="game.path">
+            <div 
+                class="nxe-blade game-blade"
+                :id="'game-item-' + index"
+                :class="{
+                    'focused': $store.app.focusedIndex === index && $store.app.focusedCollection === 'filteredLibraryGames' && !$store.app.gameSelectionAnimating,
+                    'selected-animation': $store.app.selectedIndexForAnimation === index
+                }"
+                :style="`--index: ${index};`" 
+                @click="$store.app.focusedIndex = index; $store.actions.selectFocusedItem()"
+            >
+                <div class="nxe-blade-gloss"></div>
+                <div class="nxe-blade-content">
+                
+                    <div class="nxe-blade-cover-art" 
+                        :style="`background-image: url('${game.coverUrl || 'assets/icons/placeholder.png'}')`">
+                    </div>
+                    
+                    
+
+                    <div class="library-status-bar" 
+                         :class="{
+                            'info-active': $store.app.showGameInfoOverlay && $store.app.focusedIndex === index
+                         }">
+                        
+                        <template x-if="game.compatConfig">
+                            <div class="status-content-wrapper" style="display:flex; gap:5px; align-items:center;">
+                                <div class="status-pill-main" :style="`background: ${game.compatConfig.color}; box-shadow: 0 0 15px ${game.compatConfig.color}60;`">
+                                    <span x-text="game.compatConfig.icon" class="status-icon-dark"></span>
+                                    <span x-text="game.compatConfig.text" class="status-text-dark"></span>
+                                </div>
+                                <template x-if="game.compatTags && game.compatTags.some(t => t.text === '1080p')">
+                                    <div class="tech-pill-hd">1080p</div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+
+                </div>
+            </div>
+        </template>
+    </main>
+
+    <div class="nxe-game-details" :class="{'active': $store.app.gameDetails.title}"> 
+        <div class="nxe-game-logo">
+            <img :src="$store.app.gameDetails.logoUrl" alt="Game Logo" x-show="$store.app.gameDetails.logoUrl">
+            <h2 x-show="!$store.app.gameDetails.logoUrl" x-text="$store.app.gameDetails.title" style="color: white; text-shadow: 0 2px 4px black;"></h2>
+        </div>
+    </div>
+
+    <footer class="nxe-footer-left">
+        <div class="footer-button" id="btn-a">
+            <span class="button-icon a">A</span>
+            <span x-text="$store.app.t('generic.select')">Select</span>
+        </div>
+        <div class="footer-button" id="btn-b" @click.prevent="$store.actions.goBack()">
+            <span class="button-icon b">B</span>
+            <span x-text="$store.app.t('generic.back')">Back</span>
+        </div>
+        
+        <div class="footer-button" id="btn-y" @click.prevent="$store.actions.deleteFocusedGame()">
+            <span class="button-icon y">Y</span>
+            <span x-text="$store.app.t('library.delete_game')">Delete Game</span>
+        </div>
+
+        <div class="footer-button" id="btn-info">
+            <span class="button-icon rb-icon">RB</span>
+            <span x-text="$store.app.t('library.details')">Details</span>
+        </div>
+        <div class="footer-button" id="btn-x" x-show="$store.app.focusedGamePatchInfo && $store.app.focusedGamePatchInfo.fileName" @click.prevent="$store.actions.loadView('patches-manager')">
+            <span class="button-icon x">X</span>
+            <span x-text="$store.app.t('library.patches')">Patches</span>
+        </div>
+        <div class="footer-button" id="btn-lb" @click.prevent="$store.actions.openGameConfig()">
+            <span class="button-icon lb-icon">LB</span>
+            <span x-text="$store.app.t('library.game_config')">Game Config</span>
+        </div>
+        <div class="footer-button" id="btn-back" 
+            x-show="!$store.app.filteredLibraryGames[$store.app.focusedIndex].titleID"
+            @click.prevent="$store.actions.performDeepScan()">
+            <span class="button-icon back-icon">BACK</span> 
+            <span id="deep-scan-text" x-text="$store.app.t('library.deep_scan')">Deep Scan (Fix ID)</span>
+        </div>
+        <div class="footer-button" id="btn-rt" @click.prevent="$store.actions.openArtManager()">
+            <span class="button-icon rt-icon">RT</span>
+            <span x-text="$store.app.t('library.art_manager')">Art Manager</span>
+        </div>
+
+        <div class="footer-button" id="btn-zar-scan" 
+            x-show="$store.app.filteredLibraryGames[$store.app.focusedIndex].fileName.toLowerCase().endsWith('.zar') && !$store.app.filteredLibraryGames[$store.app.focusedIndex].titleID"
+            @click.prevent="$store.actions.performZarScan()">
+            <span class="button-icon L3-icon">L3</span> 
+            <span id="zar-scan-text" x-text="$store.app.t('library.zar_scan')">Scan ZAR Title ID</span>
+        </div>
+        
+    </footer>
+    
+    <footer class="nxe-footer-right">
+        <div class="footer-guide-button" @click="$store.actions.toggleGuide()">
+            <div class="scene-3d">
+                <div class="guide-icon">
+                    <img src="assets/icons/xbox-25912.png" alt="Xbox Guide">
+                </div>
+                
+            <div class="ground-surface">
+                <div class="icon-ground-shadow"></div>
+                <div class="ripple-wave"></div>
+                <div class="ripple-wave"></div>
+                <div class="ripple-wave"></div>
+                <div class="ripple-wave"></div>
+                <div class="ripple-wave"></div>
+            </div>
+
+            </div>
+        </div>
+        </footer>
+    
+
+    <div class="game-info-overlay-container" 
+        :class="{'active': $store.app.showGameInfoOverlay}">
+        
+        <template x-if="$store.app.filteredLibraryGames[$store.app.focusedIndex]">
+            <div class="info-card expanded-layout">
+                
+                <div class="info-card-header">
+                    <div class="header-left">
+                        <div class="info-card-title" x-text="$store.app.filteredLibraryGames[$store.app.focusedIndex].name"></div>
+                        
+                        <div class="info-badges-row">
+                            <div class="info-badge rating" x-show="$store.app.gameExtendedInfo.rating">
+                                <span class="star">★</span>
+                                <span x-text="$store.app.gameExtendedInfo.rating"></span>
+                            </div>
+                            
+                            <div class="info-badge" x-show="$store.app.gameExtendedInfo.developer">
+                                <span style="opacity:0.7" x-text="$store.app.t('library.dev_short')">Dev:</span>
+                                <span x-text="$store.app.gameExtendedInfo.developer"></span>
+                            </div>
+
+                            <div class="info-badge" x-show="$store.app.gameExtendedInfo.releaseDate">
+                                <span x-text="$store.app.gameExtendedInfo.releaseDate.substring(0, 4)"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card-id">
+                        <span style="font-size: 10px; color:#888; display:block;" x-text="$store.app.t('library.title_id_label')">TITLE ID</span>
+                        <span x-text="$store.app.filteredLibraryGames[$store.app.focusedIndex].titleID || 'No ID'"></span>
+                    </div>
+                </div>
+
+                <div class="info-card-body-grid">
+                    
+                    <div class="col-description custom-scrollbar">
+                        
+                        <div class="details-grid-box" x-show="!$store.app.gameExtendedInfo.loading">
+                            <div class="detail-row" x-show="$store.app.gameExtendedInfo.publisher">
+                                <span class="label" x-text="$store.app.t('library.publisher')">Publisher</span>
+                                <span class="value" x-text="$store.app.gameExtendedInfo.publisher"></span>
+                            </div>
+                            <div class="detail-row" x-show="$store.app.gameExtendedInfo.developer">
+                                <span class="label" x-text="$store.app.t('library.developer')">Developer</span>
+                                <span class="value" x-text="$store.app.gameExtendedInfo.developer"></span>
+                            </div>
+                            <div class="detail-row" x-show="$store.app.gameExtendedInfo.genre">
+                                <span class="label" x-text="$store.app.t('library.genre')">Genre</span>
+                                <span class="value" x-text="$store.app.gameExtendedInfo.genre"></span>
+                            </div>
+                            <div class="detail-row" x-show="$store.app.gameExtendedInfo.releaseDate">
+                                <span class="label" x-text="$store.app.t('library.release_date')">Release Date</span>
+                                <span class="value" x-text="$store.app.gameExtendedInfo.releaseDate"></span>
+                            </div>
+                        </div>
+
+                        <h4 style="margin-top: 20px;" x-text="$store.app.t('library.description')">Description</h4>
+                        <p x-show="$store.app.gameExtendedInfo.loading" style="color:#888;" x-text="$store.app.t('generic.loading')">Loading...</p>
+
+                        <div class="description-container">
+                            <p x-show="!$store.app.gameExtendedInfo.loading" 
+                            x-text="$store.app.gameExtendedInfo.description"
+                            :style="$store.app.gameExtendedInfo.translatedDescription ? 'direction: rtl; text-align: right;' : 'direction: ltr;'">
+                            </p>
+
+                            <div class="translate-actions-row" style="display: flex; gap: 10px;">
+                                <button class="mini-translate-btn" 
+                                        x-show="!$store.app.gameExtendedInfo.loading && !$store.app.gameExtendedInfo.translatedDescription"
+                                        @click="$store.actions.translateDescription()">
+                                    <template x-if="!$store.app.gameExtendedInfo.isTranslating">
+                                        <span>🌐 ترجمة الوصف</span>
+                                    </template>
+                                    <template x-if="$store.app.gameExtendedInfo.isTranslating">
+                                        <span>جاري الترجمة...</span>
+                                    </template>
+                                </button>
+
+                                <button class="mini-translate-btn revert" 
+                                        x-show="$store.app.gameExtendedInfo.translatedDescription"
+                                        @click="$store.actions.revertToOriginal()">
+                                    <span>⬅ عرض النص الأصلي</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-status">
+                        <div class="info-section">
+                            <h4 x-text="$store.app.t('library.compat_status')">Compatibility</h4>
+                            <template x-if="$store.app.filteredLibraryGames[$store.app.focusedIndex].compatConfig">
+                                <div class="info-status-large"
+                                    :style="`background: ${$store.app.filteredLibraryGames[$store.app.focusedIndex].compatConfig.color};`">
+                                    <span x-text="$store.app.filteredLibraryGames[$store.app.focusedIndex].compatConfig.icon"></span>
+                                    <span x-text="$store.app.filteredLibraryGames[$store.app.focusedIndex].compatConfig.text"></span>
+                                </div>
+                            </template>
+                            
+                            <h4 style="margin-top: 15px;" x-text="$store.app.t('library.known_issues')">Known Issues</h4>
+                            <ul class="info-issues-list custom-scrollbar">
+                                <template x-for="issue in $store.app.filteredLibraryGames[$store.app.focusedIndex].compatIssues">
+                                    <li x-text="issue.replace('gpu-', 'GPU: ').replace('audio-', 'Audio: ').replace('tech-', 'Tech: ')"></li>
+                                </template>
+                                <template x-if="!$store.app.filteredLibraryGames[$store.app.focusedIndex].compatIssues || $store.app.filteredLibraryGames[$store.app.focusedIndex].compatIssues.length === 0">
+                                    <li style="color:#8f8; list-style:none;" x-text="'✔ ' + $store.app.t('library.no_issues')">✔ No known issues.</li>
+                                </template>
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="info-screenshots-section" x-show="$store.app.gameExtendedInfo.screenshots.length > 0">
+                    <h4 x-text="$store.app.t('library.screenshots')">Screenshots</h4>
+                    <div class="screenshots-strip custom-scrollbar">
+                        <template x-for="shot in $store.app.gameExtendedInfo.screenshots">
+                            <img :src="shot" loading="lazy" class="screenshot-thumb">
+                        </template>
+                    </div>
+                </div>
+                <div class="info-card-footer" :class="$store.app.locale === 'ar' ? 'is-rtl' : ''">
+                    <span class="footer-button" id="btn-Translate" @click.prevent="$store.actions.handleTranslationClick()">
+                        <span class="button-icon lt-icon">LT</span>
+                        <span x-text="$store.app.gameExtendedInfo.isTranslating ? '...' : ($store.app.gameExtendedInfo.translatedDescription ? $store.app.t('library.Original') : $store.app.t('library.Translate'))">
+                            Translate
+                        </span>
+                    </span>
+                    <span class="footer-button" id="btn-info">
+                        <span class="button-icon rb-icon">RB</span>
+                        <span x-text="$store.app.t('library.Close')">Close</span>
+                    </span>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <div class="keyboard-overlay xbox-theme" :class="{'open': $store.app.isKeyboardOpen}">
+        
+        <div class="xbox-kb-wrapper">
+            
+            <div class="kb-top-label" x-text="$store.app.t('library.search_placeholder')"></div>
+
+            <div class="xbox-kb-input-row">
+                <input type="text" class="xbox-kb-input" x-model="$store.app.librarySearch" readonly>
+                <div class="input-cursor"></div>
+            </div>
+
+            <div class="xbox-kb-main-body">
+                
+                <div class="kb-col side-col left">
+                    <div class="side-btn">
+                        <div class="btn-icon-visual lb-shape"><span class="arr-left">◀</span> LB</div>
+                        <span class="btn-label">Left</span>
+                    </div>
+                    <div class="side-btn" :class="{'active-state': $store.app.isSymbols}">
+                        <div class="btn-icon-visual lt-shape">LT</div>
+                        <span class="btn-label">Symbols</span>
+                    </div>
+                    
+                    <div class="side-btn" :class="{'active-state': $store.app.isCaps}">
+                        <div class="btn-icon-visual stick-shape">L</div>
+                        <span class="btn-label">Caps</span>
+                    </div>
+                </div>
+
+                <div class="kb-col center-col">
+                    <div class="keys-grid-tight">
+                        <template x-for="(row, rIndex) in $store.app.currentKeys" :key="rIndex">
+                            <div class="keys-row-tight">
+                                <template x-for="(key, cIndex) in row" :key="cIndex">
+                                    <div class="xbox-key-tight"
+                                         :class="{'focused': $store.app.keyboardRow === rIndex && $store.app.keyboardCol === cIndex}"
+                                         @click="$store.app.keyboardRow = rIndex; $store.app.keyboardCol = cIndex; $store.actions.pressKeyboardKey()">
+                                        <span x-text="key"></span>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+
+                    <div class="bottom-actions-row">
+                        <div class="wide-action-btn" @click="$store.actions.handleKeyboardSpecial('BACKSPACE')">
+                            <div class="circle-icon blue">X</div>
+                            <span>Backspace</span>
+                        </div>
+                        <div class="wide-action-btn" @click="$store.actions.handleKeyboardSpecial('SPACE')">
+                            <div class="circle-icon yellow">Y</div>
+                            <span>Space</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="kb-col side-col right">
+                    <div class="side-btn">
+                        <div class="btn-icon-visual rb-shape">RB <span class="arr-right">▶</span></div>
+                        <span class="btn-label">Right</span>
+                    </div>
+                    <div class="side-btn" :class="{'active-state': $store.app.isAccents}">
+                        <div class="btn-icon-visual rt-shape">RT</div>
+                        <span class="btn-label">Accents</span>
+                    </div>
+                    <div class="done-btn-container" @click="$store.actions.handleKeyboardSpecial('DONE')">
+                        <div class="play-icon-circle">▶</div>
+                        <span>Done</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="kb-black-footer">
+                <div class="footer-item"><div class="circle-icon green-small">A</div> <span>Select</span></div>
+                <div class="footer-item"><div class="circle-icon red-small">B</div> <span>Close</span></div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="patch-selector-overlay" x-show="$store.app.isPatchSelectorOpen" x-transition.opacity style="display: none;">
+        <div class="patch-selector-box">
+            <div class="patch-selector-header">
+                <h3 x-text="$store.app.t('library.select_patch')">Select Patch File</h3>
+                <span x-text="$store.app.patchSelectorFiles.length + ' ' + $store.app.t('library.versions_found')"></span>
+            </div>
+            
+            <div class="patch-selector-list custom-scrollbar">
+                <template x-for="(file, index) in $store.app.patchSelectorFiles" :key="index">
+                    <div 
+                        class="patch-file-item" 
+                        :class="{'focused': $store.app.patchSelectorIndex === index}"
+                        @click="$store.app.patchSelectorIndex = index; $store.actions.selectPatchFileAndOpen()"
+                    >
+                        <span class="file-icon">📄</span>
+                        <span class="file-name" x-text="file.replace($store.app.focusedGamePatchInfo.titleID + ' - ', '').replace('.patch.toml', '')"></span>
+                        
+                        <span class="file-tag" x-show="file.includes('TU')" x-text="$store.app.t('library.tag_update')">UPDATE</span>
+                        <span class="file-tag region" x-show="file.includes('Japan')" x-text="$store.app.t('library.tag_jpn')">JPN</span>
+                        <span class="file-tag region" x-show="file.includes('Europe')" x-text="$store.app.t('library.tag_eur')">EUR</span>
+                        <span class="file-tag region" x-show="file.includes('USA')" x-text="$store.app.t('library.tag_usa')">USA</span>
+                    </div>
+                </template>
+            </div>
+
+            <div class="patch-selector-footer">
+                <div><span class="btn-icon a">A</span> <span x-text="$store.app.t('generic.select')">Select</span></div>
+                <div><span class="btn-icon b">B</span> <span x-text="$store.app.t('generic.cancel')">Cancel</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="art-manager-overlay" :class="{'active': $store.app.isArtManagerOpen}">
+        <div class="art-manager-glass-box">
+            
+            <div class="art-header">
+                <h2 x-text="$store.app.artManagerData.gameName">Game Name</h2>
+                <div class="art-tabs">
+                    <span class="bumper-hint">LB</span> <template x-for="tab in $store.app.artTabs">
+                        <div class="art-tab" :class="{'active': $store.app.artManagerData.selectedTab === tab}">
+                            <span x-text="$store.app.t('art.tab_' + tab)"></span>
+                        </div>
+                    </template>
+                    <span class="bumper-hint">RB</span> 
+                </div>
+            </div>
+
+            <div class="art-body custom-scrollbar">
+                
+                <div x-show="$store.app.artManagerData.loading" class="art-loading">
+                    <div class="spinner"></div>
+                    <span x-text="$store.app.t('art.loading')">Fetching...</span>
+                </div>
+
+                <div x-show="$store.app.artManagerData.error" class="art-error">
+                    <span x-text="$store.app.artManagerData.error"></span>
+                </div>
+
+                <div class="art-grid" 
+                     :class="$store.app.artManagerData.selectedTab"
+                     x-show="!$store.app.artManagerData.loading">
+                    
+                    <template x-for="(asset, index) in $store.app.artManagerData.assets">
+                        <div class="art-item" 
+                             :id="'art-item-' + index"
+                             :class="{'focused': $store.app.artManagerData.focusedAssetIndex === index}"
+                             @click="$store.app.artManagerData.focusedAssetIndex = index; $store.actions.applyArtAsset(asset.full)">
+                            
+                            <img :src="asset.thumb" loading="lazy">
+                            
+                        </div>
+                    </template>
+                    
+                    <div x-show="$store.app.artManagerData.assets.length === 0 && !$store.app.artManagerData.loading" class="no-art">
+                        <span x-text="$store.app.t('art.no_results')">No images found.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="art-footer">
+                <div class="btn-group">
+                    <div class="footer-btn">
+                        <span class="icon a">A</span> 
+                        <span x-text="$store.app.t('generic.select')">Select</span>
+                    </div>
+                    <div class="footer-btn">
+                        <span class="icon x">X</span> 
+                        <span x-text="$store.app.t('art.browse_local')">Local File</span>
+                    </div>
+                    <div class="footer-btn">
+                        <span class="icon b">B</span> 
+                        <span x-text="$store.app.t('generic.close')">Close</span>
+                    </div>
+                </div>
+                <div class="provider-logo">
+                    <span x-text="$store.app.t('art.powered_by') || 'Powered by'"></span> 
+                    
+                    <b :style="{ 
+                        color: $store.app.settings.artSource === 'LocalDB' 
+                                ? '#90c31d'  /* لون الأخضر الخاص بـ LocalDB */
+                                : '#3a82e5'  /* لون الأزرق الخاص بـ SteamGridDB */
+                    }" 
+                    x-text="$store.app.settings.artSource || 'SteamGridDB'">
+                    </b>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <style>
+
+
+        .button-icon.L3-icon {
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle at 30% 30%, #555 0%, #222 100%);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            font-weight: 900;
+            color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.2);
+            margin-right: 8px;
+            text-shadow: 0 1px 2px #000;
+            position: relative;
+            border-bottom: 2px solid #111;
+        }
+
+        .button-icon.L3-icon::before {
+            content: '';
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 1px solid rgba(0,0,0,0.4);
+            background: transparent;
+        }
+
+        #btn-zar-scan:active .L3-icon {
+            transform: scale(0.9);
+            background: radial-gradient(circle at 30% 30%, #444 0%, #111 100%);
+            border-bottom: 1px solid #000;
+        }
+
+        .search-icon-glass {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            margin-right: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .search-icon-glass img {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+            
+            filter: brightness(0) invert(1) drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+            opacity: 0.8;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .library-search-capsule:hover .search-icon-glass img,
+        .library-search-capsule.active .search-icon-glass img {
+            opacity: 1;
+            transform: scale(1.1);
+            filter: brightness(0) invert(1) drop-shadow(0 0 8px var(--nxe-brand-light));
+        }
+
+        .library-search-capsule.active .search-icon-glass {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+
+        .info-card-footer {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            direction: ltr;
+        }
+
+        html[dir="rtl"] .info-card-footer {
+            direction: rtl;
+        }
+
+        .footer-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        html[dir="rtl"] .button-icon {
+            margin-left: 5px;
+            margin-right: 0;
+        }
+
+        .button-icon.lt-icon {
+        background: linear-gradient(to bottom, #ffffff 0%, #e0e0e0 100%);
+        color: #333;
+        min-width: 40px;
+        height: 18px;
+        border-radius: 2px 2px 6px 6px;
+        border-bottom: 1px solid #999;
+        border-top: 2px solid #ccc;
+        font-size: 10px;
+        font-weight: 900;
+        font-family: "Segoe UI", sans-serif;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        margin-right: 8px;
+        transform: translateY(-1px);
+        line-height: 1;
+    }
+
+        .bumper-hint {
+        background: #444;
+        color: #fff;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: bold;
+        align-self: center;
+        margin: 0 10px;
+        border: 1px solid #666;
+        opacity: 0.6;
+        }
+        .art-item.focused {
+        border-color: var(--nxe-brand-light);
+        box-shadow: 0 0 25px var(--nxe-brand-primary);
+        transform: scale(1.05);
+        outline: 4px solid rgba(255,255,255,0.2);
+        }
+
+        .mini-translate-btn.revert {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        .mini-translate-btn.revert:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .mini-translate-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 5px;
+        }
+
+        .mini-translate-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            transform: scale(1.05);
+        }
+
+        .loading-dots span {
+            animation: blink 1s infinite;
+        }
+        @keyframes blink { 0% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: 0; } }
+
+    .button-icon.rt-icon {
+        background: linear-gradient(to bottom, #ffffff 0%, #e0e0e0 100%);
+        color: #333;
+        min-width: 40px;
+        height: 18px;
+        border-radius: 2px 2px 6px 6px;
+        border-bottom: 1px solid #999;
+        border-top: 2px solid #ccc;
+        font-size: 10px;
+        font-weight: 900;
+        font-family: "Segoe UI", sans-serif;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        margin-right: 8px;
+        transform: translateY(-1px);
+        line-height: 1;
+    }
+
+
+    .button-icon.back-icon {
+        background: #333; color: white; border: 1px solid #666; font-size: 10px;
+        border-radius: 50%; width: 20px; height: 20px; display: flex; 
+        align-items: center; justify-content: center;
+    }
+
+    .button-icon.lb-icon {
+        background: linear-gradient(to bottom, #ffffff 0%, #e0e0e0 100%);
+        color: #333;
+        min-width: 40px;
+        height: 18px;
+        border-radius: 6px 6px 2px 2px; 
+        border-bottom: 2px solid #999;
+        font-size: 10px;
+        font-weight: 900;
+        font-family: "Segoe UI", sans-serif;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        margin-right: 8px;
+        transform: translateY(-1px);
+        line-height: 1;
+    }
+
+
+    .patch-selector-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px);
+        z-index: 9999; display: flex; align-items: center; justify-content: center;
+    }
+    .patch-selector-box {
+        width: 550px; background: #1a1a1a; border: 1px solid #333;
+        border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+        overflow: hidden; display: flex; flex-direction: column;
+    }
+    .patch-selector-header {
+        background: #202020; padding: 20px 25px; border-bottom: 1px solid #333;
+        display: flex; justify-content: space-between; align-items: center;
+    }
+    .patch-selector-header h3 { margin: 0; color: #fff; font-size: 20px; font-weight: 300; letter-spacing: 1px; }
+    .patch-selector-header span { color:  #ffffff; font-size: 13px; font-weight: bold; text-transform: uppercase; }
+    
+    .patch-selector-list { padding: 10px; max-height: 350px; overflow-y: auto; background: #151515; }
+    
+    .patch-file-item {
+        padding: 18px 20px; margin-bottom: 4px; border-radius: 6px;
+        display: flex; align-items: center; gap: 15px;
+        color: #aaa; cursor: pointer; transition: all 0.15s ease-out;
+        border: 1px solid transparent; position: relative;
+    }
+    
+
+    .patch-file-item.focused {
+        background: linear-gradient(to right, #585858, #4c4c4c);
+        color: #fff;
+        font-weight: 600; transform: scale(1.01);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        border-color: rgba(255,255,255,0.2);
+        z-index: 10;
+    }
+    
+    .file-icon { font-size: 18px; opacity: 0.7; }
+    .patch-file-item.focused .file-icon { opacity: 1; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+    
+    .file-name { flex: 1; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    
+    .file-tag {
+        font-size: 10px; padding: 3px 8px; border-radius: 4px;
+        background: rgba(255,255,255,0.1); font-weight: bold; letter-spacing: 0.5px;
+    }
+    .patch-file-item.focused .file-tag { background: rgba(0,0,0,0.25); box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); }
+    
+    .file-tag.region { background: #d32f2f; color: white; }
+    .patch-file-item.focused .file-tag.region { background: #b71c1c; }
+
+    .patch-selector-footer {
+        padding: 15px 25px; background: #1a1a1a; display: flex; gap: 30px;
+        justify-content: flex-end; border-top: 1px solid #333;
+    }
+    .patch-selector-footer div { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #eee; font-weight: 600; }
+
+
+    .library-search-capsule.liquid-glass {
+        display: flex; align-items: center;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-top: 1px solid rgba(255, 255, 255, 0.5);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 30px;
+        padding: 0 10px 0 20px;
+        margin-right: auto;
+        margin-left: 20px;
+        height: 45px;
+        min-width: 250px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), inset 0 0 20px rgba(255, 255, 255, 0.05);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .library-search-capsule.liquid-glass::after {
+        content: ''; position: absolute; top: 0; left: -100%;
+        width: 50%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transform: skewX(-25deg); transition: 0.5s;
+    }
+
+    .library-search-capsule.liquid-glass:hover, 
+    .library-search-capsule.liquid-glass.active {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.6);
+        transform: scale(1.02);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3), inset 0 0 30px rgba(255, 255, 255, 0.1);
+    }
+    
+    .library-search-capsule.liquid-glass:hover::after { left: 150%; transition: 0.7s ease-in-out; }
+
+    .search-icon-glass {
+        font-size: 18px; margin-right: 15px; color: rgba(255,255,255,0.8);
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    }
+
+    .search-text-content {
+        display: flex; flex-direction: column; justify-content: center;
+        margin-right: 15px; flex-grow: 1;
+    }
+
+    .search-text-content .placeholder {
+        font-size: 11px; color: rgba(255,255,255,0.6);
+        letter-spacing: 2px; font-weight: 700; text-transform: uppercase;
+    }
+
+    .search-text-content .actual-text {
+        font-size: 16px; color: #fff; font-weight: 600;
+        letter-spacing: 1px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .r3-indicator {
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        width: 34px; height: 34px;
+        background: radial-gradient(circle at 30% 30%, #555, #222);
+        border-radius: 50%; border: 1px solid rgba(0,0,0,0.5);
+        box-shadow: inset 0 1px 2px rgba(255,255,255,0.3), 0 4px 8px rgba(0,0,0,0.4);
+        position: relative;
+    }
+
+    .r3-indicator .stick-visual {
+        width: 22px; height: 22px; border-radius: 50%;
+        background: radial-gradient(circle, #222 40%, #444 100%);
+        border: 1px solid #111; box-shadow: 0 1px 0 rgba(255,255,255,0.1);
+    }
+
+    .r3-indicator span {
+        font-size: 9px; font-weight: 900; color: #aaa;
+        text-shadow: 0 1px 2px #000;
+        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    }
+
+
+    .keyboard-overlay.xbox-theme {
+        position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75);
+        z-index: 9999; display: flex; align-items: center; justify-content: center;
+        opacity: 0; pointer-events: none; transition: opacity 0.2s;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        backdrop-filter: blur(5px);
+    }
+    .keyboard-overlay.xbox-theme.open { opacity: 1; pointer-events: all; }
+
+    .xbox-kb-wrapper {
+        width: 800px; display: flex; flex-direction: column;
+        box-shadow: 0 0 0 2px rgba(255,255,255,0.1), 0 20px 50px rgba(0,0,0,0.8);
+        transform: scale(0.95); transition: transform 0.2s;
+    }
+    .keyboard-overlay.xbox-theme.open .xbox-kb-wrapper { transform: scale(1); }
+
+    .kb-top-label {
+        color: #fff; font-size: 16px; margin-bottom: 5px; font-weight: normal;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.8); padding-left: 2px;
+    }
+    .xbox-kb-input-row {
+        position: relative; background: #fff; height: 50px; 
+        display: flex; align-items: center; padding: 0 15px;
+        margin-bottom: 0; border: 1px solid #999; border-bottom: none; overflow: hidden;
+    }
+    .xbox-kb-input {
+        border: none; outline: none; width: 100%; 
+        font-size: 22px; font-weight: 600; letter-spacing: 1px;
+        color: #333; background: transparent; height: 100%;
+    }
+    .input-cursor {
+        position: absolute; top: 50%; transform: translateY(-50%);
+        left: 15px; width: 2px; height: 26px; background-color: #000;
+        z-index: 10; pointer-events: none;
+        animation: blink 1s infinite steps(2);
+    }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    .xbox-kb-main-body {
+        display: flex; background: linear-gradient(to bottom, #f0f0f0 0%, #dcdcdc 100%);
+        border: 1px solid #fff; outline: 1px solid #999; height: 280px;
+    }
+    .kb-col { border-right: 1px solid #bbb; display: flex; flex-direction: column; }
+    .kb-col:last-child { border-right: none; }
+
+    .side-col { width: 110px; }
+    .side-btn {
+        flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        border-bottom: 1px solid #bbb; background: transparent; color: #333;
+    }
+    .side-btn.active-state { background: #d9eadd; box-shadow: inset 0 0 10px rgba(0,0,0,0.05); }
+    .btn-label { font-size: 11px; margin-top: 4px; color: #444; }
+    .btn-icon-visual { font-weight: bold; font-size: 12px; display: flex; align-items: center; gap: 3px; }
+    .lb-shape, .rb-shape { font-size: 13px; font-weight: 800; }
+    .lt-shape, .rt-shape { border-bottom: 3px solid #555; border-radius: 0 0 4px 4px; padding: 0 4px; line-height: 1; }
+    .stick-shape { width: 16px; height: 16px; border: 2px solid #555; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; background: #ccc; }
+    .arr-left, .arr-right { font-size: 10px; }
+
+    .center-col { flex: 1; padding: 6px; display: flex; flex-direction: column; }
+    .keys-grid-tight { display: flex; flex-direction: column; gap: 2px; margin-bottom: 6px; }
+    .keys-row-tight { display: flex; gap: 2px; height: 38px; }
+    .xbox-key-tight {
+        flex: 1; background: #fff; border: 1px solid #aaa;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 18px; color: #333; box-shadow: 0 1px 1px rgba(0,0,0,0.1); cursor: pointer;
+    }
+    .xbox-key-tight.focused {
+        border: 2px solid #00adef; box-shadow: 0 0 4px #00adef, inset 0 0 5px rgba(0, 173, 239, 0.2);
+        z-index: 10; transform: scale(1.05);
+    }
+
+    .bottom-actions-row { display: flex; gap: 6px; height: 35px; margin-top: auto; }
+    .wide-action-btn {
+        flex: 1; background: linear-gradient(to bottom, #fff 0%, #eee 100%);
+        border: 1px solid #aaa; display: flex; align-items: center; padding-left: 10px; gap: 8px;
+        font-size: 13px; color: #333; box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+    }
+    .circle-icon {
+        width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        font-weight: bold; font-size: 11px; color: #fff; box-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    }
+    .blue { background: #0088dd; } .yellow { background: #ddaa00; }
+    .green-small { background: #55aa00; font-size: 10px; width: 16px; height: 16px; }
+    .red-small { background: #dd3300; font-size: 10px; width: 16px; height: 16px; }
+
+    .done-btn-container {
+        flex: 1.5; background: linear-gradient(to bottom,  #73ad07 0%, #385301 100%);
+        border-top: 1px solid #aaa; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,0.4); color: #fff; text-shadow: 0 1px 1px rgba(0,0,0,0.4);
+    }
+    .play-icon-circle {
+        background: #fff; color: #76a815; border-radius: 50%; width: 20px; height: 20px;
+        display: flex; align-items: center; justify-content: center; font-size: 12px; margin-bottom: 2px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+
+    .kb-black-footer {
+        background: #111; height: 30px; display: flex; align-items: center;
+        gap: 20px; padding-left: 10px; border-radius: 0 0 4px 4px;
+    }
+    .footer-item { color: #fff; font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 6px; }
+
+
+    .art-manager-overlay {
+        position: fixed; inset: 0;
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(20px);
+        z-index: 10000;
+        display: flex; align-items: center; justify-content: center;
+        opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+    }
+    .art-manager-overlay.active { opacity: 1; pointer-events: all; }
+
+    .art-manager-glass-box {
+        width: 92%; height: 90%; max-width: 1700px; max-height: 95vh;
+        background: linear-gradient(145deg, rgba(30, 30, 30, 0.95), rgba(10, 10, 10, 0.98));
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 24px;
+        box-shadow: 0 0 80px rgba(0,0,0,0.9);
+        display: flex; flex-direction: column; overflow: hidden;
+        transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .art-manager-overlay.active .art-manager-glass-box { transform: scale(1); }
+
+    .art-header {
+        flex-shrink: 0; padding: 25px 40px;
+        background: rgba(255,255,255,0.03);
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+        display: flex; justify-content: space-between; align-items: center;
+    }
+    .art-header h2 { margin: 0; color: #fff; font-size: 32px; font-weight: 300; letter-spacing: 1px; }
+    
+    .art-tabs { display: flex; gap: 10px; background: rgba(0,0,0,0.5); padding: 6px; border-radius: 40px; }
+    .art-tab {
+        padding: 10px 30px; border-radius: 30px; 
+        color: #aaa; font-size: 14px; font-weight: bold; 
+        cursor: pointer; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px;
+    }
+    .art-tab.active { 
+        background: #fff; color: #000; 
+        box-shadow: 0 0 20px rgba(255,255,255,0.4); transform: scale(1.05); 
+    }
+
+    .art-body { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 40px; position: relative; }
+
+    .art-grid {
+        display: grid;
+        gap: 30px;
+        padding-bottom: 40px;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+        justify-content: start; 
+        align-content: start;
+    }
+
+    .art-item {
+        position: relative; border-radius: 12px; overflow: hidden;
+        border: 3px solid transparent; transition: all 0.2s ease-out;
+        background: rgba(40, 40, 40, 0.5);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5); cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .art-item img { width: 100%; height: 100%; display: block; transition: transform 0.3s ease; }
+
+    .art-grid.cover .art-item { aspect-ratio: 2/3; }
+    .art-grid.cover .art-item img { object-fit: cover; }
+
+    .art-grid.hero { grid-template-columns: repeat(auto-fill, minmax(450px, 1fr)); }
+    .art-grid.hero .art-item { aspect-ratio: 16/9; }
+    .art-grid.hero .art-item img { object-fit: cover; }
+
+    .art-grid.logo { grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); }
+    .art-grid.logo .art-item { 
+        aspect-ratio: 16/9; padding: 20px;
+        background: radial-gradient(circle, rgba(60,60,60,1) 0%, rgba(20,20,20,1) 100%); 
+    }
+    .art-grid.logo .art-item img { object-fit: contain; }
+
+    .art-grid.icon { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); width: 100%; height: 50%; display: grid; gap: -20px; }
+    .art-grid.icon .art-item { 
+        aspect-ratio: 1/1; background: #0a0a0a; padding: 0;
+        background: radial-gradient(circle, rgba(60,60,60,1) 0%, rgba(20,20,20,1) 100%); 
+    }
+    .art-grid.icon .art-item img { object-fit: contain; width: 50%; height: 50%; border-radius: 50%; }
+
+    .art-item.focused {
+        border-color: #fff; box-shadow: 0 0 30px rgba(255,255,255,0.5);
+        transform: scale(1.08); z-index: 10;
+    }
+    .art-grid.icon .art-item.focused {
+        transform: scale(1.15); background: #1a1a1a; border-color: #fff;
+        box-shadow: 0 0 25px rgba(255, 255, 255, 0.4), 0 20px 40px rgba(0,0,0,0.8);
+    }
+
+    .art-loading, .art-error, .no-art {
+        height: 100%; min-height: 300px;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; 
+        color: #fff; text-align: center;
+    }
+    .spinner {
+        width: 60px; height: 60px; border: 6px solid rgba(255,255,255,0.1);
+        border-top-color:  #ffffff; border-radius: 50%;
+        animation: spin 1s linear infinite; margin-bottom: 25px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .art-footer {
+        flex-shrink: 0; padding: 25px 40px; background: rgba(0,0,0,0.4);
+        border-top: 1px solid rgba(255,255,255,0.1);
+        display: flex; justify-content: space-between; align-items: center;
+    }
+    .btn-group { display: flex; gap: 30px; }
+    .footer-btn { display: flex; align-items: center; gap: 10px; color: #eee; font-size: 15px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .icon {
+        width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        color: #fff; font-size: 13px; font-weight: bold; box-shadow: 0 3px 6px rgba(0,0,0,0.6);
+    }
+    .icon.a { background: #59c853; }
+    .icon.b { background: #e5443a; }
+    .icon.x { background: #3a82e5; }
+    .provider-logo { font-size: 13px; color: #888; }
+    .provider-logo b { color: #fff; }
+
+    .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+
+
+    
+    .info-card.expanded-layout {
+        width: 90%;
+        max-width: 950px; 
+        height: 85vh;     
+        display: flex;
+        flex-direction: column;
+    }
+
+    .info-badges-row {
+        display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;
+    }
+    .info-badge {
+        background: rgba(255,255,255,0.1);
+        padding: 4px 10px; 
+        border-radius: 4px;
+        font-size: 12px; 
+        color: #eee;
+        display: flex; align-items: center; gap: 5px;
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+    .info-badge.rating {
+        background: rgba(242, 196, 14, 0.15);
+        border-color: rgba(242, 196, 14, 0.3);
+        color: #f2c40e;
+        font-weight: bold;
+    }
+    .star { font-size: 14px; margin-top: -2px; }
+
+    .info-card-body-grid {
+        display: flex; gap: 30px; padding: 0 30px;
+        flex: 1; 
+        min-height: 0;
+        margin-bottom: 20px;
+    }
+
+    .col-description {
+        flex: 2;
+        padding-right: 10px;
+        overflow-y: auto;
+    }
+
+    .details-grid-box {
+        background: rgba(0,0,0,0.2);
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+    .detail-row {
+        display: flex;
+        flex-direction: column;
+    }
+    .detail-row .label {
+        font-size: 11px;
+        color: #ffffff;
+        text-transform: uppercase;
+        font-weight: bold;
+        margin-bottom: 3px;
+        letter-spacing: 0.5px;
+    }
+    .detail-row .value {
+        font-size: 13px;
+        color: #fff;
+        font-weight: 500;
+    }
+
+    .col-description h4 { margin-top: 0; color: #ffffff; margin-bottom: 10px; }
+    .col-description p {
+        font-size: 15px; line-height: 1.6; color: #ccc;
+        white-space: pre-line;
+    }
+
+    .col-status {
+        flex: 1;
+        background: rgba(0,0,0,0.3);
+        padding: 20px; border-radius: 12px;
+        height: fit-content;
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .info-screenshots-section {
+        padding: 0 30px 30px 30px;
+        border-top: 1px solid rgba(255,255,255,0.1);
+        background: rgba(0,0,0,0.2);
+    }
+    .info-screenshots-section h4 {
+        color: #888; font-size: 12px; text-transform: uppercase; margin: 15px 0 10px 0;
+    }
+    
+    .screenshots-strip {
+        display: flex; gap: 15px; overflow-x: auto;
+        padding-bottom: 10px;
+        scroll-behavior: smooth;
+    }
+    .screenshot-thumb {
+        height: 130px; border-radius: 8px;
+        border: 2px solid transparent;
+        transition: all 0.2s;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        object-fit: cover;
+    }
+    .screenshot-thumb:hover {
+        transform: scale(1.05);
+        border-color: #fff;
+        z-index: 10;
+    }
+
+
+
+    html.is-rtl .info-card-header {
+        direction: ltr !important; 
+        text-align: left;
+    }
+
+    html.is-rtl .info-badges-row {
+        direction: rtl !important;
+        justify-content: flex-start;
+    }
+
+
+    html.is-rtl .info-badge {
+        direction: ltr !important;
+        text-align: left;
+    }
+
+</style>
+</section>

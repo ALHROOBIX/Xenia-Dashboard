@@ -1,0 +1,11 @@
+{
+  "name": "NEXE-2008",
+  "navigation": {
+    "dashboard": "horizontal",
+    "game-library": "horizontal",
+    "settings-hub": "vertical",
+    "settings-core": "vertical",
+    "settings-system": "vertical",
+    "marketplace-hub": "vertical"
+  }
+}

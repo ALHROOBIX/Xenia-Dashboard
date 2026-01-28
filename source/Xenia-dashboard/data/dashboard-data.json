@@ -1,0 +1,21 @@
+{
+  "masterMenu": [
+    {
+      "id": "About",
+      "name": "About",
+      "detailMenu": [
+        { "id": "about", "name": "ABOUT", "view": "about-hub", "icon": "assets/icons/About.webp" }
+      ]
+    },
+    {
+      "id": "myxbox",
+      "name": "MY XBOX",
+      "detailMenu": [
+        { "id": "opentray", "name": "OPEN TRAY", "view": "opentray", "icon": "assets/icons/start.png" },
+        { "id": "achievements", "name": "ACHIEVEMENTS", "view": "achievements", "icon": "assets/icons/achievements.png" },
+        { "id": "gamelibrary", "name": "GAME LIBRARY", "view": "game-library", "icon": "assets/icons/games.png" },
+        { "id": "settings", "name": "SYSTEM SETTINGS", "view": "settings-hub", "icon": "assets/icons/Setting.png" }
+      ]
+    }
+  ]
+}

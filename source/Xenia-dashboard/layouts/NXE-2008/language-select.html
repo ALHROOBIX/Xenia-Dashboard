@@ -1,0 +1,237 @@
+<section class="page" id="language-select" x-data>
+    
+    <div class="nxe-settings-wrapper">
+
+        <h1 class="nxe-settings-title" x-text="$store.app.t('settings.language_title')">Language</h1> 
+        
+        <div class="nxe-settings-container">
+            
+            <nav class="nxe-settings-menu">
+                
+                <div id="lang-item-0"
+                     class="nxe-settings-item"
+                     :class="{'focused': $store.app.focusedIndex === 0}"
+                     @click="$store.actions.setLanguage('en')">
+                    
+                    <div class="item-content">
+                        <span class="flag-icon">🇺🇸</span>
+                        <div class="item-text">
+                            <span class="main-text">English</span>
+                            <span class="sub-text">United States</span>
+                        </div>
+                    </div>
+
+                    <template x-if="$store.app.language === 'en'">
+                        <div class="active-badge">
+                            <span class="check-icon">✓</span>
+                        </div>
+                    </template>
+                </div>
+
+                <div id="lang-item-1"
+                     class="nxe-settings-item"
+                     :class="{'focused': $store.app.focusedIndex === 1}"
+                     @click="$store.actions.setLanguage('ar')">
+                    
+                    <div class="item-content">
+                        <span class="flag-icon">🇸🇦</span>
+                        <div class="item-text">
+                            <span class="main-text">العربية</span>
+                            <span class="sub-text">المملكة العربية السعودية</span>
+                        </div>
+                    </div>
+
+                    <template x-if="$store.app.language === 'ar'">
+                        <div class="active-badge">
+                            <span class="check-icon">✓</span>
+                        </div>
+                    </template>
+                </div>
+
+            </nav>
+                    
+            <div class="nxe-settings-description">
+                
+                <h3>Language Selection</h3>
+                <hr class="desc-separator">
+
+                <div x-show="$store.app.focusedIndex === 0" x-transition.opacity>
+                    <p class="desc-text">Change the dashboard language to <strong>English</strong>.</p>
+                    <p class="desc-sub">System menus, settings.</p>
+                </div>
+
+                <div x-show="$store.app.focusedIndex === 1" x-transition.opacity>
+                    <p class="desc-text">تغيير لغة الواجهة إلى <strong>العربية</strong>.</p>
+                    <p class="desc-sub">سيتم عرض قوائم النظام والإعدادات باللغة العربية.</p>
+                </div>
+                
+            </div>
+            
+        </div>
+    </div> 
+
+    <footer class="nxe-footer-left">
+        <div class="footer-button" id="btn-a">
+            <span class="button-icon a">A</span> 
+            <span x-text="$store.app.t('generic.select')">Select</span>
+        </div>
+        <div class="footer-button" id="btn-b" @click.prevent="$store.actions.goBack()">
+            <span class="button-icon b">B</span> 
+            <span x-text="$store.app.t('generic.back')">Back</span>
+        </div>
+    </footer>
+    
+    <footer class="nxe-footer-right">
+        <div class="footer-guide-button" @click="$store.actions.toggleGuide()">
+            <div class="scene-3d">
+                <div class="guide-icon">
+                    <img src="assets/icons/xbox-25912.png" alt="Xbox Guide">
+                </div>
+                
+            <div class="ground-surface">
+                <div class="icon-ground-shadow"></div>
+                <div class="ripple-wave"></div>
+                <div class="ripple-wave"></div>
+                <div class="ripple-wave"></div>
+                <div class="ripple-wave"></div>
+                <div class="ripple-wave"></div>
+            </div>
+
+            </div>
+        </div>
+        </footer>
+
+    <style>
+        .nxe-settings-container {
+            display: flex;
+            flex-direction: row;
+            gap: 0;
+            padding-top: 20px;
+            min-height: 450px;
+            height: auto;
+        }
+
+        .nxe-settings-menu {
+            background: rgba(0,0,0,0.25);
+            overflow: hidden;
+            flex: 0 0 40%;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.2) 100%);
+            
+        }
+
+        .nxe-settings-item {
+            padding: 18px 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.15s ease-out;
+            position: relative;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .item-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .nxe-settings-item.focused {
+            background: linear-gradient(180deg, #1c75bc 0%, #0c4b85 100%); 
+            box-shadow: 
+                0 0 10px rgba(28, 117, 188, 0.6),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            color: white;
+            transform: scale(1.03) translateX(5px);
+            z-index: 10;
+            border-radius: 4px;
+            border-bottom-color: transparent;
+        }
+
+        .main-text {
+            font-size: 1.3rem;
+            font-weight: bold;
+            display: block;
+        }
+
+        .sub-text {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin-top: 2px;
+            display: block;
+        }
+
+        .flag-icon {
+            font-size: 2rem;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+        }
+
+        .active-badge {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .nxe-settings-item.focused .active-badge {
+            background: white;
+            color: #0c4b85;
+        }
+
+        .nxe-settings-description {
+            flex: 1;
+            padding: 30px 40px;
+            background: rgba(0, 0, 0, 0.25);
+            color: #ddd;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nxe-settings-description h3 {
+            font-size: 1.6rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+            color: white;
+        }
+
+        .desc-separator {
+            border: 0;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%);
+            margin-bottom: 20px;
+        }
+
+        .desc-text {
+            font-size: 1.1rem;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .desc-sub {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .is-rtl .nxe-settings-container {
+            flex-direction: row-reverse;
+        }
+        
+        .is-rtl .nxe-settings-menu {
+            border-right: none;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .is-rtl .nxe-settings-item.focused {
+            transform: scale(1.03) translateX(-5px);
+        }
+    </style>
+</section>

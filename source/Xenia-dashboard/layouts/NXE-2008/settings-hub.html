@@ -1,0 +1,87 @@
+<section class="page" id="settings-hub" x-data>
+    
+    <div class="nxe-settings-wrapper">
+
+        <h1 class="nxe-settings-title" x-text="$store.app.t('settings.title')">Settings</h1> 
+        
+        <div class="nxe-settings-container">
+            
+            <nav class="nxe-settings-menu">
+                
+                <template x-for="(item, index) in $store.app.settingsMenu" :key="item.id">
+                    <div 
+                        class="nxe-settings-item"
+                        :class="{'focused': $store.app.focusedIndex === index && $store.app.focusedCollection === 'settingsMenu'}"
+                        :data-page="item.view"
+                        @click.prevent="$store.actions.selectFocusedItem()"
+                    >
+                        <img class="nxe-settings-icon" :src="item.icon" alt="">
+                        
+                        <span x-text="$store.app.t('settings.' + item.id + '_title') || item.name"></span>
+                        
+                        <template x-if="item.id === 'language'">
+                            <span class="lang-badge" x-text="$store.app.language.toUpperCase()"></span>
+                        </template>
+                    </div>
+                </template>
+            </nav>
+                    
+            <div class="nxe-settings-description">
+                
+                <template x-for="(item, index) in $store.app.settingsMenu" :key="item.id">
+                    <div x-show="$store.app.focusedIndex === index" style="width: 100%;">
+                        
+                        <h3 x-text="$store.app.t('settings.' + item.id + '_title')"></h3>
+                        
+                        <p x-text="$store.app.t('settings.' + item.id + '_desc')"></p>
+
+                        </div>
+                </template>
+                
+            </div>
+            
+        </div>
+    </div> 
+
+    <footer class="nxe-footer-left">
+        <div class="footer-button" id="btn-a">
+            <span class="button-icon a">A</span> 
+            <span x-text="$store.app.t('generic.select')">Select</span>
+        </div>
+        <div class="footer-button" id="btn-b" @click.prevent="$store.actions.goBack()">
+            <span class="button-icon b">B</span> 
+            <span x-text="$store.app.t('generic.back')">Back</span>
+        </div>
+    </footer>
+    
+    <footer class="nxe-footer-right">
+        <div class="footer-guide-button" @click="$store.actions.toggleGuide()">
+            <div class="scene-3d">
+                <div class="guide-icon">
+                    <img src="assets/icons/xbox-25912.png" alt="Xbox Guide">
+                </div>
+                
+            <div class="ground-surface">
+                <div class="icon-ground-shadow"></div>
+                <div class="ripple-wave"></div>
+                <div class="ripple-wave"></div>
+                <div class="ripple-wave"></div>
+                <div class="ripple-wave"></div>
+                <div class="ripple-wave"></div>
+            </div>
+
+            </div>
+        </div>
+        </footer>
+
+    <style>
+        .lang-badge {
+            font-size: 0.75rem;
+            background: rgba(255,255,255,0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-inline-start: auto;
+            color: var(--nxe-brand-light);
+        }
+    </style>
+</section>

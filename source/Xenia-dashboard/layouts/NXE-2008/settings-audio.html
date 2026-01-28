@@ -1,0 +1,123 @@
+<section class="page" id="settings-audio" x-data>
+    
+    <div class="nxe-settings-wrapper">
+        <h1 class="nxe-settings-title" x-text="$store.app.t('audio.title')">Sound Settings</h1> 
+        
+        <div class="nxe-settings-container">
+            
+            <nav class="nxe-settings-menu" style="flex: 0 0 55%;">
+                <template x-for="(item, index) in $store.app.audioMenu" :key="item.id">
+                    <div 
+                        class="nxe-settings-item"
+                        :class="{'focused': $store.app.focusedIndex === index}"
+                        :id="'audio-item-' + index"
+                        @click.prevent="item.type === 'file' ? $store.actions.changeSoundFile() : null"
+                    >
+                        <template x-if="item.type === 'slider'">
+                            <div style="display: flex; align-items: center; width: 100%; justify-content: space-between;">
+                                <span x-text="$store.app.t('audio.' + item.id) || item.name"></span>
+                                
+                                <div class="volume-bar-track">
+                                    <div class="volume-bar-fill" 
+                                         :style="`width: ${(item.id === 'bgmVolume' ? $store.app.soundSettings.bgmVolume : $store.app.soundSettings.masterVolume) * 100}%`">
+                                    </div>
+                                </div>
+                                <span style="font-weight: bold; width: 40px; text-align: right;" 
+                                      x-text="Math.round((item.id === 'bgmVolume' ? $store.app.soundSettings.bgmVolume : $store.app.soundSettings.masterVolume) * 100) + '%'">
+                                </span>
+                            </div>
+                        </template>
+
+                        <template x-if="item.type === 'file'">
+                            <div style="display: flex; align-items: center; width: 100%; justify-content: space-between;">
+                                <span x-text="$store.app.t('audio.' + item.id) || item.name"></span>
+                                
+                                <span class="badge" 
+                                      :class="{
+                                          'badge-def': (item.id === 'bgmFile' && !$store.app.soundSettings.bgmFile) || (item.id !== 'bgmFile' && $store.app.soundSettings.files[item.id] === 'default'),
+                                          'badge-cust': (item.id === 'bgmFile' && $store.app.soundSettings.bgmFile) || (item.id !== 'bgmFile' && $store.app.soundSettings.files[item.id] !== 'default')
+                                      }">
+                                    
+                                    <span x-text="item.id === 'bgmFile' ? ($store.app.soundSettings.bgmFile ? $store.app.t('generic.edit') : 'None') : ($store.app.soundSettings.files[item.id] === 'default' ? $store.app.t('generic.default') : $store.app.t('colors.active'))"></span>
+                                </span>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </nav>
+            
+            <div class="nxe-settings-description">
+                <div style="padding: 20px;">
+                    <h3 x-text="$store.app.t('audio.options_title')">Audio Options</h3>
+                    <p x-text="$store.app.t('audio.options_desc')">Customize the dashboard sound effects.</p>
+                    
+                    <div class="y-hint" style="margin-top: 40px; display: flex; align-items: center; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 15px;">
+                        <div class="xbox-btn-y">Y</div>
+                        <span style="margin-left: 10px; color: #f2c40e; font-weight: bold;" x-text="$store.app.t('audio.reset')">Reset to Defaults</span>
+                    </div>
+                    
+                    <p style="margin-top: 10px; font-size: 0.8rem; color: #aaa;" x-text="$store.app.t('audio.reset_desc')">Press Y to restore original sounds and volume.</p>
+                </div>
+            </div>
+        </div>
+    </div> 
+
+    <footer class="nxe-footer-left">
+        <div class="footer-button">
+            <span class="button-icon a">A</span> 
+            <span x-text="$store.app.audioMenu[$store.app.focusedIndex].type === 'file' ? $store.app.t('generic.select') : $store.app.t('generic.action')"></span>
+        </div>
+        <div class="footer-button" @click.prevent="$store.actions.goBack()">
+            <span class="button-icon b">B</span> <span x-text="$store.app.t('generic.back')">Back</span>
+        </div>
+        <div class="footer-button">
+            <span class="button-icon y">Y</span> <span x-text="$store.app.t('generic.default')">Defaults</span>
+        </div>
+    </footer>
+
+    <footer class="nxe-footer-right">
+        <div class="footer-guide-button" @click="$store.actions.toggleGuide()">
+            <div class="scene-3d">
+                <div class="guide-icon">
+                    <img src="assets/icons/xbox-25912.png" alt="Xbox Guide">
+                </div>
+                
+            <div class="ground-surface">
+                <div class="icon-ground-shadow"></div>
+                <div class="ripple-wave"></div>
+                <div class="ripple-wave"></div>
+                <div class="ripple-wave"></div>
+                <div class="ripple-wave"></div>
+                <div class="ripple-wave"></div>
+            </div>
+
+            </div>
+        </div>
+        </footer>
+
+    <style>
+        .volume-bar-track {
+            flex-grow: 1;
+            height: 10px;
+            background: rgba(0,0,0,0.5);
+            margin: 0 15px;
+            border-radius: 5px;
+            border: 1px solid rgba(255,255,255,0.1);
+            overflow: hidden;
+        }
+        .volume-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #90c31d, #588a00);
+            box-shadow: 0 0 10px #90c31d;
+            transition: width 0.1s ease;
+        }
+        .badge { padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+        .badge-def { background: rgba(255,255,255,0.1); color: #aaa; }
+        .badge-cust { background: #3a82e5; color: white; box-shadow: 0 0 5px #3a82e5; }
+        .xbox-btn-y {
+            width: 24px; height: 24px; background: #f2c40e; color: black;
+            border-radius: 50%; text-align: center; line-height: 24px;
+            font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+    </style>
+</section>

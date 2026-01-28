@@ -1,0 +1,120 @@
+<section class="page" id="settings-display" x-data>
+    
+    <div class="nxe-settings-wrapper">
+
+        <h1 class="nxe-settings-title" x-text="$store.app.t('display.title')">Wallpaper Settings</h1> 
+        
+        <div class="nxe-settings-container">
+            
+            <nav class="nxe-settings-menu" style="width: 42%;">
+                
+                <div 
+                    class="nxe-settings-item"
+                    id="display-item-0"
+                    :class="{'focused': $store.app.focusedIndex === 0}"
+                    @click.prevent="$store.actions.selectFocusedItem()"
+                >
+                    <img class="nxe-settings-icon" src="assets/icons/image.png" alt="">
+                    <span x-text="$store.app.t('display.wall_bg')">Background Wallpaper</span>
+                </div>
+
+                <div 
+                    class="nxe-settings-item"
+                    id="display-item-1"
+                    :class="{'focused': $store.app.focusedIndex === 1}"
+                    @click.prevent="$store.actions.selectFocusedItem()"
+                >
+                    <img class="nxe-settings-icon" src="assets/icons/layers.png" alt="">
+                    <span x-text="$store.app.t('display.wall_stage')">Background Stage</span>
+                </div>
+
+                <div 
+                    class="nxe-settings-item"
+                    id="display-item-2"
+                    :class="{'focused': $store.app.focusedIndex === 2}"
+                    @click.prevent="$store.actions.selectFocusedItem()"
+                >
+                    <img class="nxe-settings-icon" src="assets/icons/art.png" alt=""> 
+                    <span x-text="$store.app.t('display.wall_flourish')">Background Flourish</span>
+                </div>
+
+            </nav>
+            
+            <div class="nxe-settings-description">
+                
+                <template x-if="$store.app.focusedIndex === 0">
+                    <div>
+                        <h3 x-text="$store.app.t('display.wall_bg')">Customize Wallpaper</h3>
+                        <p x-text="$store.app.t('display.wall_bg_desc')"></p>
+                        
+                        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 15px 0;">
+                        <p style="font-size: 0.9rem; color: #ccc;" x-text="$store.app.t('display.current') + ':'">Current Selection:</p>
+                        <p style="color: var(--nxe-green-light); font-weight: bold; word-break: break-all;" 
+                           x-text="$store.app.displaySettings.wallpaperName === 'Default' ? $store.app.t('generic.default') : $store.app.displaySettings.wallpaperName"></p>
+                    </div>
+                </template>
+
+                <template x-if="$store.app.focusedIndex === 1">
+                    <div>
+                        <h3 x-text="$store.app.t('display.wall_stage')">Customize Stage</h3>
+                        <p x-text="$store.app.t('display.wall_stage_desc')"></p>
+                        
+                        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 15px 0;">
+                        <p style="font-size: 0.9rem; color: #ccc;" x-text="$store.app.t('display.current') + ':'">Current Selection:</p>
+                        <p style="color: var(--nxe-green-light); font-weight: bold; word-break: break-all;" 
+                           x-text="$store.app.displaySettings.stageName === 'Default' ? $store.app.t('generic.default') : $store.app.displaySettings.stageName"></p>
+                    </div>
+                </template>
+
+                <template x-if="$store.app.focusedIndex === 2">
+                    <div>
+                        <h3 x-text="$store.app.t('display.wall_flourish')">Customize Flourish</h3>
+                        <p x-text="$store.app.t('display.wall_flourish_desc')"></p>
+                        
+                        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 15px 0;">
+                        <p style="font-size: 0.9rem; color: #ccc;" x-text="$store.app.t('display.current') + ':'">Current Selection:</p>
+                        <p style="color: var(--nxe-green-light); font-weight: bold; word-break: break-all;" 
+                           x-text="$store.app.displaySettings.flourishName === 'Default' ? $store.app.t('generic.default') : $store.app.displaySettings.flourishName"></p>
+                    </div>
+                </template>
+                
+            </div>
+            
+        </div>
+    </div>
+
+    <footer class="nxe-footer-left">
+        <div class="footer-button" id="btn-a">
+            <span class="button-icon a">A</span> 
+            <span x-text="$store.app.t('generic.select')">Change</span>
+        </div>
+        <div class="footer-button" id="btn-b" @click.prevent="$store.actions.goBack()">
+            <span class="button-icon b">B</span> 
+            <span x-text="$store.app.t('generic.back')">Back</span>
+        </div>
+        <div class="footer-button" id="btn-y" @click.prevent="$store.actions.resetDisplaySettings()">
+            <span class="button-icon" style="background-color: #e6b92e; color: #222; border:none;">Y</span> 
+            <span x-text="$store.app.t('generic.default')">Default</span>
+        </div>
+    </footer>
+    
+    <footer class="nxe-footer-right">
+        <div class="footer-guide-button" @click="$store.actions.toggleGuide()">
+            <div class="scene-3d">
+                <div class="guide-icon">
+                    <img src="assets/icons/xbox-25912.png" alt="Xbox Guide">
+                </div>
+                
+            <div class="ground-surface">
+                <div class="icon-ground-shadow"></div>
+                <div class="ripple-wave"></div>
+                <div class="ripple-wave"></div>
+                <div class="ripple-wave"></div>
+                <div class="ripple-wave"></div>
+                <div class="ripple-wave"></div>
+            </div>
+
+            </div>
+        </div>
+        </footer>
+</section>

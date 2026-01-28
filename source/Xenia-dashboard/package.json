@@ -1,0 +1,79 @@
+{
+  "name": "xenia-dashboard",
+  "version": "1.1.2",
+  "description": "Xbox 360 Dashboard for Xenia Emulator",
+  "main": "main.js",
+  "author": "ALHROOBIX",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder",
+    "dist:win": "electron-builder --win --x64 --config.directories.output=dist/Windows",
+    "dist:linux": "electron-builder --linux --config.directories.output=dist/Linux"
+  },
+  "overrides": {
+    "tar": "^7.5.3"
+  },
+  "dependencies": {
+    "axios": "^1.13.2",
+    "decompress": "^4.2.1",
+    "electron-store": "^11.0.2",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "electron": "^38.3.0",
+    "electron-builder": "^24.6.0"
+  },
+  "build": {
+    "appId": "com.alhroobix.xenia.dashboard",
+    "productName": "Xenia-Dashboard",
+    "asar": true,
+    "win": {
+      "target": "portable",
+      "icon": "assets/icons/icon.ico",
+      "publisherName": "ALHROOBIX",
+      "requestedExecutionLevel": "asInvoker", 
+      "verifyUpdateCodeSignature": false,
+      "artifactName": "${productName}.${ext}"
+    },
+    "portable": {
+      "artifactName": "Xenia-Dashboard.exe",
+      "requestExecutionLevel": "user"
+    },
+    "linux": {
+      "icon": "assets/icons/icon.png",
+      "category": "Game",
+      "target": [
+        "AppImage"
+      ],
+      "artifactName": "${productName}.${ext}"
+    },
+    "files": [
+      "main.js",
+      "core.js",
+      "preload.js",
+      "cdn.min.js",
+      "index.html",
+      "package.json",
+      "node_modules/**/*",
+      "assets/**/*",
+      "themes/**/*",
+      "layouts/**/*",
+      "data/**/*"
+    ],
+    "asarUnpack": [
+      "assets/bin/**",
+      "assets/xenia-win/**",
+      "assets/xenia-linux/**"
+    ],
+    "extraResources": [
+      {
+        "from": "data",
+        "to": "data",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ]
+  }
+}

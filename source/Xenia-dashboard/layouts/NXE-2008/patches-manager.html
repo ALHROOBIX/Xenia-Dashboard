@@ -1,0 +1,97 @@
+<section class="page" id="patches-manager" x-data>
+
+    
+    <div class="nxe-settings-wrapper">
+
+        <h1 class="nxe-settings-title" x-text="($store.app.focusedGamePatchInfo?.fileName.split(' - ')[1] || $store.app.t('patches.title')).replace('.patch.toml', '')">
+            Game Patches
+        </h1> 
+        
+        <div class="nxe-settings-container">
+            
+            <nav class="nxe-settings-menu config-editor-menu">
+                <template x-if="!$store.app.patchesLoadingError && $store.app.patchList.length === 0">
+                     <div class="nxe-settings-item"><span x-text="$store.app.t('generic.loading')">Loading patches...</span></div>
+                </template>
+                <template x-if="$store.app.patchesLoadingError">
+                     <div class="nxe-settings-item" style="color: var(--nxe-red-light);" x-text="$store.app.patchesLoadingError"></div>
+                </template>
+                
+                <template x-for="(patch, index) in $store.app.patchList" :key="patch.id">
+                    <div 
+                        :id="`patch-item-${index}`"
+                        class="nxe-settings-item"
+                        :class="{'focused': $store.app.focusedIndex === index && $store.app.configFocusedPanel === 'categories'}"
+                        @click="$store.app.focusedIndex = index"
+                    >
+                        <div class="patch-status-indicator" :class="{'enabled': patch.is_enabled}"></div>
+                        <span x-text="patch.name"></span>
+                    </div>
+                </template>
+            </nav>
+            
+            <div class="nxe-settings-description config-editor-options" style="justify-content: center;">
+                
+                <template x-if="$store.app.patchList.length > 0 && $store.app.patchList[$store.app.focusedIndex]">
+                    <div>
+                        <h3 x-text="$store.app.patchList[$store.app.focusedIndex].name"></h3>
+                        <p x-text="$store.app.patchList[$store.app.focusedIndex].desc"></p>
+                        
+                        <div style="margin-top: 20px;">
+                            <label class="nxe-toggle-switch">
+                                <input 
+                                    type="checkbox" 
+                                    :checked="$store.app.patchList[$store.app.focusedIndex].is_enabled"
+                                    @click="$store.actions.togglePatch($store.app.patchList[$store.app.focusedIndex])"
+                                >
+                                <span class="slider"></span>
+                            </label>
+                            <span 
+                                style="margin-left: 15px; font-size: 1.2rem; vertical-align: middle;"
+                                x-text="$store.app.patchList[$store.app.focusedIndex].is_enabled ? $store.app.t('patches.enabled') : $store.app.t('patches.disabled')"
+                            ></span>
+                        </div>
+                    </div>
+                </template>
+                
+            </div>
+            
+        </div>
+    </div> 
+    
+    <footer class="nxe-footer-left">
+        <div class="footer-button" id="btn-a">
+            <span class="button-icon a">A</span> 
+            <span x-text="$store.app.t('generic.toggle')">Toggle</span>
+        </div>
+        <div class="footer-button" id="btn-b" @click.prevent="$store.actions.goBack()">
+            <span class="button-icon b">B</span> 
+            <span x-text="$store.app.t('generic.back')">Back</span>
+        </div>
+        
+        <div class="footer-button" id="btn-x" @click.prevent="$store.actions.saveAllPatches()">
+            <span class="button-icon x">X</span> 
+            <span x-show="$store.app.patchSaveStatus === 'idle'" x-text="$store.app.t('generic.save')">Save</span>
+            <span x-show="$store.app.patchSaveStatus === 'saving'" x-text="$store.app.t('generic.saving')">Saving...</span>
+            <span x-show="$store.app.patchSaveStatus === 'saved'" x-text="$store.app.t('generic.saved')">Saved!</span>
+            <span x-show="$store.app.patchSaveStatus === 'error'" x-text="$store.app.t('generic.error')">Error!</span>
+        </div>
+
+    </footer>
+    
+    <footer class="nxe-footer-right">
+        <div class="footer-guide-button">
+            <div class="scene-3d">
+                <div class="guide-icon">
+                    <img src="assets/icons/xbox-25912.png" alt="Xbox Guide">
+                </div>
+                <div class="ground-surface">
+                    <div class="icon-ground-shadow"></div>
+                    <div class="ripple-wave"></div>
+                    <div class="ripple-wave"></div>
+                    <div class="ripple-wave"></div>
+                </div>
+            </div>
+        </div>
+    </footer>
+</section>
