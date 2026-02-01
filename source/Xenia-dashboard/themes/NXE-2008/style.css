@@ -175,15 +175,11 @@ body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; heigh
     transition: transform 0.5s ease, opacity 0.4s ease, filter 0.4s ease, width 0.5s ease, height 0.5s ease, box-shadow 0.4s ease; 
     cursor: pointer; 
     will-change: transform, opacity, filter; 
-    
+  
     --offset: calc(var(--index) - var(--active-index)); 
     opacity: calc(min(1, max(0, var(--offset) + 1))); 
-    
-
     transform: translate(-50%, -50%) translateX(calc(var(--offset) * 22vw + -20vw)) scale(calc(1 - 0.15 * var(--offset))); 
-    
     transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
-    filter: brightness(calc(1 - 0.35 * var(--offset))); 
     z-index: calc(100 - var(--offset)); 
 }
 .nxe-blade.focused { filter: brightness(1); z-index: 101; border-color: var(--nxe-brand-primary); box-shadow: 0 0 70px 15px var(--nxe-brand-primary), inset 0 0 50px var(--nxe-brand-light); }
