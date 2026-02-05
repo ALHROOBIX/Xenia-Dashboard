@@ -66,6 +66,7 @@ const gotTheLock = app.requestSingleInstanceLock();
 
 if (!gotTheLock) {
     app.quit();
+    app.exit(0);
 } else {
     app.on('second-instance', (event, commandLine, workingDirectory) => {
         if (mainWindow) {
@@ -1208,6 +1209,7 @@ ipcMain.handle('scanForGames', async () => {
     const gamesToFetch = [];
     let cacheUpdated = false;
 
+
     const CONTENT_TYPES = {
         '00007000': 'Games on Demand',
         '000D0000': 'Xbox Live Arcade'
@@ -1220,37 +1222,48 @@ ipcMain.handle('scanForGames', async () => {
             const gamePath = path.join(entry.parentPath, entry.name);
             const gameFileName = entry.name;
             let isXBLA = false;
+            let isGOD = false;
             let detectedTitleID = null;
+
 
             const isNormalGame = entry.isFile() && 
                                (entry.name.toLowerCase().endsWith('.iso') || 
                                 entry.name.toLowerCase().endsWith('.xex') ||
                                 entry.name.toLowerCase().endsWith('.zar'));
 
+
+
             const isHashFile = entry.isFile() && !entry.name.includes('.') && entry.name.length > 15;
             
             if (isHashFile) {
                 const pathParts = gamePath.split(path.sep);
+
                 const contentTypeDir = pathParts[pathParts.length - 2];
                 const titleIdDir = pathParts[pathParts.length - 3];
 
                 if (CONTENT_TYPES[contentTypeDir] && /^[0-9A-F]{8}$/i.test(titleIdDir)) {
-                    isXBLA = true;
+                    if (contentTypeDir === '00007000') {
+                        isGOD = true;
+                    } else if (contentTypeDir === '000D0000') {
+                        isXBLA = true;
+                    }
                     detectedTitleID = titleIdDir.toUpperCase();
                 }
             }
 
-            if (isNormalGame || isXBLA) {
+            if (isNormalGame || isXBLA || isGOD) {
                 const cacheKey = gameFileName;
-                const gameNameOnly = isXBLA ? "" : path.basename(gameFileName, path.extname(gameFileName));
+                const gameNameOnly = (isXBLA || isGOD) ? "" : path.basename(gameFileName, path.extname(gameFileName));
 
                 let game = {
                     name: gameNameOnly,
                     fileName: gameFileName,
                     path: gamePath,
                     titleID: detectedTitleID || (cache[cacheKey]?.titleID) || null,
-                    isArcade: isXBLA
+                    isArcade: isXBLA,
+                    isGOD: isGOD
                 };
+
 
                 if (game.titleID) {
                     const cleanID = game.titleID.toUpperCase();
@@ -1263,15 +1276,24 @@ ipcMain.handle('scanForGames', async () => {
                     game.name = gameNameOnly || "Unknown Game " + (game.titleID || Math.random().toString(36).substring(7));
                 }
 
+
                 if (!game.name || game.name === "") {
-                    game.name = isXBLA ? `Arcade Game [${game.titleID}]` : gameNameOnly;
+                    if (isXBLA) {
+                        game.name = `Arcade Game [${game.titleID}]`;
+                    } else if (isGOD) {
+                        game.name = `GOD Game [${game.titleID}]`;
+                    } else {
+                        game.name = gameNameOnly;
+                    }
                 }
 
-                const result = isXBLA ? { titleID: game.titleID, source: 'folder' } : await _resolveTitleIDInternal(game.path, game, { nameIndex });
+
+                const result = (isXBLA || isGOD) ? { titleID: game.titleID, source: 'folder' } : await _resolveTitleIDInternal(game.path, game, { nameIndex });
                 game.titleID = result.titleID;
                 game.patchSource = result.source;
                 game.patchFiles = result.titleID ? (patchMap[result.titleID] || []) : [];
                 game.patchFileName = game.patchFiles.length > 0 ? game.patchFiles[0] : null;
+
 
                 if (result.titleID && (!cache[cacheKey] || cache[cacheKey].titleID !== result.titleID)) {
                     newCache[cacheKey] = { ...newCache[cacheKey], titleID: result.titleID };
@@ -1295,7 +1317,7 @@ ipcMain.handle('scanForGames', async () => {
 
                 if (!game.path || !game.name) {
                     console.warn(`[Scanner] Skipping invalid game entry: ${gameFileName}`);
-                    continue; 
+                    continue;
                 }
                 gameList.push(game);
             }
