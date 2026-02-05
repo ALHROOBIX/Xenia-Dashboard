@@ -186,8 +186,17 @@ document.addEventListener('alpine:init', () => {
         audioMenu: [ 
             { id: 'volume', name: 'Master Volume', type: 'slider' },
             { id: 'bgmVolume', name: 'Music Volume', type: 'slider' },
-            { id: 'bgmFile', name: 'Background Music', type: 'file' }
+            { id: 'bgmFile', name: 'Background Music', type: 'file' },
+            { id: 'select', name: 'Select Sound', type: 'file' },
+            { id: 'back', name: 'Back Sound', type: 'file' },
+            { id: 'focus', name: 'Navigation Sound', type: 'file' },
+            { id: 'panelUnfold', name: 'Menu Open', type: 'file' },
+            { id: 'channelUp', name: 'Blade Up', type: 'file' },
+            { id: 'channelDown', name: 'Blade Down', type: 'file' },
+            { id: 'panelLeft', name: 'Tab Left', type: 'file' },
+            { id: 'panelRight', name: 'Tab Right', type: 'file' }
         ],
+        activeSoundElement: null,
         audioCache: {},
         focusedCollection: null, focusedIndex: 0, selectedIndexForAnimation: -1, gameSelectionAnimating: false,
         focusedGamePatchInfo: null, patchList: [], patchHeader: {}, patchesLoadingError: null,
@@ -881,49 +890,47 @@ document.addEventListener('alpine:init', () => {
                 await this.applyArtAsset(artProtocolUrl, true);
             }
         },
-    playSound(soundKey) {
-        const app = Alpine.store('app');
-        let targetId = soundKey + '-sound';
-        const kebabKey = soundKey.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
-        
-        let audioElement = app.audioCache[soundKey];
-
-        if (!audioElement) {
-            audioElement = document.getElementById(targetId);
+        playSound(soundKey) {
+            const app = Alpine.store('app');
             
+
+            let targetId = soundKey + '-sound';
+            const kebabKey = soundKey.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+            
+
+            let audioElement = app.audioCache[soundKey];
+
+
             if (!audioElement) {
-                audioElement = document.getElementById(kebabKey + '-sound');
+                audioElement = document.getElementById(targetId) || document.getElementById(kebabKey + '-sound');
+                
+                if (audioElement) {
+                    app.audioCache[soundKey] = audioElement;
+                } else {
+                    return;
+                }
             }
 
-            if (audioElement) {
-                app.audioCache[soundKey] = audioElement;
-            } else {
-                console.warn(`[Audio] Sound element not found for: ${soundKey}`);
-                return;
+
+            if (app.activeSoundElement && app.activeSoundElement !== audioElement) {
+                app.activeSoundElement.pause();
+                app.activeSoundElement.currentTime = 0;
             }
-        }
-
-        const vol = (app.soundSettings && app.soundSettings.masterVolume !== undefined) 
-                    ? app.soundSettings.masterVolume 
-                    : 1.0;
 
 
-        const rapidSounds = ['focus', 'channelUp', 'channelDown', 'channel-up', 'channel-down'];
-        
-        if (rapidSounds.includes(soundKey) || rapidSounds.includes(kebabKey)) {
-            const clone = audioElement.cloneNode();
-            clone.volume = vol;
-            
-            clone.play().then(() => {
-                clone.addEventListener('ended', () => clone.remove());
-            }).catch(() => clone.remove());
-            
-        } else {
+            const vol = (app.soundSettings && app.soundSettings.masterVolume !== undefined) 
+                        ? app.soundSettings.masterVolume : 1.0;
+
             audioElement.volume = vol;
             audioElement.currentTime = 0;
-            audioElement.play().catch(e => { });
-        }
-    },
+            
+            audioElement.play().then(() => {
+
+                app.activeSoundElement = audioElement;
+            }).catch(e => {});
+
+
+        },
 
   
     async updateMusicVolume(direction) {
@@ -975,6 +982,7 @@ document.addEventListener('alpine:init', () => {
                 const filePath = await window.electronAPI.openAudioFile();
                 
                 if (filePath) {
+
                     if (item.id === 'bgmFile') {
                         app.soundSettings.bgmFile = filePath;
                         
@@ -986,17 +994,28 @@ document.addEventListener('alpine:init', () => {
                         }
                         await window.electronAPI.set('bgmFile', filePath);
                     } 
+
                     else {
+
                         app.soundSettings.files[item.id] = filePath;
-                        const el = document.getElementById(item.id + '-sound');
+                        
+
+                        const kebabKey = item.id.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+                        let el = document.getElementById(item.id + '-sound') || document.getElementById(kebabKey + '-sound');
+
                         if (el) {
                             el.src = `file://${filePath.replace(/\\/g, '/')}`;
+                            el.load();
                             el.onloadeddata = () => {
                                 this.playSound(item.id);
                                 el.onloadeddata = null; 
                             };
                         }
-                        await window.electronAPI.set('soundFiles', app.soundSettings.files);
+
+                        const rawSoundFiles = JSON.parse(JSON.stringify(app.soundSettings.files));
+                        await window.electronAPI.set('soundFiles', rawSoundFiles);
+                        
+                        console.log("[Audio] New sound saved to JSON:", item.id);
                     }
                 }
             }, 100);
@@ -3748,23 +3767,10 @@ document.addEventListener('alpine:init', () => {
 
         window.electronAPI.onWindowBlur(() => {
             Alpine.store('actions').manageBGM('pause');
-        });
-
-        window.electronAPI.onWindowFocus(() => {
-            Alpine.store('actions').manageBGM('play');
-        });
-
-        window.electronAPI.onGameStarted(() => {
-            app.isGameRunning = true;
-            Alpine.store('actions').manageBGM('pause');
-        });
-
-        window.electronAPI.onGameStopped(() => {
-            app.isGameRunning = false;
-            Alpine.store('actions').manageBGM('play');
-        });
-        window.electronAPI.onWindowBlur(() => {
-            console.log('[System] Window blurred. Clearing active inputs...');
+            if (app.activeSoundElement) {
+                app.activeSoundElement.pause();
+                app.activeSoundElement.currentTime = 0;
+            }
 
             if (keyRepeatTimers.x.delay) clearTimeout(keyRepeatTimers.x.delay);
             if (keyRepeatTimers.x.interval) clearInterval(keyRepeatTimers.x.interval);
@@ -3774,9 +3780,26 @@ document.addEventListener('alpine:init', () => {
             keyRepeatTimers.x = { delay: null, interval: null };
             keyRepeatTimers.y = { delay: null, interval: null };
 
-            const app = Alpine.store('app');
             app.isControllerLocked = true;
             setTimeout(() => { app.isControllerLocked = false; }, 150);
+        });
+
+        window.electronAPI.onWindowFocus(() => {
+            Alpine.store('actions').manageBGM('play');
+        });
+
+        window.electronAPI.onGameStarted(() => {
+            app.isGameRunning = true;
+            Alpine.store('actions').manageBGM('pause');
+            if (app.activeSoundElement) {
+                app.activeSoundElement.pause();
+                app.activeSoundElement.currentTime = 0;
+            }
+        });
+
+        window.electronAPI.onGameStopped(() => {
+            app.isGameRunning = false;
+            Alpine.store('actions').manageBGM('play');
         });
 
         setInterval(() => {
