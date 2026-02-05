@@ -234,6 +234,7 @@ body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; heigh
     filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4)); 
     transition: transform 0.4s ease, filter 0.4s ease;
     -webkit-box-reflect: below 60px linear-gradient(to bottom, transparent 0%, rgba(255, 255, 255, 0.473) 100%);
+    will-change: transform;
 }
 
 .nxe-blade.focused .nxe-blade-icon { animation: iconPopInEffect 0.6s ease-out forwards; }
@@ -250,7 +251,7 @@ body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; heigh
     -webkit-box-reflect: below 100px linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.3));
 }
 .nxe-blade-logo-container { width: 100%; padding: 0 25px 20px 25px; box-sizing: border-box; flex-shrink: 0; }
-.nxe-blade-logo { max-width: 65%; height: 70px; object-fit: contain; object-position: left; filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.7));  border-radius: 20px;  -webkit-box-reflect: below 60px linear-gradient(to bottom, transparent 0%, rgba(255, 255, 255, 0.473) 100%); }
+.nxe-blade-logo { max-width: 65%; height: 70px; object-fit: contain; object-position: left; filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.7));  border-radius: 20px;  -webkit-box-reflect: below 60px linear-gradient(to bottom, transparent 0%, rgba(255, 255, 255, 0.473) 100%); will-change: transform; }
 .nxe-blade-logo-fallback { font-size: 1.8rem; font-weight: 700; color: #ffffff; text-shadow: 0 2px 4px rgb(0, 0, 0); margin: 0; text-align: left; }
 .nxe-blade.game-blade .nxe-blade-content { padding: 0; }
 
@@ -269,14 +270,13 @@ body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; heigh
 
 .game-art-fill {
     position: absolute;
-    top: 0.5%;
+    top: 0.7%;
     bottom: 0.7%;
-    left: 0.5%;
-    right: 6%;
-    
+    left: 0.1%;
+    right: 3.5%;
     background-size: cover;
     background-position: center;
-    z-index: 1;
+    z-index: 2;
 }
 
 .cover-frame-img {
