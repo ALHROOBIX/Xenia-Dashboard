@@ -39,10 +39,21 @@
                 <div class="nxe-blade-content">
                 
                     <div class="nxe-blade-cover-art">
-                        <div class="game-art-fill" 
+                         <div class="game-art-fill" 
                             :style="`background-image: url('${game.coverUrl || 'assets/icons/placeholder.png'}')` ">
                         </div>
-                        <img src="assets/images/cover-game.webp" class="cover-frame-img">
+    
+                        <img src="assets/images/cover-game.webp" 
+                            class="cover-frame-img" 
+                            x-show="!game.isArcade && !game.isGOD">
+    
+                        <img src="assets/images/cover-game-XBLA.webp" 
+                            class="cover-frame-img" 
+                            x-show="game.isArcade">
+    
+                        <img src="assets/images/cover-game-GOD.webp" 
+                            class="cover-frame-img" 
+                            x-show="game.isGOD">
                     </div>
 
                     <div class="library-status-bar" 
