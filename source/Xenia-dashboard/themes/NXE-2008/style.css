@@ -1033,10 +1033,38 @@ html[dir="rtl"] .nxe-settings-wrapper {
     padding: 0;
 }
 
+html[dir="ltr"] .nxe-settings-wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    
+    transform: translate(-50%, -50%);
+    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    
+    text-align: left;
+    direction: ltr;
+    
+    width: 100%;
+
+    padding: 0;
+}
+
 html[dir="rtl"] .nxe-settings-container {
    display: flex; 
    width: 1250px; 
    height: 500px;
+   flex-shrink: 0;
+}
+
+html[dir="ltr"] .nxe-settings-container {
+   display: flex; 
+   width: 1250px; 
+   height: 500px;
+
    flex-shrink: 0;
 }
 
