@@ -214,30 +214,32 @@
                         <p x-show="$store.app.gameExtendedInfo.loading" style="color:#888;" x-text="$store.app.t('generic.loading')">Loading...</p>
 
                         <div class="description-container">
-                            <p x-show="!$store.app.gameExtendedInfo.loading" 
-                            x-text="$store.app.gameExtendedInfo.description"
-                            :style="$store.app.gameExtendedInfo.translatedDescription ? 'direction: rtl; text-align: right;' : 'direction: ltr;'">
-                            </p>
+                                <p x-show="!$store.app.gameExtendedInfo.loading" 
+                                x-text="$store.app.gameExtendedInfo.description"
+                                :style="($store.app.gameExtendedInfo.translatedDescription && $store.app.language === 'ar') 
+                                        ? 'direction: rtl; text-align: right;' 
+                                        : 'direction: ltr; text-align: left;'">
+                                </p>
 
-                            <div class="translate-actions-row" style="display: flex; gap: 10px;">
-                                <button class="mini-translate-btn" 
-                                        x-show="!$store.app.gameExtendedInfo.loading && !$store.app.gameExtendedInfo.translatedDescription"
-                                        @click="$store.actions.translateDescription()">
-                                    <template x-if="!$store.app.gameExtendedInfo.isTranslating">
-                                        <span>🌐 ترجمة الوصف</span>
-                                    </template>
-                                    <template x-if="$store.app.gameExtendedInfo.isTranslating">
-                                        <span>جاري الترجمة...</span>
-                                    </template>
-                                </button>
+                                <div class="translate-actions-row" style="display: flex; gap: 10px;">
+                                    <button class="mini-translate-btn" 
+                                            x-show="!$store.app.gameExtendedInfo.loading && !$store.app.gameExtendedInfo.translatedDescription"
+                                            @click="$store.actions.translateDescription()">
+                                        <template x-if="!$store.app.gameExtendedInfo.isTranslating">
+                                            <span>🌐 <span x-text="$store.app.t('library.Translate')"></span></span>
+                                        </template>
+                                        <template x-if="$store.app.gameExtendedInfo.isTranslating">
+                                            <span x-text="$store.app.t('library.loading')"></span>
+                                        </template>
+                                    </button>
 
-                                <button class="mini-translate-btn revert" 
-                                        x-show="$store.app.gameExtendedInfo.translatedDescription"
-                                        @click="$store.actions.revertToOriginal()">
-                                    <span>⬅ عرض النص الأصلي</span>
-                                </button>
+                                    <button class="mini-translate-btn revert" 
+                                            x-show="$store.app.gameExtendedInfo.translatedDescription"
+                                            @click="$store.actions.revertToOriginal()">
+                                        <span>⬅ <span x-text="$store.app.t('library.Original')"></span></span>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
                     </div>
 
                     <div class="col-status">
