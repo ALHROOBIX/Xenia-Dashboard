@@ -48,6 +48,205 @@
                     </template>
                 </div>
 
+                                <div id="lang-item-2"
+                     class="nxe-settings-item"
+                     :class="{'focused': $store.app.focusedIndex === 2}"
+                     @click="$store.actions.setLanguage('zh')">
+
+                    <div class="item-content">
+                        <span class="flag-icon">🇨🇳</span>
+                        <div class="item-text">
+                            <span class="main-text">中文</span>
+                            <span class="sub-text">中国</span>
+                        </div>
+                    </div>
+
+                    <template x-if="$store.app.language === 'zh'">
+                        <div class="active-badge">
+                            <span class="check-icon">✓</span>
+                        </div>
+                    </template>
+                </div>
+                <div id="lang-item-3"
+                     class="nxe-settings-item"
+                     :class="{'focused': $store.app.focusedIndex === 3}"
+                     @click="$store.actions.setLanguage('ja')">
+
+                    <div class="item-content">
+                        <span class="flag-icon">🇯🇵</span>
+                        <div class="item-text">
+                            <span class="main-text">日本語</span>
+                            <span class="sub-text">日本</span>
+                        </div>
+                    </div>
+
+                    <template x-if="$store.app.language === 'ja'">
+                        <div class="active-badge">
+                            <span class="check-icon">✓</span>
+                        </div>
+                    </template>
+                </div>
+
+                <div id="lang-item-4"
+                     class="nxe-settings-item"
+                     :class="{'focused': $store.app.focusedIndex === 4}"
+                     @click="$store.actions.setLanguage('ko')">
+
+                    <div class="item-content">
+                        <span class="flag-icon">🇰🇷</span>
+                        <div class="item-text">
+                            <span class="main-text">한국어</span>
+                            <span class="sub-text">대한민국</span>
+                        </div>
+                    </div>
+
+                    <template x-if="$store.app.language === 'ko'">
+                        <div class="active-badge">
+                            <span class="check-icon">✓</span>
+                        </div>
+                    </template>
+                </div>
+
+                <div id="lang-item-5"
+                     class="nxe-settings-item"
+                     :class="{'focused': $store.app.focusedIndex === 5}"
+                     @click="$store.actions.setLanguage('ru')">
+
+                    <div class="item-content">
+                        <span class="flag-icon">🇷🇺</span>
+                        <div class="item-text">
+                            <span class="main-text">Русский</span>
+                            <span class="sub-text">Россия</span>
+                        </div>
+                    </div>
+
+                    <template x-if="$store.app.language === 'ru'">
+                        <div class="active-badge">
+                            <span class="check-icon">✓</span>
+                        </div>
+                    </template>
+                </div>
+
+                <div id="lang-item-6"
+                     class="nxe-settings-item"
+                     :class="{'focused': $store.app.focusedIndex === 6}"
+                     @click="$store.actions.setLanguage('de')">
+
+                    <div class="item-content">
+                        <span class="flag-icon">🇩🇪</span>
+                        <div class="item-text">
+                            <span class="main-text">Deutsch</span>
+                            <span class="sub-text">Deutschland</span>
+                        </div>
+                    </div>
+
+                    <template x-if="$store.app.language === 'de'">
+                        <div class="active-badge">
+                            <span class="check-icon">✓</span>
+                        </div>
+                    </template>
+                </div>
+
+                <div id="lang-item-7"
+                     class="nxe-settings-item"
+                     :class="{'focused': $store.app.focusedIndex === 7}"
+                     @click="$store.actions.setLanguage('pt_BR')">
+
+                    <div class="item-content">
+                        <span class="flag-icon">🇧🇷</span>
+                        <div class="item-text">
+                            <span class="main-text">Português</span>
+                            <span class="sub-text">Brasil</span>
+                        </div>
+                    </div>
+
+                    <template x-if="$store.app.language === 'pt_BR'">
+                        <div class="active-badge">
+                            <span class="check-icon">✓</span>
+                        </div>
+                    </template>
+                </div>
+
+                <div id="lang-item-8"
+                     class="nxe-settings-item"
+                     :class="{'focused': $store.app.focusedIndex === 8}"
+                     @click="$store.actions.setLanguage('es')">
+
+                    <div class="item-content">
+                        <span class="flag-icon">🇪🇸</span>
+                        <div class="item-text">
+                            <span class="main-text">Español</span>
+                            <span class="sub-text">España</span>
+                        </div>
+                    </div>
+
+                    <template x-if="$store.app.language === 'es'">
+                        <div class="active-badge">
+                            <span class="check-icon">✓</span>
+                        </div>
+                    </template>
+                </div>
+
+                <div id="lang-item-9"
+                     class="nxe-settings-item"
+                     :class="{'focused': $store.app.focusedIndex === 9}"
+                     @click="$store.actions.setLanguage('tr')">
+
+                    <div class="item-content">
+                        <span class="flag-icon">🇹🇷</span>
+                        <div class="item-text">
+                            <span class="main-text">Türkçe</span>
+                            <span class="sub-text">Türkiye</span>
+                        </div>
+                    </div>
+
+                    <template x-if="$store.app.language === 'tr'">
+                        <div class="active-badge">
+                            <span class="check-icon">✓</span>
+                        </div>
+                    </template>
+                </div>
+
+                <div id="lang-item-10"
+                     class="nxe-settings-item"
+                     :class="{'focused': $store.app.focusedIndex === 10}"
+                     @click="$store.actions.setLanguage('it')">
+
+                    <div class="item-content">
+                        <span class="flag-icon">🇮🇹</span>
+                        <div class="item-text">
+                            <span class="main-text">Italiano</span>
+                            <span class="sub-text">Italia</span>
+                        </div>
+                    </div>
+
+                    <template x-if="$store.app.language === 'it'">
+                        <div class="active-badge">
+                            <span class="check-icon">✓</span>
+                        </div>
+                    </template>
+                </div>
+
+                <div id="lang-item-11"
+                     class="nxe-settings-item"
+                     :class="{'focused': $store.app.focusedIndex === 11}"
+                     @click="$store.actions.setLanguage('fr')">
+
+                    <div class="item-content">
+                        <span class="flag-icon">🇫🇷</span>
+                        <div class="item-text">
+                            <span class="main-text">Français</span>
+                            <span class="sub-text">France</span>
+                        </div>
+                    </div>
+
+                    <template x-if="$store.app.language === 'fr'">
+                        <div class="active-badge">
+                            <span class="check-icon">✓</span>
+                        </div>
+                    </template>
+                </div>
+
             </nav>
                     
             <div class="nxe-settings-description">
@@ -63,6 +262,56 @@
                 <div x-show="$store.app.focusedIndex === 1" x-transition.opacity>
                     <p class="desc-text">تغيير لغة الواجهة إلى <strong>العربية</strong>.</p>
                     <p class="desc-sub">سيتم عرض قوائم النظام والإعدادات باللغة العربية.</p>
+                </div>
+
+                <div x-show="$store.app.focusedIndex === 2" x-transition.opacity>
+                    <p class="desc-text">将仪表板语言更改为<strong>中文</strong>。</p>
+                    <p class="desc-sub">系统菜单、设置。</p>
+                </div>
+
+                <div x-show="$store.app.focusedIndex === 3" x-transition.opacity>
+                    <p class="desc-text">ダッシュボードの言語を<strong>日本語</strong>に変更します。</p>
+                    <p class="desc-sub">システムメニュー、設定。</p>
+                </div>
+
+                <div x-show="$store.app.focusedIndex === 4" x-transition.opacity>
+                    <p class="desc-text">대시보드 언어를 <strong>한국어</strong>로 변경하세요.</p>
+                    <p class="desc-sub">시스템 메뉴, 설정.</p>
+                </div>
+
+                <div x-show="$store.app.focusedIndex === 5" x-transition.opacity>
+                    <p class="desc-text">Измените язык панели на <strong>Русский</strong>.</p>
+                    <p class="desc-sub">Системные меню, настройки.</p>
+                </div>
+
+                <div x-show="$store.app.focusedIndex === 6" x-transition.opacity>
+                    <p class="desc-text">Ändern Sie die Dashboard-Sprache in <strong>Deutsch</strong>.</p>
+                    <p class="desc-sub">Systemmenüs, Einstellungen.</p>
+                </div>
+
+                <div x-show="$store.app.focusedIndex === 7" x-transition.opacity>
+                    <p class="desc-text">Altere o idioma do painel para <strong>Português (Brasil)</strong>.</p>
+                    <p class="desc-sub">Menus do sistema, configurações.</p>
+                </div>
+
+                <div x-show="$store.app.focusedIndex === 8" x-transition.opacity>
+                    <p class="desc-text">Cambie el idioma del panel a <strong>Español</strong>.</p>
+                    <p class="desc-sub">Menús del sistema, configuraciones.</p>
+                </div>
+
+                <div x-show="$store.app.focusedIndex === 9" x-transition.opacity>
+                    <p class="desc-text">Panoyu <strong>Türkçe</strong> diline değiştirin.</p>
+                    <p class="desc-sub">Sistem menüleri, ayarlar.</p>
+                </div>
+
+                <div x-show="$store.app.focusedIndex === 10" x-transition.opacity>
+                    <p class="desc-text">Cambia el idioma del panel a <strong>Italiano</strong>.</p>
+                    <p class="desc-sub">Menús del sistema, configuraciones.</p>
+                </div>
+
+                <div x-show="$store.app.focusedIndex === 11" x-transition.opacity>
+                    <p class="desc-text">Change the dashboard language to <strong>Français</strong>.</p>
+                    <p class="desc-sub">System menus, settings.</p>
                 </div>
                 
             </div>
