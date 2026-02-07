@@ -65,7 +65,6 @@ const appIcon = nativeImage.createFromPath(iconPath);
 const gotTheLock = app.requestSingleInstanceLock();
 
 if (!gotTheLock) {
-    app.quit();
     app.exit(0);
 } else {
     app.on('second-instance', (event, commandLine, workingDirectory) => {
@@ -89,6 +88,66 @@ if (!gotTheLock) {
                     message: 'واجهة زينيا نشطة بالفعل',
                     detail: 'التطبيق يعمل حالياً على نظامك. يرجى استخدام النافذة المفتوحة لمتابعة جلسة اللعب الخاصة بك.',
                     button: 'إغلاق'
+                },
+                zh: {
+                    title: '系统消息',
+                    message: 'Xenia仪表板已处于活动状态',
+                    detail: '该应用程序已在您的系统上运行。请使用现有窗口继续您的会话。',
+                    button: '关闭'
+                },
+                ja: {
+                    title: 'システムメッセージ',
+                    message: 'Xeniaダッシュボードはすでにアクティブです',
+                    detail: 'このアプリケーションはすでにシステムで実行されています。既存のウィンドウを使用してセッションを続行してください。',
+                    button: '閉じる'
+                },
+                ko: {
+                    title: '시스템 메시지',
+                    message: 'Xenia 대시보드가 이미 활성화되어 있습니다',
+                    detail: '이 응용 프로그램은 이미 시스템에서 실행 중입니다. 기존 창을 사용하여 세션을 계속하십시오.',
+                    button: '닫기'
+                },
+                ru: {
+                    title: 'Системное сообщение',
+                    message: 'Панель управления Xenia уже активна',
+                    detail: 'Это приложение уже работает на вашей системе. Пожалуйста, используйте существующее окно, чтобы продолжить свою сессию.',
+                    button: 'Закрыть'
+                },
+                de: {
+                    title: 'Systemnachricht',
+                    message: 'Das Xenia-Dashboard ist bereits aktiv',
+                    detail: 'Diese Anwendung läuft bereits auf Ihrem System. Bitte verwenden Sie das vorhandene Fenster, um Ihre Sitzung fortzusetzen.',
+                    button: 'Schließen'
+                },
+                pt_BR: {
+                    title: 'Mensagem do Sistema',
+                    message: 'O painel Xenia já está ativo',
+                    detail: 'O aplicativo já está em execução no seu sistema. Use a janela existente para continuar sua sessão.',
+                    button: 'Fechar'
+                },
+                es: {
+                    title: 'Mensaje del Sistema',
+                    message: 'El panel de Xenia ya está activo',
+                    detail: 'La aplicación ya se está ejecutando en su sistema. Utilice la ventana existente para continuar con su sesión.',
+                    button: 'Cerrar'
+                },
+                tr: {
+                    title: 'Sistem Mesajı',
+                    message: 'Xenia Paneli zaten aktif',
+                    detail: 'Uygulama sisteminizde zaten çalışıyor. Lütfen oturumunuza devam etmek için mevcut pencereyi kullanın.',
+                    button: 'Kapat'
+                },
+                it: {
+                    title: 'Messaggio di Sistema',
+                    message: 'Il pannello di Xenia è già attivo',
+                    detail: 'L\'applicazione è già in esecuzione sul tuo sistema. Utilizza la finestra esistente per continuare la tua sessione.',
+                    button: 'Chiudi'
+                },
+                fr: {
+                    title: 'Message du Système',
+                    message: 'Le tableau de bord Xenia est déjà actif',
+                    detail: 'L\'application est déjà en cours d\'exécution sur votre système. Veuillez utiliser la fenêtre existante pour continuer votre session.',
+                    button: 'Fermer'
                 }
             };
 
@@ -1126,36 +1185,65 @@ ipcMain.handle('launchGame', async (event, xeniaPath, gamePath, titleID) => {
     });
 
 function forceExitApp() {
-    console.log('[System] Initiating forceful shutdown...');
+    console.log('[System] Initiating forceful shutdown and cleaning Task Manager...');
 
-    if (controllerProcess) {
+
+    if (controllerProcess && controllerProcess.pid) {
         try {
-            controllerProcess.kill('SIGKILL'); 
+            if (process.platform === 'win32') {
+                // /f لقوة القتل، /t لقتل العمليات التابعة (الشجرة)
+                exec(`taskkill /pid ${controllerProcess.pid} /f /t`);
+            } else {
+                controllerProcess.kill('SIGKILL');
+            }
         } catch (e) {
             console.error('[Cleanup] Controller kill error:', e.message);
         }
     }
 
-    if (currentXeniaProcess) {
+
+    if (currentXeniaProcess && currentXeniaProcess.pid) {
         try {
-            currentXeniaProcess.kill('SIGKILL');
+            if (process.platform === 'win32') {
+                exec(`taskkill /pid ${currentXeniaProcess.pid} /f /t`);
+            } else {
+                currentXeniaProcess.kill('SIGKILL');
+            }
         } catch (e) {
             console.error('[Cleanup] Xenia kill error:', e.message);
         }
     }
 
-    if (process.platform === 'linux') {
-        try {
-            const { execSync } = require('child_process');
-            execSync('pkill -9 -f xenia_canary || true');
-            execSync('pkill -9 -f controller_service || true');
-        } catch (e) {}
-    }
 
-    app.exit(0); 
+    try {
+        if (process.platform === 'win32') {
+
+            exec('taskkill /f /im controller_service.exe /t');
+            exec('taskkill /f /im xenia_canary.exe /t');
+            exec('taskkill /f /im abgx360.exe /t');
+        } else {
+            exec('pkill -9 -f xenia_canary || true');
+            exec('pkill -9 -f controller_service || true');
+        }
+    } catch (e) {}
+
+
+
+    setTimeout(() => {
+        app.exit(0); 
+    }, 500);
 }
 
+app.on('window-all-closed', () => {
+    forceExitApp();
+});
+
+
 ipcMain.handle('quit-app', () => {
+    forceExitApp();
+});
+
+app.on('will-quit', () => {
     forceExitApp();
 });
 
@@ -2740,11 +2828,15 @@ ipcMain.handle('update-local-db', async () => {
     return { success: true, count: Object.keys(localGameDB).length };
 });
 
-ipcMain.handle('translate-text', async (event, text) => {
+ipcMain.handle('translate-text', async (event, text, targetLang) => {
     try {
-        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=ar&dt=t&q=${encodeURIComponent(text)}`;
+
+        const lang = targetLang || 'en';
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${lang}&dt=t&q=${encodeURIComponent(text)}`;
+        
         const response = await axios.get(url);
         
+
         const translatedText = response.data[0].map(s => s[0]).join('');
         return { success: true, translatedText };
     } catch (error) {
