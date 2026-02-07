@@ -300,7 +300,17 @@ document.addEventListener('alpine:init', () => {
 
         languageOptions: [
             { code: 'en', name: 'English', native: 'United States', flag: '🇺🇸' },
-            { code: 'ar', name: 'العربية', native: 'المملكة العربية السعودية', flag: '🇸🇦' }
+            { code: 'ar', name: 'العربية', native: 'المملكة العربية السعودية', flag: '🇸🇦' },
+            { code: 'zh', name: '中文', native: '中国', flag: '🇨🇳' },
+            { code: 'ja', name: '日本語', native: '日本', flag: '🇯🇵' },
+            { code: 'ko', name: '한국어', native: '대한민국', flag: '🇰🇷' },
+            { code: 'ru', name: 'Русский', native: 'Россия', flag: '🇷🇺' },
+            { code: 'de', name: 'Deutsch', native: 'Deutschland', flag: '🇩🇪' },
+            { code: 'pt_BR', name: 'Português (Brasil)', native: 'Brasil', flag: '🇧🇷' },
+            { code: 'es', name: 'Español', native: 'España', flag: '🇪🇸' },
+            { code: 'tr', name: 'Türkçe', native: 'Türkiye', flag: '🇹🇷' },
+            { code: 'it', name: 'Italiano', native: 'Italia', flag: '🇮🇹' },
+            { code: 'fr', name: 'Français', native: 'France', flag: '🇫🇷' }
         ],
 
         configMode: 'global', 
@@ -641,7 +651,8 @@ document.addEventListener('alpine:init', () => {
             this.playSound('focus');
             info.isTranslating = true;
 
-            const result = await window.electronAPI.translateText(info.originalDescription);
+
+            const result = await window.electronAPI.translateText(info.originalDescription, app.language);
 
             if (result.success) {
                 info.translatedDescription = result.translatedText;
@@ -3325,18 +3336,30 @@ document.addEventListener('alpine:init', () => {
             this.applyDirection(lang);
         },
 
-        applyDirection(lang) {
+       applyDirection(lang) {
             const html = document.documentElement;
-            if (lang === 'ar') {
+            
+
+            const rtlLanguages = ['ar'];
+            
+
+            const ltrLanguages = ['en', 'zh', 'ja', 'ko', 'ru', 'de', 'pt_BR', 'es', 'tr', 'it', 'fr'];
+            
+            if (rtlLanguages.includes(lang)) {
                 html.setAttribute('dir', 'rtl');
-                html.lang = 'ar';
+                html.lang = lang;
                 html.classList.add('is-rtl');
+            } else if (ltrLanguages.includes(lang)) {
+                html.setAttribute('dir', 'ltr');
+                html.lang = lang;
+                html.classList.remove('is-rtl');
             } else {
+
                 html.setAttribute('dir', 'ltr');
                 html.lang = 'en';
                 html.classList.remove('is-rtl');
             }
-        },
+        }
 
     });
 
