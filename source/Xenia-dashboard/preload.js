@@ -54,7 +54,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     onWindowBlur: (callback) => ipcRenderer.on('window-blur', () => callback()),
     
 
-    translateText: (text) => ipcRenderer.invoke('translate-text', text),
+    translateText: (text, targetLang) => ipcRenderer.invoke('translate-text', text, targetLang),
     checkAbgxStatus: () => ipcRenderer.invoke('check-abgx-status'),
 
     scanZarTitleID: (gamePath) => ipcRenderer.invoke('scan-zar-titleid', gamePath),
