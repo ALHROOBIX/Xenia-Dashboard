@@ -156,14 +156,17 @@
 
 .profile-modal {
     background: linear-gradient(180deg, #2a2a2a 0%, #161616 100%);
-    width: 580px;
+    width: 680px;
+    max-width: 95vw;
     padding: 30px;
+    padding-bottom: 20px;
     border-radius: 20px;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8), 
-                inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8);
     position: relative;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .profile-modal::before {
@@ -201,6 +204,25 @@
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     border: 1px solid rgba(255, 255, 255, 0.05);
     position: relative;
+}
+
+.button-icon.start-icon {
+        background: linear-gradient(to bottom, #9e9e9e 0%, #929292 100%);
+        color: #333;
+        min-width: 40px;
+        height: 18px;
+        border-radius: 10px 10px 10px 10px; 
+        border-bottom: 2px solid #999;
+        font-size: 10px;
+        font-weight: 900;
+        font-family: "Segoe UI", sans-serif;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        margin-right: 8px;
+        transform: translateY(-1px);
+        line-height: 1;
 }
 
 .profile-card:hover, .profile-card.focused {
@@ -297,9 +319,25 @@
     margin-top: 20px;
     display: flex;
     justify-content: center;
-    gap: 30px;
-    border-top: 1px solid rgba(255,255,255,0.05);
+    flex-wrap: wrap;
+    gap: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
     padding-top: 20px;
+}
+
+.footer-button {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    font-size: 13px;
+}
+
+
+.button-icon.menu {
+    min-width: 35px;
+    height: 18px;
+    font-size: 10px;
+    padding: 0 5px;
 }
 
 @keyframes fadeIn {
@@ -468,8 +506,8 @@
 
         <div class="profile-selector-overlay" x-show="$store.app.isProfileSelectorOpen" x-transition.opacity x-cloak>
             <div class="profile-modal" @click.away="$store.app.isProfileSelectorOpen = false">
-                <h2 x-text="$store.app.isCreatingProfile ? ($store.app.t('profile.create_title') || 'Create New Profile') : ($store.app.t('profile.switch_user') || 'Switch User Profile')"></h2>
-                                    
+                <h2 x-text="$store.app.isCreatingProfile ? ($store.app.t('profile.create_title') || 'Create New Profile') : ($store.app.isRenamingProfile ? ($store.app.t('profile.rename_title') || 'Rename Profile') : ($store.app.t('profile.switch_user') || 'Switch User Profile'))"></h2>
+
                     <template x-if="$store.app.isCreatingProfile">
                         <div style="margin: 30px 0; text-align: center; animation: fadeIn 0.3s;">
                             <p style="color: #aaa; font-size: 14px; margin-bottom: 15px;" x-text="$store.app.t('profile.enter_name_msg') || 'Enter your new gamertag'"></p>
@@ -502,7 +540,39 @@
                         </div>
                     </template>
 
-                <template x-if="!$store.app.isCreatingProfile">
+                    <template x-if="$store.app.isRenamingProfile">
+                        <div style="margin: 30px 0; text-align: center; animation: fadeIn 0.3s;">
+                            <p style="color: #aaa; font-size: 14px; margin-bottom: 15px;" x-text="$store.app.t('profile.enter_New_name') || 'Enter your new gamertag'"></p>
+
+                            <div style="position: relative; display: flex; justify-content: center;">
+                                <input 
+                                    id="rename-profile-input"
+                                    type="text" 
+                                    x-model="$store.app.newProfileName"
+                                    @keydown.enter="$store.actions.submitProfileRename()"
+                                    @keydown.escape="$store.actions.cancelRenameProfile()"
+                                    maxlength="15"
+                                    autofocus
+                                    style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 12px; border: 2px solid var(--nxe-brand-primary); font-size: 28px; color: #fff; width: 80%; text-align: center; outline: none; font-family: inherit;"
+                                >
+                            </div>
+
+                            <div style="margin-top: 25px; display: flex; justify-content: center; gap: 20px;">
+                                <div class="footer-button" @click="$store.actions.submitProfileRename()" style="cursor: pointer;">
+                                    <span class="button-icon a">A</span> 
+                                    <span x-text="$store.app.t('generic.done') || 'Done'"></span>
+                                </div>
+
+                                <div class="footer-button" @click="$store.actions.cancelRenameProfile()" style="cursor: pointer;">
+                                    <span class="button-icon b">B</span> 
+                                    <span x-text="$store.app.t('generic.cancel') || 'Cancel'"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+
+                <template x-if="!$store.app.isCreatingProfile && !$store.app.isRenamingProfile">
                     <div class="profile-grid">
                         <template x-for="(profile, index) in $store.app.profilesList" :key="profile.xuid">
                             <div :id="'profile-item-' + index" 
@@ -551,8 +621,28 @@
                     </div>
                 </template>
 
-                <template x-if="!$store.app.isCreatingProfile">
+                <template x-if="!$store.app.isCreatingProfile && !$store.app.isRenamingProfile">
                     <div class="modal-footer">
+                        <template x-if="$store.app.profilesList[$store.app.focusedProfileIndex]?.slot === null">
+                            <div class="footer-button" @click.stop="$store.actions.loginFocusedProfile()">
+                                <span class="button-icon menu">RB</span> 
+                                <span x-text="$store.app.t('generic.Login')">Login</span>
+                            </div>
+                        </template>
+
+                        <template x-if="$store.app.profilesList[$store.app.focusedProfileIndex]?.slot !== null">
+                            <div class="footer-button" @click.stop="$store.actions.logoutFocusedProfile()">
+                                <span class="button-icon menu">LB</span> 
+                                <span x-text="$store.app.t('generic.Logout')">Logout</span>
+                            </div>
+                        </template>
+
+                        <template x-if="!$store.app.isCreatingProfile && $store.app.focusedProfileIndex < $store.app.profilesList.length">
+                            <div class="footer-button" @click.stop="$store.actions.deleteFocusedProfile()">
+                                <span class="button-icon start-icon">Back</span> <span x-text="$store.app.t('generic.Delete')">Delete</span>
+                            </div>
+                        </template>
+
                         <div class="footer-button">
                             <span class="button-icon y">Y</span>
                             <span x-text="$store.app.t('generic.Create')">Create</span>
@@ -568,6 +658,10 @@
                             <span x-text="$store.app.t('generic.back')">Back</span>
                         </div>
 
+                        <div class="footer-button" @click.stop="$store.actions.startRenameProfile()">
+                            <span class="button-icon start-icon">Start</span> 
+                            <span x-text="$store.app.t('generic.rename') || 'Rename'"></span>
+                        </div>
                     </div>
                 </template>
             </div>
