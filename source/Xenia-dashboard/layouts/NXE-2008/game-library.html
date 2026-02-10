@@ -130,6 +130,11 @@
             <span class="button-icon L3-icon">L3</span> 
             <span id="zar-scan-text" x-text="$store.app.t('library.zar_scan')">Scan ZAR Title ID</span>
         </div>
+
+        <div class="footer-button" id="btn-rename" @click.prevent="$store.actions.startRename()">
+            <span class="button-icon start-icon">START</span> 
+            <span x-text="$store.app.t('library.rename') || 'Rename'">Rename</span>
+        </div>
         
     </footer>
     
@@ -298,7 +303,9 @@
             <div class="kb-top-label" x-text="$store.app.t('library.search_placeholder')"></div>
 
             <div class="xbox-kb-input-row">
-                <input type="text" class="xbox-kb-input" x-model="$store.app.librarySearch" readonly>
+                <input type="text" class="xbox-kb-input" 
+                    x-model="$store.app[ $store.app.keyboardMode === 'rename' ? 'renameInput' : 'librarySearch' ]" 
+                    readonly>
                 <div class="input-cursor"></div>
             </div>
 
@@ -565,6 +572,7 @@
         }
 
         .footer-button {
+            flex-shrink: 0;
             display: inline-flex;
             align-items: center;
             gap: 8px;
@@ -680,6 +688,25 @@
         min-width: 40px;
         height: 18px;
         border-radius: 6px 6px 2px 2px; 
+        border-bottom: 2px solid #999;
+        font-size: 10px;
+        font-weight: 900;
+        font-family: "Segoe UI", sans-serif;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        margin-right: 8px;
+        transform: translateY(-1px);
+        line-height: 1;
+    }
+
+    .button-icon.start-icon {
+        background: linear-gradient(to bottom, #9e9e9e 0%, #929292 100%);
+        color: #333;
+        min-width: 40px;
+        height: 18px;
+        border-radius: 10px 10px 10px 10px; 
         border-bottom: 2px solid #999;
         font-size: 10px;
         font-weight: 900;
