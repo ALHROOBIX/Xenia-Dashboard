@@ -684,6 +684,21 @@ function sendProgress(payload) {
 
 
 function registerIpcHandlers() {
+    ipcMain.handle('update-game-name', async (event, { fileName, newName }) => {
+        try {
+            const cache = await loadCache();
+            if (!cache[fileName]) cache[fileName] = {};
+            
+            cache[fileName].name = newName;
+            
+            await saveCache(cache);
+            return { success: true };
+        } catch (error) {
+            console.error("[Rename Error]", error);
+            return { success: false, error: error.message };
+        }
+    });
+    
     console.log('[Debug Main] Registering IPC Handlers...');
 
     ipcMain.handle('join-paths', (event, ...paths) => {
@@ -982,13 +997,20 @@ ipcMain.handle('launchGame', async (event, xeniaPath, gamePath, titleID) => {
         const args = [gamePath]; 
         
         if (titleID) {
-            const xeniaDir = path.dirname(xeniaPath);
-            const customConfigPath = path.join(xeniaDir, 'config', `${titleID}.config.toml`);
+
+            const configResult = await getXeniaConfigPath(); 
             
-            if (fsSync.existsSync(customConfigPath)) {
-                console.log(`[Game Launcher] 🎯 Applying custom config: ${customConfigPath}`);
-                args.push('--config');
-                args.push(customConfigPath);
+            if (configResult.path) {
+
+                const xeniaBaseDir = path.dirname(configResult.path);
+                const customConfigPath = path.join(xeniaBaseDir, 'config', `${titleID}.config.toml`);
+                
+
+                if (fsSync.existsSync(customConfigPath)) {
+                    console.log(`[Game Launcher] 🎯 Applying custom config: ${customConfigPath}`);
+                    args.push('--config');
+                    args.push(customConfigPath);
+                }
             }
         }
         
@@ -2353,46 +2375,50 @@ ipcMain.handle('manage-game-config', async (event, { action, titleID, data }) =>
         return { success: false, error: "Xenia path not set." };
     }
 
-    const xeniaDir = path.dirname(xeniaPath);
-    const configDir = path.join(xeniaDir, 'config');
-    const globalConfigPath = path.join(xeniaDir, 'xenia-canary.config.toml');
-    const gameConfigPath = path.join(configDir, `${titleID}.config.toml`);
+
+    const configResult = await getXeniaConfigPath(); 
+    if (configResult.error) return { success: false, error: configResult.error };
+
+    const globalConfigPath = configResult.path;
+    const xeniaBaseDir = path.dirname(globalConfigPath); 
+    const gameConfigDir = path.join(xeniaBaseDir, 'config');
+    const gameConfigPath = path.join(gameConfigDir, `${titleID}.config.toml`);
 
     try {
-        if (!fsSync.existsSync(configDir)) {
-            await fs.mkdir(configDir, { recursive: true });
+
+        if (!fsSync.existsSync(gameConfigDir)) {
+            await fs.mkdir(gameConfigDir, { recursive: true });
         }
 
         if (action === 'load') {
-            let targetPath = gameConfigPath;
             let isNewFile = false;
+
 
             if (!fsSync.existsSync(gameConfigPath)) {
                 if (fsSync.existsSync(globalConfigPath)) {
-                    console.log(`[Game Config] Creating new config for ${titleID} from base.`);
+                    console.log(`[Game Config] Creating Linux/Win config for ${titleID} at: ${gameConfigPath}`);
                     await fs.copyFile(globalConfigPath, gameConfigPath);
                     isNewFile = true;
                 } else {
-                    return { success: false, error: "Global config not found to copy from." };
+
+                    await fs.writeFile(gameConfigPath, '# Per-Game Config\n');
+                    isNewFile = true;
                 }
             }
 
-            const result = await runPythonScript('patch_manager', ['load_config', targetPath]);
-            
+            const result = await runPythonScript('patch_manager', ['load_config', gameConfigPath]);
             if (!result.success) throw new Error(result.error);
             
             return { 
                 success: true, 
                 data: result.data, 
                 isNew: isNewFile,
-                path: targetPath 
+                path: gameConfigPath 
             };
         }
 
         else if (action === 'save') {
-            console.log(`[Game Config] Saving config for ${titleID}`);
             const configJson = JSON.stringify(data);
-            
             const result = await runPythonScript('patch_manager', [
                 'save_config', 
                 gameConfigPath,
@@ -2457,6 +2483,78 @@ ipcMain.handle('create-profile', async (event, gamertag) => {
             });
         });
     } catch (e) { return { success: false, error: e.message }; }
+});
+
+ipcMain.handle('rename-profile', async (event, { xuid, newName }) => {
+    try {
+        const contentRoot = await getContentRootPath();
+
+        const accountPath = path.join(contentRoot, xuid, 'FFFE07D1', '00010000', xuid, 'Account');
+        const toolboxPath = getBinaryPath('xenia_toolbox');
+
+        return new Promise((resolve) => {
+
+            const child = spawn(toolboxPath, ['rename', accountPath, newName]);
+            let out = '';
+            child.stdout.on('data', (d) => { out += d.toString(); });
+            child.on('close', () => {
+                try { 
+                    resolve(JSON.parse(out)); 
+                } catch (e) { 
+                    resolve({ success: false, error: "Toolbox Error" }); 
+                }
+            });
+        });
+    } catch (e) { 
+        return { success: false, error: e.message }; 
+    }
+});
+
+
+ipcMain.handle('assign-profile-to-slot', async (event, { xuid, slotIndex }) => {
+    const configResult = await getXeniaConfigPath();
+    if (configResult.error) return { success: false };
+    try {
+        let content = await fs.readFile(configResult.path, 'utf-8');
+        const key = `logged_profile_slot_${slotIndex}_xuid`;
+        const regex = new RegExp(`${key}\\s*=\\s*"[0-9A-F]*"`, 'i');
+        const newLine = `${key} = "${xuid.toUpperCase()}"`;
+        content = regex.test(content) ? content.replace(regex, newLine) : content.replace('[General]', `[General]\n${newLine}`);
+        await fs.writeFile(configResult.path, content);
+        return { success: true };
+    } catch (e) { return { success: false }; }
+});
+
+
+ipcMain.handle('logout-profile-slot', async (event, slotIndex) => {
+    const configResult = await getXeniaConfigPath();
+    if (configResult.error) return { success: false };
+    try {
+        let content = await fs.readFile(configResult.path, 'utf-8');
+        const key = `logged_profile_slot_${slotIndex}_xuid`;
+        const regex = new RegExp(`${key}\\s*=\\s*"[0-9A-F]*"`, 'i');
+        content = content.replace(regex, `${key} = ""`);
+        await fs.writeFile(configResult.path, content);
+        return { success: true };
+    } catch (e) { return { success: false }; }
+});
+
+
+ipcMain.handle('delete-profile', async (event, xuid) => {
+    try {
+        const contentRoot = await getContentRootPath(); // جلب مسار المحتوى الذكي
+        const profilePath = path.join(contentRoot, xuid);
+        
+        if (fsSync.existsSync(profilePath)) {
+
+            await fs.rm(profilePath, { recursive: true, force: true });
+            console.log(`[System] Profile ${xuid} deleted from disk.`);
+            return { success: true };
+        }
+        return { success: false, error: "Profile folder not found" };
+    } catch (e) {
+        return { success: false, error: e.message };
+    }
 });
 
 ipcMain.handle('get-played-games-list', async (event, xuid) => {
