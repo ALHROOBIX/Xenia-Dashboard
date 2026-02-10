@@ -13,19 +13,15 @@ An advanced, feature-rich frontend for the **Xenia Xbox 360 Emulator**, designed
   </p>
 
 ---
-## Image Gallery with Details
+<dev align="center">
+<h3>Dashboard</h3>
+<img src="Screenshot/dashboard.png">
+<h3>Achievement</h3>
+<img src="Screenshot/achievement.png">
+<h3>Game List</h3>
+<img src="Screenshot/game-list.png">
 
-| Image | Screenshot | Details | Status |
-|-------|------------|---------|--------|
-| **Dashboard** | ![Screenshot](Screenshot/dashboard.png) |Dashboard for gaming system with settings, library, tray, and profile options. Includes Select and Menu navigation.| ✅ Active |
-|Switch User| ![Screenshot](Screenshot/change-account.png)|The user can switch between users|✅ Active|
-|Create New Profile|![Screenshot](Screenshot/create-new-account.png)|Create new profiles for xenia canary|✅ Active|
-|Achievement|![Screenshot](Screenshot/achievement.png)|You can view the achievements you've earned in games|✅ Active|
-|Game List|![Screenshot](Screenshot/game-list.png)|The game library uses color: <br><br> <span style="color:green">Green</span> for disc files (ISO/XEX/ZAR). <br><br> <span style="color:red">Red</span> for GOD digital downloads. <br><br> <span style="color:orange">Orange</span> for Xbox Live Arcade (XBLA) titles.|✅ Active|
-|Language|![Screenshot](Screenshot/language.png)|You can now switch between different languages. <span style="color:red">Note: The flag logo appears only in the Linux version.</span>|✅ Active|
-|Translate game detels|![Screenshot](Screenshot/translate-game-detels.png)|You can now translate game details according to the application's selected language.|✅ Active|
-|Sounds Setting|![Screenshot](Screenshot/sounds-settings.png)|You can fully customize the audio configuration within the Xenia dashboard|✅ Active|
-|Download xenia canary|![Screenshot](Screenshot/download-xenia-canary.png)|You can download Xenia Canary for either Windows or Linux versions, identify the latest release, and it will automatically detect its installation path after download.|✅ Active|
+</dev>
 
 ---
 
