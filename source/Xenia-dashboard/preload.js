@@ -67,6 +67,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
     createProfile: (gamertag) => ipcRenderer.invoke('create-profile', gamertag),
     getCachedAchievements: (xuid) => ipcRenderer.invoke('get-cached-achievements', xuid),
     saveAchievementsCache: (data) => ipcRenderer.invoke('save-achievements-cache', data),
+    updateGameName: (data) => ipcRenderer.invoke('update-game-name', data),
+    renameProfile: (data) => ipcRenderer.invoke('rename-profile', data),
+    assignProfileToSlot: (data) => ipcRenderer.invoke('assign-profile-to-slot', data),
+    logoutProfileSlot: (slotIndex) => ipcRenderer.invoke('logout-profile-slot', slotIndex),
+    deleteProfile: (xuid) => ipcRenderer.invoke('delete-profile', xuid),
     quitApp: () => ipcRenderer.invoke('quit-app')
 });
 
