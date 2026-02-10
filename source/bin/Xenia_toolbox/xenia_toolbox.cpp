@@ -273,6 +273,47 @@ void cmd_read_account(std::string account_path) {
     std::cout << "{" << "\"success\": true, " << "\"gamertag\": \"" << escape_json(gamertag) << "\", " << "\"xuid\": \"0x" << ss.str() << "\"" << "}" << std::endl;
 }
 
+void cmd_rename_profile(std::string account_path, std::string new_gamertag) {
+    const uint8_t MASTER_KEY[] = { 0xE1, 0xBC, 0x15, 0x9C, 0x73, 0xB1, 0xEA, 0xE9, 0xAB, 0x31, 0x70, 0xF3, 0xAD, 0x47, 0xEB, 0xF3 };
+    const size_t FILE_SIZE = 404;
+
+    std::ifstream f_in(account_path, std::ios::binary);
+    if (!f_in) { std::cout << "{\"success\": false, \"error\": \"Account file not found\"}" << std::endl; return; }
+    
+    std::vector<uint8_t> buffer(FILE_SIZE);
+    f_in.read((char*)buffer.data(), FILE_SIZE);
+    f_in.close();
+
+
+    uint8_t rc4_key_old[20];
+    Crypto::hmac_sha1(MASTER_KEY, 16, buffer.data(), 16, rc4_key_old);
+    Crypto::rc4(&buffer[0x10], FILE_SIZE - 16, rc4_key_old, 16);
+
+
+    uint8_t* struct_start = &buffer[0x18];
+    memset(&struct_start[0x08], 0, 0x1E);
+    std::vector<uint8_t> gt_bytes = ascii_to_utf16_be(new_gamertag);
+    if (gt_bytes.size() > 0x1E) gt_bytes.resize(0x1E);
+    memcpy(&struct_start[0x08], gt_bytes.data(), gt_bytes.size());
+
+
+    uint8_t new_data_hash[20];
+    Crypto::hmac_sha1(MASTER_KEY, 16, &buffer[0x10], FILE_SIZE - 16, new_data_hash);
+    memcpy(&buffer[0x00], new_data_hash, 0x10);
+
+    uint8_t rc4_key_new[20];
+    Crypto::hmac_sha1(MASTER_KEY, 16, new_data_hash, 0x10, rc4_key_new);
+    Crypto::rc4(&buffer[0x10], FILE_SIZE - 16, rc4_key_new, 16);
+
+
+    std::ofstream f_out(account_path, std::ios::binary);
+    if (!f_out) { std::cout << "{\"success\": false, \"error\": \"Failed to save Account file\"}" << std::endl; return; }
+    f_out.write((char*)buffer.data(), buffer.size());
+    f_out.close();
+
+    std::cout << "{\"success\": true, \"new_gamertag\": \"" << escape_json(new_gamertag) << "\"}" << std::endl;
+}
+
 void cmd_scan_path(std::string scan_path) {
     if (!fs::exists(scan_path)) { std::cout << "[]" << std::endl; return; }
 
@@ -321,6 +362,7 @@ int main(int argc, char* argv[]) {
         std::cout << "Usage:" << std::endl;
         std::cout << "  create <gamertag> <dest_path>          : Create profile in specific path" << std::endl;
         std::cout << "  read <account_file_path>               : Read specific account file" << std::endl;
+        std::cout << "  rename <account_file_path> <new_tag>   : Rename existing profile" << std::endl;
         std::cout << "  scan <content_path>                    : Scan a folder for profiles" << std::endl;
         std::cout << "  achievements <gpd_path> <img_out_dir>  : Parse GPD file" << std::endl;
         return 1;
@@ -333,6 +375,9 @@ int main(int argc, char* argv[]) {
     }
     else if (mode == "read" && argc >= 3) {
         cmd_read_account(argv[2]);
+    }
+    else if (mode == "rename" && argc >= 4) {
+        cmd_rename_profile(argv[2], argv[3]);
     }
     else if (mode == "scan" && argc >= 3) {
         cmd_scan_path(argv[2]);
