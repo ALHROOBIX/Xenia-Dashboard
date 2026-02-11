@@ -11,6 +11,7 @@ An advanced, feature-rich frontend for the **Xenia Xbox 360 Emulator**, designed
   <a href ="https://github.com/ALHROOBIX/Xenia-Dashboard/releases/latest"> <img src= "https://img.shields.io/github/downloads/ALHROOBIX/Xenia-Dashboard/total?style=social&label=Total%20Downloads&logo=github" height="40"></a>
   <a href ="https://github.com/ALHROOBIX/Xenia-Dashboard/releases/latest"> <img src="https://img.shields.io/github/v/release/ALHROOBIX/Xenia-Dashboard?style=social&label=Latest%20Release&logo=github" height="40"></a>
   </p>
+  
 ---
 <dev align="center">
 <h3>Dashboard</h3>
