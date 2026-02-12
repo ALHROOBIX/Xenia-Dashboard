@@ -394,6 +394,23 @@ function createWindow() {
             nodeIntegration: false,
             preload: path.join(__dirname, 'preload.js'),
             webSecurity: false,
+            devTools: false
+        }
+    });
+
+    mainWindow.setMenu(null); 
+
+
+    mainWindow.webContents.on('before-input-event', (event, input) => {
+        const key = input.key.toLowerCase();
+        
+
+        if (key === 'f12' || (input.control && input.shift && key === 'i')) {
+            event.preventDefault();
+        }
+
+        if (input.control && (key === '+' || key === '=' || key === '-')) {
+            event.preventDefault();
         }
     });
 
@@ -684,6 +701,163 @@ function sendProgress(payload) {
 
 
 function registerIpcHandlers() {
+
+    ipcMain.handle('check-app-update', async () => {
+        try {
+            const currentVersion = app.getVersion();
+            const repoUrl = 'https://api.github.com/repos/ALHROOBIX/Xenia-Dashboard/releases/latest';
+            
+            const { data: remoteRelease } = await axios.get(repoUrl, {
+                headers: { 'User-Agent': 'Xenia-Dashboard-Updater' }
+            });
+
+            const latestVersion = remoteRelease.tag_name.replace('v', '');
+            const hasUpdate = latestVersion !== currentVersion;
+
+            return {
+                success: true,
+                currentVersion,
+                latestVersion,
+                hasUpdate,
+                releaseNotes: remoteRelease.body,
+                publishedAt: remoteRelease.published_at
+            };
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    });
+
+
+
+
+    ipcMain.handle('download-app-update', async (event, platform) => {
+        const repoUrl = 'https://api.github.com/repos/ALHROOBIX/Xenia-Dashboard/releases/latest';
+        
+
+        let currentAppPath;
+        if (platform === 'win') {
+
+            currentAppPath = process.env.PORTABLE_EXECUTABLE_FILE || app.getPath('exe');
+        } else {
+
+            currentAppPath = process.env.APPIMAGE || app.getPath('exe');
+        }
+
+        const exeDir = path.dirname(currentAppPath);
+        const exeName = path.basename(currentAppPath);
+        
+
+        const downloadDir = path.join(exeDir, 'dashboard_update_tmp');
+
+        try {
+
+            const { data: release } = await axios.get(repoUrl, { headers: { 'User-Agent': 'Xenia-Dashboard' } });
+            const asset = release.assets.find(a => 
+                platform === 'win' ? a.name.endsWith('.exe') : a.name.endsWith('.AppImage')
+            );
+
+            if (!asset) throw new Error("No compatible asset found.");
+
+
+            if (!fsSync.existsSync(downloadDir)) {
+                fsSync.mkdirSync(downloadDir, { recursive: true });
+            }
+
+
+            const downloadPath = path.join(downloadDir, `new_${exeName}`);
+
+
+            const writer = fsSync.createWriteStream(downloadPath);
+            const response = await axios({ url: asset.browser_download_url, method: 'GET', responseType: 'stream' });
+
+            const totalBytes = parseInt(response.headers['content-length'], 10);
+            let downloadedBytes = 0;
+
+            response.data.on('data', (chunk) => {
+                downloadedBytes += chunk.length;
+                const percentage = Math.floor((downloadedBytes / totalBytes) * 100);
+                mainWindow.webContents.send('download-progress', { 
+                    type: 'app-update', 
+                    status: 'Downloading...', 
+                    percentage 
+                });
+            });
+
+            response.data.pipe(writer);
+            await new Promise((r, j) => { writer.on('finish', r); writer.on('error', j); });
+
+
+            
+            if (platform === 'win') {
+                const batchPath = path.join(downloadDir, 'apply_update.bat');
+                const script = `
+    @echo off
+    title Xenia Dashboard Updater
+    echo Waiting for Dashboard to close...
+    timeout /t 2 /nobreak > nul
+
+    :attempt
+    del /f /q "${currentAppPath}"
+    if exist "${currentAppPath}" (
+        echo File is locked, retrying...
+        timeout /t 1 /nobreak > nul
+        goto attempt
+    )
+
+    echo Moving new version...
+    move /y "${downloadPath}" "${currentAppPath}"
+    echo Restarting...
+    start "" "${currentAppPath}"
+    echo Cleaning up...
+    rd /s /q "${downloadDir}"
+    exit
+                `;
+                fsSync.writeFileSync(batchPath, script);
+                
+                spawn('cmd.exe', ['/c', batchPath], {
+                    detached: true,
+                    stdio: 'ignore',
+                    cwd: exeDir
+                }).unref();
+
+            } else {
+
+                const scriptPath = path.join(downloadDir, 'apply_update.sh');
+                const script = `
+    #!/bin/bash
+    sleep 2
+
+    mv -f "${downloadPath}" "${currentAppPath}"
+    chmod +x "${currentAppPath}"
+
+    "${currentAppPath}" &
+
+    rm -rf "${downloadDir}"
+                `;
+                fsSync.writeFileSync(scriptPath, script);
+                fsSync.chmodSync(scriptPath, 0o755);
+                
+                spawn('/bin/bash', [scriptPath], {
+                    detached: true,
+                    stdio: 'ignore',
+                    cwd: exeDir
+                }).unref();
+            }
+
+
+            setTimeout(() => app.exit(0), 500);
+            return { success: true };
+
+        } catch (error) {
+            console.error("Update Error:", error);
+
+            if (fsSync.existsSync(downloadDir)) {
+                try { fsSync.rmSync(downloadDir, { recursive: true }); } catch(e){}
+            }
+            return { success: false, error: error.message };
+        }
+    });
+    
     ipcMain.handle('update-game-name', async (event, { fileName, newName }) => {
         try {
             const cache = await loadCache();
