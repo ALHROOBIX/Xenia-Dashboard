@@ -27,6 +27,9 @@
                             item.id === 'download-xenia-linux' ? $store.app.t('core_config.manager_linux') :
                             item.id === 'download-patches' ? $store.app.t('core_config.download_patches') :
                             item.id === 'open-xenia-dash' ? $store.app.t('core_config.open_dashboard') :
+                            item.id === 'art-source' ? $store.app.t('core_config.art_source') :
+                            item.id === 'app-update' ? $store.app.t('core_config.app_update_title') :
+
                             item.name
                         "></span>
 
@@ -94,7 +97,7 @@
                             style="color: var(--nxe-green-light); font-weight: bold; font-size: 1.2rem;"
                             x-text="$store.app.settings.linuxLaunchMethod"
                         ></p>
-                        <p style="color: var(--nxe-text-secondary); font-size: 1rem;">(For Linux users only). Press (A) to cycle the method:</p>
+                        <p style="color: var(--nxe-text-secondary); font-size: 1rem;">(For Linux users only). Press <span style="color: var(--nxe-btn-a);">(A)</span> to cycle the method:</p>
                         <p style="color: var(--nxe-text-secondary); font-size: 1rem;">Native -> Wine -> Proton</p>
                     </div>
                 </template>
@@ -182,7 +185,7 @@
                         </div>
 
                         <p style="color: var(--nxe-text-secondary); font-size: 0.9rem; margin-top: 15px;">
-                            <span x-show="$store.app.downloadStatuses.win.status === 'idle'">Press (A) to <span x-text="$store.app.xeniaUpdateInfo.win.btnText"></span>.</span>
+                            <span x-show="$store.app.downloadStatuses.win.status === 'idle'">Press <span style="color: var(--nxe-btn-a);">(A)</span> to <span x-text="$store.app.xeniaUpdateInfo.win.btnText"></span>.</span>
                             <span x-show="$store.app.downloadStatuses.win.status !== 'idle' && $store.app.downloadStatuses.win.step !== 'done'" style="color: #f2c40e;" x-text="$store.app.t('generic.processing')">Processing... Please wait.</span>
                             <span x-show="$store.app.downloadStatuses.win.step === 'done'" style="color: #59c853;">Success!</span>
                         </p>
@@ -231,7 +234,7 @@
                         </div>
 
                         <p style="color: var(--nxe-text-secondary); font-size: 0.9rem; margin-top: 15px;">
-                            <span x-show="$store.app.downloadStatuses.linux.status === 'idle'">Press (A) to <span x-text="$store.app.xeniaUpdateInfo.linux.btnText"></span>.</span>
+                            <span x-show="$store.app.downloadStatuses.linux.status === 'idle'">Press <span style="color: var(--nxe-btn-a);">(A)</span> to <span x-text="$store.app.xeniaUpdateInfo.linux.btnText"></span>.</span>
                             <span x-show="$store.app.downloadStatuses.linux.status !== 'idle' && $store.app.downloadStatuses.linux.step !== 'done'" style="color: #f2c40e;" x-text="$store.app.t('generic.processing')">Processing... Please wait.</span>
                             <span x-show="$store.app.downloadStatuses.linux.step === 'done'" style="color: #59c853;">Success!</span>
                         </p>
@@ -272,7 +275,7 @@
                         </div>
                         
                         <p style="color: var(--nxe-text-secondary); font-size: 0.9rem; margin-top: 15px;">
-                            Press (A) to Download.
+                            Press <span style="color: var(--nxe-btn-a);">(A)</span> to Download.
                         </p>
                     </div>
                 </template>
@@ -336,6 +339,52 @@
                             <span style="color: var(--nxe-brand-primary); font-weight: bold;" x-text="$store.app.settings.artSource || 'SteamGridDB'"></span>
                             <br>
                             <span x-text="$store.app.t('core_config.toggle_source')">Press (A) to toggle source.</span>
+                        </p>
+                    </div>
+                </template>
+
+                <template x-if="$store.app.focusedIndex === 11">
+                    <div>
+                        <h3 x-text="$store.app.t('core_config.app_update_title') || 'Dashboard Update'">Dashboard Update</h3>
+                        
+                        <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <span style="color: #888;" x-text="$store.app.t('core_config.current_version')">Current Version:</span>
+                                <span style="color: white; font-weight: bold;" x-text="$store.app.appUpdateInfo.currentVer"></span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: #888;" x-text="$store.app.t('core_config.latest_version')">Latest Version:</span>
+                                <span style="color: var(--nxe-green-light); font-weight: bold;" x-text="$store.app.appUpdateInfo.remoteVer"></span>
+                            </div>
+                        </div>
+
+                        <div style="min-height: 60px; display: flex; flex-direction: column; justify-content: center;">
+                            <p 
+                                style="font-weight: bold; font-size: 1.1rem; margin: 0;"
+                                :style="{ color: $store.app.appUpdateInfo.status === 'update-available' ? '#59c853' : '#fff' }"
+                                x-text="$store.app.appUpdateInfo.message"
+                            ></p>
+
+                            <div x-show="$store.app.appUpdateInfo.status === 'downloading'" style="margin-top: 10px;">
+                                <div class="nxe-progress-bar" style="height: 12px; background: rgba(255,255,255,0.1); border-radius: 6px; overflow: hidden;">
+                                    <div class="nxe-progress-bar-fill" 
+                                        :style="{ width: $store.app.appUpdateInfo.percentage + '%' }"
+                                        style="height: 100%; background: var(--nxe-brand-primary); transition: width 0.3s ease;">
+                                    </div>
+                                </div>
+                                <p style="text-align: center; margin-top: 5px; font-size: 0.9rem; color: var(--nxe-brand-primary); font-weight: bold;" 
+                                x-text="$store.app.appUpdateInfo.percentage + '%'"></p>
+                            </div>
+                        </div>
+
+                        <p style="color: var(--nxe-text-secondary); font-size: 0.9rem; margin-top: 15px;">
+                            <span x-show="$store.app.appUpdateInfo.status !== 'downloading'">
+                                <span x-text="$store.app.t('core_config.press')">Press</span> <span style="color: var(--nxe-btn-y);">(Y)</span> <span x-text="$store.app.t('core_config.check')">to Check or</span> <span style="color: var(--nxe-btn-a);">(A)</span> <span x-text="$store.app.t('core_config.update')">to Update.</span>
+                            </span>
+
+                            <span x-show="$store.app.appUpdateInfo.status === 'downloading'" style="color: #f2c40e;" x-text="$store.app.t('core_config.downloading')">
+                                Downloading & Installing... The app will restart automatically.
+                            </span>
                         </p>
                     </div>
                 </template>
