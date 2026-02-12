@@ -72,6 +72,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     assignProfileToSlot: (data) => ipcRenderer.invoke('assign-profile-to-slot', data),
     logoutProfileSlot: (slotIndex) => ipcRenderer.invoke('logout-profile-slot', slotIndex),
     deleteProfile: (xuid) => ipcRenderer.invoke('delete-profile', xuid),
+    checkAppUpdate: () => ipcRenderer.invoke('check-app-update'),
+    downloadAppUpdate: (platform) => ipcRenderer.invoke('download-app-update', platform),
     quitApp: () => ipcRenderer.invoke('quit-app')
 });
 
