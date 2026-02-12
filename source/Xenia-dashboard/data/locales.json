@@ -22,7 +22,11 @@
       "Create": "Create",
       "done": "Done",
       "refresh": "Refresh",
-      "details": "Details"
+      "details": "Details",
+      "rename": "Rename",
+      "Login": "Login",
+      "Logout": "Logout",
+      "Delete": "Delete"
     },
     "dashboard_menu": {
       "myxbox": "MY XENIA",
@@ -53,8 +57,10 @@
       "change_photo": "Change Photo",
       "local_creation": "Create User",
       "create_title": "Create New Profile",
+      "rename_title": "Rename Profile",
       "enter_name_msg": "Enter your name:",
-      "total_gamerscore": "Total Gamerscore: "
+      "total_gamerscore": "Total Gamerscore: ",
+      "enter_New_name": "Enter your new gamertag"
     },
     "guide": {
       "xbox_guide": "XENIA Guide",
@@ -131,7 +137,14 @@
       "source_local": "LocalDB:",
       "source_local_desc": "Local database based on Json file (Fast).",
       "toggle_source": "Press (A) to toggle source.",
-      "current_setting": "Current:"
+      "current_setting": "Current:",
+      "app_update_title": "Check for Dashboard Updates",
+      "current_version": "Current Version:",
+      "latest_version": "Latest Version:",
+      "press": "Press",
+      "check": "to Check or",
+      "update": "to Update.",
+      "downloading": "Downloading & Installing... The app will restart automatically."
     },
     "colors": {
       "title": "Interface Colors",
@@ -217,7 +230,8 @@
       "Translate": "Translate",
       "Original": "Original",
       "zar_scan": "Scan ZAR Title ID",
-      "loading": "Loading..."
+      "loading": "Loading...",
+      "rename": "Rename"
       
     },
     "art": {
@@ -271,7 +285,11 @@
       "Create": "إنشاء",
       "done": "تم",
       "refresh": "تحديث",
-      "details": "تفاصيل"
+      "details": "تفاصيل",
+      "rename": "إعادة تسمية",
+      "Login": "تسجيل الدخول",
+      "Logout": "تسجيل الخروج",
+      "Delete": "حذف"
     },
     "dashboard_menu": {
       "myxbox": "جهازي زينيا",
@@ -322,8 +340,10 @@
       "change_photo": "تغيير الصورة",
       "local_creation": "إنشاء مستخدم",
       "create_title": "إنشاء ملف شخصي جديد",
+      "rename_title": "إعادة تسمية الملف الشخصي",
       "enter_name_msg": "أدخل اسمك:",
-      "total_gamerscore": "إجمالي نقاط اللاعبين: "
+      "total_gamerscore": "إجمالي نقاط اللاعبين: ",
+      "enter_New_name": "أدخل اسم اللاعب الجديد"
     },
     "guide": {
       "xbox_guide": "دليل XENIA",
@@ -401,7 +421,15 @@
       "source_local": "LocalDB:",
       "source_local_desc": "قاعدة بيانات محلية تعتمد على Json file (سريع).",
       "toggle_source": "اضغط (A) للتبديل.",
-      "current_setting": "الحالي:"
+      "current_setting": "الحالي:",
+
+      "app_update_title": "التحقق من تحديثات الواجهة",
+      "current_version": "الإصدار الحالي:",
+      "latest_version": "الإصدار الأحدث:",
+      "press": "اضغط",
+      "check": "للتحقق أو",
+      "update": "للتحديث.",
+      "downloading": "جاري التحميل والتثبيت... سيتم إعادة تشغيل التطبيق تلقائياً."
     },
     "colors": {
       "title": "ألوان الواجهة",
@@ -487,7 +515,8 @@
       "Translate": "ترجمة",
       "Original": "الأصلي",
       "zar_scan": "فحص معرف ZAR",
-      "loading": "جاري التحميل..."
+      "loading": "جاري التحميل...",
+      "rename": "إعادة تسمية"
     },
     "art": {
       "loading": "جاري البحث في SteamGridDB...",
@@ -540,7 +569,11 @@
       "Create": "创建",
       "done": "完成",
       "refresh": "刷新",
-      "details": "详情"
+      "details": "详情",
+      "rename": "重命名",
+      "Login": "登录",
+      "Logout": "登出",
+      "Delete": "删除"
     },
     "dashboard_menu": {
       "myxbox": "我的 XENIA",
@@ -591,8 +624,10 @@
       "change_photo": "更改照片",
       "local_creation": "创建用户",
       "create_title": "创建新个人资料",
+      "rename_title": "重命名个人资料",
       "enter_name_msg": "输入您的姓名：",
-      "total_gamerscore": "总玩家分数："
+      "total_gamerscore": "总玩家分数：",
+      "enter_New_name": "输入您的新玩家名称："
     },
     "guide": {
       "xbox_guide": "XENIA 指南",
@@ -670,7 +705,14 @@
       "source_local": "本地数据库：",
       "source_local_desc": "基于 Json 文件的本地数据库（快速）。",
       "toggle_source": "按 (A) 切换。",
-      "current_setting": "当前："
+      "current_setting": "当前：",
+      "app_update_title": "检查仪表板更新",
+      "current_version": "当前版本：",
+      "latest_version": "最新版本：",
+      "press": "按",
+      "check": "检查或",
+      "update": "更新。",
+      "downloading": "正在下载和安装... 应用将自动重启。"
     },
     "colors": {
       "title": "界面颜色",
@@ -755,7 +797,8 @@
       "Translate": "翻译",
       "Original": "原始",
       "zar_scan": "扫描 ZAR ID",
-      "loading": "加载中..."
+      "loading": "加载中...",
+      "rename": "重命名"
     },
     "art": {
       "loading": "正在从 SteamGridDB 搜索...",
@@ -809,7 +852,11 @@
       "Create": "作成",
       "done": "完了",
       "refresh": "更新",
-      "details": "詳細"
+      "details": "詳細",
+      "rename": "名前を変更",
+      "Login": "ログイン",
+      "Logout": "ログアウト",
+      "Delete": "削除"
     },
     "dashboard_menu": {
       "myxbox": "私のXENIA",
@@ -860,8 +907,10 @@
       "change_photo": "写真を変更",
       "local_creation": "ユーザーを作成",
       "create_title": "新しいプロフィールを作成",
+      "rename_title": "プロフィールの名前を変更",
       "enter_name_msg": "名前を入力してください：",
-      "total_gamerscore": "総ゲーマースコア："
+      "total_gamerscore": "総ゲーマースコア：",
+      "enter_New_name": "新しいプレイヤー名を入力してください："
     },
     "guide": {
       "xbox_guide": "XENIAガイド",
@@ -939,7 +988,14 @@
       "source_local": "ローカルDB：",
       "source_local_desc": "Jsonファイルに基づくローカルデータベース（高速）。",
       "toggle_source": "(A)を押して切り替え。",
-      "current_setting": "現在："
+      "current_setting": "現在：",
+      "app_update_title": "ダッシュボードの更新を確認",
+      "current_version": "現在のバージョン：",
+      "latest_version": "最新バージョン：",
+      "press": "押す",
+      "check": "確認するか",
+      "update": "更新する。",
+      "downloading": "ダウンロードとインストール中... アプリは自動的に再起動します。"
     },
     "colors": {
       "title": "インターフェースカラー",
@@ -1024,7 +1080,8 @@
       "Translate": "翻訳",
       "Original": "オリジナル",
       "zar_scan": "ZAR IDをスキャン",
-      "loading": "読み込み中..."
+      "loading": "読み込み中...",
+      "rename": "名前を変更"
     },
     "art": {
       "loading": "SteamGridDBから検索中...",
@@ -1078,7 +1135,11 @@
       "Create": "생성",
       "done": "완료",
       "refresh": "새로 고침",
-      "details": "상세 정보"
+      "details": "상세 정보",
+      "rename": "이름 변경",
+      "Login": "로그인",
+      "Logout": "로그아웃",
+      "Delete": "삭제"
     },
     "dashboard_menu": {
       "myxbox": "나의 XENIA",
@@ -1129,8 +1190,10 @@
       "change_photo": "사진 변경",
       "local_creation": "사용자 생성",
       "create_title": "새 프로필 생성",
+      "rename_title": "프로필 이름 변경",
       "enter_name_msg": "이름을 입력하세요:",
-      "total_gamerscore": "총 게이머 점수: "
+      "total_gamerscore": "총 게이머 점수: ",
+      "enter_New_name": "새 플레이어 이름을 입력하세요:"
     },
     "guide": {
       "xbox_guide": "XENIA 가이드",
@@ -1208,7 +1271,14 @@
       "source_local": "로컬 DB:",
       "source_local_desc": "Json 파일 기반 로컬 데이터베이스 (빠름).",
       "toggle_source": "소스를 전환하려면 (A)를 누르세요.",
-      "current_setting": "현재:"
+      "current_setting": "현재:",
+      "app_update_title": "대시보드 업데이트 확인",
+      "current_version": "현재 버전:",
+      "latest_version": "최신 버전:",
+      "press": "누르세요",
+      "check": "확인하거나",
+      "update": "업데이트하세요.",
+      "downloading": "다운로드 및 설치 중... 앱이 자동으로 재시작됩니다."
     },
     "colors": {
       "title": "인터페이스 색상",
@@ -1293,7 +1363,8 @@
       "Translate": "번역",
       "Original": "원본",
       "zar_scan": "ZAR 타이틀 ID 스캔",
-      "loading": "로딩 중..."
+      "loading": "로딩 중...",
+      "rename": "이름 변경"
     },
     "art": {
       "loading": "SteamGridDB에서 가져오는 중...",
@@ -1347,7 +1418,11 @@
       "Create": "Создать",
       "done": "Готово",
       "refresh": "Обновить",
-      "details": "Подробности"
+      "details": "Подробности",
+      "rename": "Переименовать",
+      "Login": "Войти",
+      "Logout": "Выйти",
+      "Delete": "Удалить"
     },
     "dashboard_menu": {
       "myxbox": "МОЙ XENIA",
@@ -1398,8 +1473,10 @@
       "change_photo": "Изменить фото",
       "local_creation": "Создать пользователя",
       "create_title": "Создать новый профиль",
+      "rename_title": "Переименовать профиль",
       "enter_name_msg": "Введите ваше имя:",
-      "total_gamerscore": "Общий игровой счет: "
+      "total_gamerscore": "Общий игровой счет: ",
+      "enter_New_name": "Введите новое имя игрока:"
     },
     "guide": {
       "xbox_guide": "РУКОВОДСТВО XENIA",
@@ -1477,7 +1554,14 @@
       "source_local": "Локальная БД:",
       "source_local_desc": "Локальная база данных на основе Json файла (быстро).",
       "toggle_source": "Нажмите (A) для переключения.",
-      "current_setting": "Текущий:"
+      "current_setting": "Текущий:",
+      "app_update_title": "Проверить обновление панели управления",
+      "current_version": "Текущая версия:",
+      "latest_version": "Последняя версия:",
+      "press": "Нажмите",
+      "check": "проверить или",
+      "update": "обновить.",
+      "downloading": "Загрузка и установка... Приложение автоматически перезапустится."
     },
     "colors": {
       "title": "Цвета интерфейса",
@@ -1562,7 +1646,8 @@
       "Translate": "Перевести",
       "Original": "Оригинал",
       "zar_scan": "Сканировать ZAR ID",
-      "loading": "Загрузка..."
+      "loading": "Загрузка...",
+      "rename": "Переименовать"
     },
     "art": {
       "loading": "Поиск в SteamGridDB...",
@@ -1616,7 +1701,11 @@
       "Create": "Erstellen",
       "done": "Fertig",
       "refresh": "Aktualisieren",
-      "details": "Details"
+      "details": "Details",
+      "rename": "Umbenennen",
+      "Login": "Anmelden",
+      "Logout": "Abmelden",
+      "Delete": "Löschen"
     },
     "dashboard_menu": {
       "myxbox": "MEIN XENIA",
@@ -1667,8 +1756,10 @@
       "change_photo": "Foto ändern",
       "local_creation": "Benutzer erstellen",
       "create_title": "Neues Profil erstellen",
+      "rename_title": "Profilnamen ändern",
       "enter_name_msg": "Gib deinen Namen ein:",
-      "total_gamerscore": "Gesamtpunktzahl: "
+      "total_gamerscore": "Gesamtpunktzahl: ",
+      "enter_New_name": "Gib deinen neuen Spielernamen ein:"
     },
     "guide": {
       "xbox_guide": "XENIA-ANLEITUNG",
@@ -1746,7 +1837,14 @@
       "source_local": "Lokale DB:",
       "source_local_desc": "Lokale Datenbank basierend auf Json-Datei (Schnell).",
       "toggle_source": "Drücke (A) zum Wechseln.",
-      "current_setting": "Aktuell:"
+      "current_setting": "Aktuell:",
+      "app_update_title": "Dashboard-Update überprüfen",
+      "current_version": "Aktuelle Version:",
+      "latest_version": "Neueste Version:",
+      "press": "Drücke",
+      "check": "überprüfen oder",
+      "update": "aktualisieren.",
+      "downloading": "Herunterladen und installieren... App wird automatisch neu gestartet."
     },
     "colors": {
       "title": "Oberflächenfarben",
@@ -1831,7 +1929,8 @@
       "Translate": "Übersetzen",
       "Original": "Original",
       "zar_scan": "ZAR-Titel-ID scannen",
-      "loading": "Laden..."
+      "loading": "Laden...",
+      "rename": "Umbenennen"
     },
     "art": {
       "loading": "Wird von SteamGridDB abgerufen...",
@@ -1885,7 +1984,11 @@
       "Create": "Criar",
       "done": "Concluído",
       "refresh": "Atualizar",
-      "details": "Detalhes"
+      "details": "Detalhes",
+      "rename": "Renomear",
+      "Login": "Entrar",
+      "Logout": "Sair",
+      "Delete": "Excluir"
     },
     "dashboard_menu": {
       "myxbox": "MEU XENIA",
@@ -1936,8 +2039,10 @@
       "change_photo": "Alterar Foto",
       "local_creation": "Criar Usuário",
       "create_title": "Criar Novo Perfil",
+      "rename_title": "Renomear Perfil",
       "enter_name_msg": "Digite seu nome:",
-      "total_gamerscore": "Pontuação Total: "
+      "total_gamerscore": "Pontuação Total: ",
+      "enter_New_name": "Digite seu novo nome de jogador:"
     },
     "guide": {
       "xbox_guide": "GUIA XENIA",
@@ -2015,7 +2120,14 @@
       "source_local": "Banco de Dados Local:",
       "source_local_desc": "Banco de dados local baseado em arquivo Json (Rápido).",
       "toggle_source": "Pressione (A) para alternar fonte.",
-      "current_setting": "Atual:"
+      "current_setting": "Atual:",
+      "app_update_title": "Verificar atualização do painel de controle",
+      "current_version": "Versão Atual:",
+      "latest_version": "Última Versão:",
+      "press": "Pressione",
+      "check": "verificar ou",
+      "update": "atualizar.",
+      "downloading": "Baixando e instalando... O aplicativo será reiniciado automaticamente. "
     },
     "colors": {
       "title": "Cores da Interface",
@@ -2100,7 +2212,8 @@
       "Translate": "Traduzir",
       "Original": "Original",
       "zar_scan": "Escanear ID ZAR",
-      "loading": "Carregando..."
+      "loading": "Carregando...",
+      "rename": "Renomear"
     },
     "art": {
       "loading": "Buscando do SteamGridDB...",
@@ -2154,7 +2267,11 @@
       "Create": "Crear",
       "done": "Hecho",
       "refresh": "Actualizar",
-      "details": "Detalles"
+      "details": "Detalles",
+      "rename": "Renombrar",
+      "Login": "Iniciar Sesión",
+      "Logout": "Cerrar Sesión",
+      "Delete": "Eliminar"
     },
     "dashboard_menu": {
       "myxbox": "MI XENIA",
@@ -2205,8 +2322,10 @@
       "change_photo": "Cambiar Foto",
       "local_creation": "Crear Usuario",
       "create_title": "Crear Nuevo Perfil",
+      "rename_title": "Renombrar Perfil",
       "enter_name_msg": "Introduce tu nombre:",
-      "total_gamerscore": "Puntuación Total: "
+      "total_gamerscore": "Puntuación Total: ",
+      "enter_New_name": "Introduce tu nuevo nombre de jugador:"
     },
     "guide": {
       "xbox_guide": "GUÍA XENIA",
@@ -2284,7 +2403,14 @@
       "source_local": "Base de Datos Local:",
       "source_local_desc": "Base de datos local basada en archivo Json (Rápido).",
       "toggle_source": "Presiona (A) para alternar fuente.",
-      "current_setting": "Actual:"
+      "current_setting": "Actual:",
+      "app_update_title": "Verificar actualización del panel de control",
+      "current_version": "Versión Actual:",
+      "latest_version": "Última Versión:",
+      "press": "Presiona",
+      "check": "verificar o",
+      "update": "actualizar.",
+      "downloading": "Descargando e instalando... La aplicación se reiniciará automáticamente."
     },
     "colors": {
       "title": "Colores de Interfaz",
@@ -2369,7 +2495,8 @@
       "Translate": "Traducir",
       "Original": "Original",
       "zar_scan": "Escanear ID ZAR",
-      "loading": "Cargando..."
+      "loading": "Cargando...",
+      "rename": "Renombrar"
     },
     "art": {
       "loading": "Obteniendo de SteamGridDB...",
@@ -2423,7 +2550,11 @@
       "Create": "Oluştur",
       "done": "Tamamlandı",
       "refresh": "Yenile",
-      "details": "Ayrıntılar"
+      "details": "Ayrıntılar",
+      "rename": "Yeniden Adlandır",
+      "Login": "Giriş Yap",
+      "Logout": "Çıkış Yap",
+      "Delete": "Sil"
     },
     "dashboard_menu": {
       "myxbox": "XENIA'M",
@@ -2474,8 +2605,10 @@
       "change_photo": "Fotoğrafı Değiştir",
       "local_creation": "Kullanıcı Oluştur",
       "create_title": "Yeni Profil Oluştur",
+      "rename_title": "Profili Yeniden Adlandır",
       "enter_name_msg": "Adınızı girin:",
-      "total_gamerscore": "Toplam Puan: "
+      "total_gamerscore": "Toplam Puan: ",
+      "enter_New_name": "Yeni oyuncu adınızı girin:"
     },
     "guide": {
       "xbox_guide": "XENIA KILAVUZU",
@@ -2553,7 +2686,14 @@
       "source_local": "Yerel Veritabanı:",
       "source_local_desc": "Json dosyasına dayalı yerel veritabanı (Hızlı).",
       "toggle_source": "Kaynak değiştirmek için (A) tuşuna basın.",
-      "current_setting": "Mevcut:"
+      "current_setting": "Mevcut:",
+      "app_update_title": "Kontrol paneli güncellemesini kontrol et",
+      "current_version": "Mevcut Sürüm:",
+      "latest_version": "En Son Sürüm:",
+      "press": "Kontrol etmek veya",
+      "check": "güncellemek için basın.",
+      "update": "güncellemek için basın.",
+      "downloading": "İndiriliyor ve kuruluyor... Uygulama otomatikmanatik olarak yeniden başlayacak. "
     },
     "colors": {
       "title": "Arayüz Renkleri",
@@ -2638,7 +2778,8 @@
       "Translate": "Çevir",
       "Original": "Orijinal",
       "zar_scan": "ZAR Kimliğini Tara",
-      "loading": "Yükleniyor..."
+      "loading": "Yükleniyor...",
+      "rename": "Yeniden Adlandır"
     },
     "art": {
       "loading": "SteamGridDB'den alınıyor...",
@@ -2692,7 +2833,11 @@
       "Create": "Crea",
       "done": "Fatto",
       "refresh": "Aggiorna",
-      "details": "Dettagli"
+      "details": "Dettagli",
+      "rename": "Rinomina",
+      "Login": "Accedi",
+      "Logout": "Esci",
+      "Delete": "Elimina"
     },
     "dashboard_menu": {
       "myxbox": "IL MIO XENIA",
@@ -2743,8 +2888,10 @@
       "change_photo": "Cambia Foto",
       "local_creation": "Crea Utente",
       "create_title": "Crea Nuovo Profilo",
+      "rename_title": "Rinomina Profilo",
       "enter_name_msg": "Inserisci il tuo nome:",
-      "total_gamerscore": "Punteggio Totale: "
+      "total_gamerscore": "Punteggio Totale: ",
+      "enter_New_name": "Inserisci il tuo nuovo nome giocatore:"
     },
     "guide": {
       "xbox_guide": "GUIDA XENIA",
@@ -2822,7 +2969,14 @@
       "source_local": "Database Locale:",
       "source_local_desc": "Database locale basato su file Json (Veloce).",
       "toggle_source": "Premi (A) per cambiare fonte.",
-      "current_setting": "Attuale:"
+      "current_setting": "Attuale:",
+      "app_update_title": "Controlla aggiornamento del pannello di controllo",
+      "current_version": "Versione Attuale:",
+      "latest_version": "Versione Più Recente:",
+      "press": "Premi per controllare o",
+      "check": "aggiornare.",
+      "update": "aggiornare.",
+      "downloading": "Scaricamento e installazione in corso... L'app si riavvierà automaticamente."
     },
     "colors": {
       "title": "Colori Interfaccia",
@@ -2907,7 +3061,8 @@
       "Translate": "Traduci",
       "Original": "Originale",
       "zar_scan": "Scansiona ID ZAR",
-      "loading": "Caricamento in corso..."
+      "loading": "Caricamento in corso...",
+      "rename": "Rinomina"
     },
     "art": {
       "loading": "Recupero da SteamGridDB...",
@@ -2961,7 +3116,11 @@
       "Create": "Créer",
       "done": "Terminé",
       "refresh": "Actualiser",
-      "details": "Détails"
+      "details": "Détails",
+      "rename": "Renommer",
+      "Login": "Connexion",
+      "Logout": "Déconnexion",
+      "Delete": "Supprimer"
     },
     "dashboard_menu": {
       "myxbox": "MON XENIA",
@@ -3012,8 +3171,10 @@
       "change_photo": "Changer la Photo",
       "local_creation": "Créer un Utilisateur",
       "create_title": "Créer un Nouveau Profil",
+      "rename_title": "Renommer le Profil",
       "enter_name_msg": "Entrez votre nom :",
-      "total_gamerscore": "Score Total : "
+      "total_gamerscore": "Score Total : ",
+      "enter_New_name": "Entrez votre nouveau nom de joueur :"
     },
     "guide": {
       "xbox_guide": "GUIDE XENIA",
@@ -3091,7 +3252,14 @@
       "source_local": "Base de Données Locale :",
       "source_local_desc": "Base de données locale basée sur fichier Json (Rapide).",
       "toggle_source": "Appuyez sur (A) pour changer de source.",
-      "current_setting": "Actuel :"
+      "current_setting": "Actuel :",
+      "app_update_title": "Vérifier la mise à jour du panneau de contrôle",
+      "current_version": "Version Actuelle :",
+      "latest_version": "Dernière Version :",
+      "press": "Appuyez pour vérifier ou",
+      "check": "mettre à jour.",
+      "update": "mettre à jour.",
+      "downloading": "Téléchargement et installation en cours... L'application redémarrera automatiquement."
     },
     "colors": {
       "title": "Couleurs de l'Interface",
@@ -3176,7 +3344,8 @@
       "Translate": "Traduire",
       "Original": "Original",
       "zar_scan": "Analyser l'ID ZAR",
-      "loading": "Chargement en cours..."
+      "loading": "Chargement en cours...",
+      "rename": "Renommer"
     },
     "art": {
       "loading": "Récupération depuis SteamGridDB...",
