@@ -56,6 +56,18 @@ document.addEventListener('alpine:init', () => {
         }
     ];
 
+    function isNewerVersion(current, latest) {
+        const curr = current.split('.').map(Number);
+        const late = latest.split('.').map(Number);
+
+        for (let i = 0; i < 3; i++) {
+            if (late[i] > (curr[i] || 0)) return true;
+            if (late[i] < (curr[i] || 0)) return false;
+        }
+        return false;
+    }
+
+
     Alpine.store('app', {
         currentView: 'dashboard',
         currentViewHTML: '<h1>Loading...</h1>', 
@@ -158,12 +170,8 @@ document.addEventListener('alpine:init', () => {
             { id: 'download-xenia-linux', name: 'Download Xenia (Linux)', icon: 'assets/icons/linux.png' },
             { id: 'download-patches', name: 'Download Game Patches', icon: 'assets/icons/xenia canary.png' },
             { id: 'open-xenia-dash', name: 'Open Xenia Dashboard', icon: 'assets/icons/xenia canary.png' },
-            { 
-                id: 'art-source', 
-                name: 'Metadata Source', 
-                icon: 'assets/icons/database.png',
-                
-            },
+            { id: 'art-source', name: 'Metadata Source', icon: 'assets/icons/database.png'},
+            {id: 'app-update', name: 'Check for Dashboard Updates', icon: 'assets/icons/icon.png'}
             
         ],
 
@@ -344,9 +352,59 @@ document.addEventListener('alpine:init', () => {
         selectedAchievementGame: null,
         focusedAchievementIndex: 0,
         ach_lock: false,
+        appUpdateInfo: {
+            status: 'idle',
+            currentVer: '1.1.8',
+            remoteVer: '---',
+            message: 'Press (Y) to check for updates',
+            percentage: 0
+        }
     });
 
     Alpine.store('actions', {
+
+        async checkAppUpdate() {
+            const app = Alpine.store('app');
+            app.appUpdateInfo.status = 'checking';
+            app.appUpdateInfo.message = 'Checking for dashboard updates...';
+            
+            const result = await window.electronAPI.checkAppUpdate();
+            
+            if (result.success) {
+
+                app.appUpdateInfo.currentVer = result.currentVersion;
+                app.appUpdateInfo.remoteVer = result.latestVersion;
+                
+
+                const hasNewUpdate = isNewerVersion(result.currentVersion, result.latestVersion);
+
+                if (hasNewUpdate) {
+                    app.appUpdateInfo.status = 'update-available';
+                    app.appUpdateInfo.message = `New Version ${result.latestVersion} available!`;
+                } else {
+
+                    app.appUpdateInfo.status = 'up-to-date';
+                    app.appUpdateInfo.message = 'Dashboard is up to date.';
+                }
+            } else {
+                app.appUpdateInfo.status = 'idle';
+                app.appUpdateInfo.message = 'Error: ' + result.error;
+            }
+        },
+
+        async downloadAppUpdate() {
+            const app = Alpine.store('app');
+            const platform = window.navigator.platform.toLowerCase().includes('win') ? 'win' : 'linux';
+            
+            this.playSound('select');
+            app.appUpdateInfo.status = 'downloading';
+            
+            const result = await window.electronAPI.downloadAppUpdate(platform);
+            if (!result.success) {
+                alert("Update failed: " + result.error);
+                app.appUpdateInfo.status = 'update-available';
+            }
+        },
 
         openAchievementOverlay() {
             const app = Alpine.store('app');
@@ -3520,6 +3578,24 @@ document.addEventListener('alpine:init', () => {
             return;
         }
 
+        if (app.currentView === 'settings-core' && app.focusedIndex === 11 && !app.isGuideOpen) {
+    
+
+            if (key === 'y' || key === 'Y') {
+                e.preventDefault();
+                actions.checkAppUpdate();
+                actions.playSound('select');
+            }
+
+
+            if (key === 'Enter') {
+                e.preventDefault();
+                if (app.appUpdateInfo.status === 'update-available') {
+                    actions.downloadAppUpdate();
+                }
+            }
+        }
+
         if (app.currentView === 'achievements') {
             if (e.key === 'ArrowRight') {
                 e.preventDefault();
@@ -4219,9 +4295,22 @@ const getMoveAction = (axis, value) => {
                     actions.startRename();
                     return;
                 }
-
-
                 return;
+            }
+            if (app.currentView === 'settings-core' && app.focusedIndex === 11 && !app.isGuideOpen) {
+
+
+                if (message.event === 'button_y' && message.value === 1) {
+                    actions.checkAppUpdate();
+                    actions.playSound('select');
+                }
+
+
+                if (message.event === 'button_a' && message.value === 1) {
+                    if (app.appUpdateInfo.status === 'update-available') {
+                        actions.downloadAppUpdate();
+                    }
+                }
             }
 
             if (message.event.startsWith('button_') && message.value === 0) return;
