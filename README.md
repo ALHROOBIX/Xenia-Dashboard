@@ -11,6 +11,9 @@ An advanced, feature-rich frontend for the **Xenia Xbox 360 Emulator**, designed
   <a href ="https://github.com/ALHROOBIX/Xenia-Dashboard/releases/latest"> <img src= "https://img.shields.io/github/downloads/ALHROOBIX/Xenia-Dashboard/total?style=social&label=Total%20Downloads&logo=github" height="40"></a>
   <a href ="https://github.com/ALHROOBIX/Xenia-Dashboard/releases/latest"> <img src="https://img.shields.io/github/v/release/ALHROOBIX/Xenia-Dashboard?style=social&label=Latest%20Release&logo=github" height="40"></a>
   </p>
+
+[![Support me on Ko-fi](https://img.shields.io/badge/Support%20me%20on%20Ko--fi-F16061?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/alhroobixi)
+
   
 ---
 <dev align="center">
@@ -26,14 +29,6 @@ An advanced, feature-rich frontend for the **Xenia Xbox 360 Emulator**, designed
 ---
 
 # Special Thanks
-
-
-<div align="center">
-  <h3>🎮 The Ultimate Frontend for Xenia Canary Emulator 🎮</h3>
-  <p><i>Transforming emulation into a polished, accessible experience</i></p>
-</div>
-
----
 
 ## 🌟 The Emulation Pioneers
 
@@ -73,12 +68,6 @@ This project stands on the shoulders of giants. Special thanks to these incredib
   <h2>⚠️ Disclaimer</h2>
   <p><strong>This project is a third-party frontend and is not affiliated with the official Xenia Project or Microsoft.</strong></p>
 </div>
-
----
-
-## 🎯 About Xenia Dashboard
-
-> Designed to bridge the gap between emulator and user, this specialized interface transforms Xenia Canary into a polished, accessible platform with robust control and effortless library management.
 
 ---
 
