@@ -314,16 +314,16 @@
                 <div class="kb-col side-col left">
                     <div class="side-btn">
                         <div class="btn-icon-visual lb-shape"><span class="arr-left">◀</span> LB</div>
-                        <span class="btn-label">Left</span>
+                        <span class="btn-label" x-text="$store.app.t('generic.left') || 'Left'"></span>
                     </div>
                     <div class="side-btn" :class="{'active-state': $store.app.isSymbols}">
                         <div class="btn-icon-visual lt-shape">LT</div>
-                        <span class="btn-label">Symbols</span>
+                        <span class="btn-label" x-text="$store.app.t('generic.symbols') || 'Symbols'"></span>
                     </div>
                     
                     <div class="side-btn" :class="{'active-state': $store.app.isCaps}">
-                        <div class="btn-icon-visual stick-shape">L</div>
-                        <span class="btn-label">Caps</span>
+                        <div class="btn-icon-visual stick-shape">L3</div>
+                        <span class="btn-label" x-text="$store.app.t('generic.caps') || 'Caps'"></span>
                     </div>
                 </div>
 
@@ -345,11 +345,11 @@
                     <div class="bottom-actions-row">
                         <div class="wide-action-btn" @click="$store.actions.handleKeyboardSpecial('BACKSPACE')">
                             <div class="circle-icon blue">X</div>
-                            <span>Backspace</span>
+                            <span x-text="$store.app.t('generic.backspace') || 'Backspace'"></span>
                         </div>
                         <div class="wide-action-btn" @click="$store.actions.handleKeyboardSpecial('SPACE')">
                             <div class="circle-icon yellow">Y</div>
-                            <span>Space</span>
+                            <span x-text="$store.app.t('generic.space') || 'Space'"></span>
                         </div>
                     </div>
                 </div>
@@ -357,23 +357,23 @@
                 <div class="kb-col side-col right">
                     <div class="side-btn">
                         <div class="btn-icon-visual rb-shape">RB <span class="arr-right">▶</span></div>
-                        <span class="btn-label">Right</span>
+                        <span class="btn-label" x-text="$store.app.t('generic.right') || 'Right'"></span>
                     </div>
                     <div class="side-btn" :class="{'active-state': $store.app.isAccents}">
                         <div class="btn-icon-visual rt-shape">RT</div>
-                        <span class="btn-label">Accents</span>
+                        <span class="btn-label" x-text="$store.app.t('generic.accents') || 'Accents'"></span>
                     </div>
                     <div class="done-btn-container" @click="$store.actions.handleKeyboardSpecial('DONE')">
                         <div class="play-icon-circle">▶</div>
-                        <span>Done</span>
+                        <span x-text="$store.app.t('generic.done') || 'Done'"></span>
                     </div>
                 </div>
 
             </div>
 
             <div class="kb-black-footer">
-                <div class="footer-item"><div class="circle-icon green-small">A</div> <span>Select</span></div>
-                <div class="footer-item"><div class="circle-icon red-small">B</div> <span>Close</span></div>
+                <div class="footer-item"><div class="circle-icon green-small">A</div> <span x-text="$store.app.t('generic.select') || 'Select'"></span></div>
+                <div class="footer-item"><div class="circle-icon red-small">B</div> <span x-text="$store.app.t('generic.cancel') || 'Cancel'"></span></div>
             </div>
 
         </div>
