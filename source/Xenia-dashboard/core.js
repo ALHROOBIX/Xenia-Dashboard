@@ -347,7 +347,7 @@ document.addEventListener('alpine:init', () => {
         isProfileSelectorOpen: false,
         achievementsGamesList: [],
         isCreatingProfile: false, 
-        newProfileName: '',
+        : '',
         isAchievementOverlayOpen: false,
         selectedAchievementGame: null,
         focusedAchievementIndex: 0,
@@ -404,6 +404,43 @@ document.addEventListener('alpine:init', () => {
                 alert("Update failed: " + result.error);
                 app.appUpdateInfo.status = 'update-available';
             }
+        },
+
+        startRename() {
+            const app = Alpine.store('app');
+            const game = app.filteredLibraryGames[app.focusedIndex];
+            if (!game) return;
+
+            this.playSound('panelUnfold');
+            app.keyboardMode = 'rename';
+            app.renameInput = game.name;
+            app.searchCursorPos = app.renameInput.length;
+            app.isKeyboardOpen = true;
+            
+            setTimeout(() => this.updateCursorVisuals(), 50);
+        },
+
+        async submitRename() {
+            const app = Alpine.store('app');
+            const game = app.filteredLibraryGames[app.focusedIndex];
+            const newName = app.renameInput.trim();
+
+            if (newName && game) {
+                const result = await window.electronAPI.updateGameName({
+                    fileName: game.fileName,
+                    newName: newName
+                });
+
+                if (result.success) {
+                    game.name = newName;
+                    this.updateGameDetails();
+                    this.playSound('channelUp');
+                }
+            }
+            
+            app.isKeyboardOpen = false;
+            app.keyboardMode = 'search';
+            app.renameInput = '';
         },
 
         openAchievementOverlay() {
@@ -526,15 +563,16 @@ document.addEventListener('alpine:init', () => {
 
         createNewProfilePrompt() {
             const app = Alpine.store('app');
-            app.newProfileName = ''; 
-            app.isCreatingProfile = true;
             this.playSound('panelUnfold');
             
+            app.newProfileName = ''; 
+            app.keyboardMode = 'create_profile';
+            app.searchCursorPos = 0;
+            app.keyboardRow = 0;
+            app.keyboardCol = 0;
+            app.isKeyboardOpen = true;
             
-            setTimeout(() => {
-                const input = document.getElementById('new-profile-input');
-                if (input) input.focus();
-            }, 100);
+            setTimeout(() => this.updateCursorVisuals(), 50);
         },
         cancelCreateProfile() {
             const app = Alpine.store('app');
@@ -556,9 +594,7 @@ document.addEventListener('alpine:init', () => {
             if (result.success) {
                 app.isCreatingProfile = false; 
                 
-                await this.refreshProfileData(); 
-                
-                this.playSound('channelUp');
+                await this.refreshProfileData();
             }
         },
 
@@ -568,17 +604,14 @@ document.addEventListener('alpine:init', () => {
             if (!profile) return;
 
             this.playSound('panelUnfold');
-            app.newProfileName = profile.gamertag;
-            app.isRenamingProfile = true;
+            app.newProfileName = profile.gamertag; 
+            app.keyboardMode = 'rename_profile';
+            app.searchCursorPos = app.newProfileName.length;
+            app.keyboardRow = 0;
+            app.keyboardCol = 0;
+            app.isKeyboardOpen = true;
             
-
-            setTimeout(() => {
-                const input = document.getElementById('rename-profile-input');
-                if (input) {
-                    input.focus();
-                    input.select();
-                }
-            }, 100);
+            setTimeout(() => this.updateCursorVisuals(), 50);
         },
 
 
@@ -605,7 +638,6 @@ document.addEventListener('alpine:init', () => {
             if (result.success) {
                 app.isRenamingProfile = false;
                 await this.refreshProfileData();
-                this.playSound('channelUp');
             }
         },
 
@@ -3203,13 +3235,21 @@ document.addEventListener('alpine:init', () => {
                 
                 if (!input || !cursor || !container) return;
 
- 
 
-                const targetVar = 'librarySearch';
+
+                let targetVar = 'librarySearch';
+                if (app.keyboardMode === 'rename') {
+                    targetVar = 'renameInput';
+                } else if (app.keyboardMode === 'create_profile' || app.keyboardMode === 'rename_profile') {
+                    targetVar = 'newProfileName';
+                }
+                
                 const currentText = app[targetVar] || "";
+
 
                 let textUpToCursor = currentText.substring(0, app.searchCursorPos);
                 
+
                 const span = document.createElement('span');
                 const inputStyle = window.getComputedStyle(input);
                 const containerStyle = window.getComputedStyle(container);
@@ -3232,8 +3272,10 @@ document.addEventListener('alpine:init', () => {
 
                 const paddingLeft = parseFloat(containerStyle.paddingLeft) || 15;
                 
+
                 cursor.style.left = (paddingLeft + textWidth + 1) + 'px';
                 
+
                 cursor.style.animation = 'none';
                 cursor.offsetHeight; 
                 cursor.style.animation = ''; 
@@ -3243,7 +3285,12 @@ document.addEventListener('alpine:init', () => {
             moveTextCursor(direction) {
                 const app = Alpine.store('app');
                 
-                const targetVar = 'librarySearch';
+                let targetVar = 'librarySearch';
+                if (app.keyboardMode === 'rename') {
+                    targetVar = 'renameInput';
+                } else if (app.keyboardMode === 'create_profile' || app.keyboardMode === 'rename_profile') {
+                    targetVar = 'newProfileName';
+                }
                 const currentText = app[targetVar] || "";
                 
                 const textLen = currentText.length;
@@ -3272,7 +3319,12 @@ document.addEventListener('alpine:init', () => {
                     app.isSymbols = false;
                     app.isAccents = false;
                     
-                    const targetVar = 'librarySearch';
+                    let targetVar = 'librarySearch';
+                if (app.keyboardMode === 'rename') {
+                    targetVar = 'renameInput';
+                } else if (app.keyboardMode === 'create_profile' || app.keyboardMode === 'rename_profile') {
+                    targetVar = 'newProfileName';
+                }
                     app.searchCursorPos = (app[targetVar] || "").length;
                     
                     setTimeout(() => this.updateCursorVisuals(), 50);
@@ -3305,15 +3357,18 @@ document.addEventListener('alpine:init', () => {
             pressKeyboardKey() {
                 const app = Alpine.store('app');
                 const key = app.currentKeys[app.keyboardRow][app.keyboardCol];
-                const targetVar = app.keyboardMode === 'rename' ? 'renameInput' : 'librarySearch';
+                
+                let targetVar = 'librarySearch';
+                if (app.keyboardMode === 'rename') targetVar = 'renameInput';
+                if (app.keyboardMode === 'create_profile' || app.keyboardMode === 'rename_profile') targetVar = 'newProfileName';
+
                 const currentText = app[targetVar] || "";
                 const pos = app.searchCursorPos;
 
                 app[targetVar] = currentText.slice(0, pos) + key + currentText.slice(pos);
                 app.searchCursorPos++;
 
-                this.playSound('select');
-
+                this.playSound('focus');
 
                 if (app.currentView === 'game-library' && app.keyboardMode === 'search') {
                     this.filterLibrary(); 
@@ -3325,67 +3380,48 @@ document.addEventListener('alpine:init', () => {
 
             handleKeyboardSpecial(action) {
                 const app = Alpine.store('app');
-                const actions = Alpine.store('actions');
                 
-
-
-                const targetVar = app.keyboardMode === 'rename' ? 'renameInput' : 'librarySearch';
-
+                let targetVar = 'librarySearch';
+                if (app.keyboardMode === 'rename') targetVar = 'renameInput';
+                if (app.keyboardMode === 'create_profile' || app.keyboardMode === 'rename_profile') targetVar = 'newProfileName';
 
                 const currentText = app[targetVar] || "";
                 const pos = app.searchCursorPos;
 
                 if (action === 'BACKSPACE') {
                     if (pos > 0) {
-
                         app[targetVar] = currentText.slice(0, pos - 1) + currentText.slice(pos);
                         app.searchCursorPos--;
-                        actions.playSound('back');
-                        setTimeout(() => this.updateCursorVisuals(), 0);
+                        this.playSound('back');
                     }
                 } 
                 else if (action === 'SPACE') {
-
                     app[targetVar] = currentText.slice(0, pos) + " " + currentText.slice(pos);
                     app.searchCursorPos++;
-                    actions.playSound('select');
-                    setTimeout(() => this.updateCursorVisuals(), 0);
+                    this.playSound('focus');
                 }
-                else if (action === 'CAPS') {
-                    app.isCaps = !app.isCaps;
-                    app.isSymbols = false;
-                    app.isAccents = false;
-                    actions.playSound('focus');
-                }
-                else if (action === 'SYMBOLS') {
-                    app.isSymbols = !app.isSymbols;
-                    app.isCaps = false;
-                    app.isAccents = false;
-                    actions.playSound('focus');
-                }
-                else if (action === 'ACCENTS') {
-                    app.isAccents = !app.isAccents;
-                    app.isSymbols = false;
-                    app.isCaps = false;
-                    actions.playSound('focus');
-                }
-                
                 else if (action === 'DONE') {
-                    if (app.keyboardMode === 'rename') {
+                    this.playSound('select');
+                    if (app.keyboardMode === 'create_profile') {
+                        this.submitNewProfile();
+                    } else if (app.keyboardMode === 'rename_profile') {
+                        this.submitProfileRename();
+                    } else if (app.keyboardMode === 'rename') {
                         this.submitRename();
-                    } else {
-                        this.toggleKeyboard();
                     }
+                    app.isKeyboardOpen = false;
+                    app.isCreatingProfile = false;
+                    app.isRenamingProfile = false;
                     return;
                 }
-                
+                else if (action === 'CAPS') { app.isCaps = !app.isCaps; this.playSound('focus'); }
+                else if (action === 'SYMBOLS') { app.isSymbols = !app.isSymbols; this.playSound('focus'); }
+                else if (action === 'ACCENTS') { app.isAccents = !app.isAccents; this.playSound('focus'); }
 
-                if (action !== 'DONE') {
-
-                    if (app.currentView === 'game-library' && app.keyboardMode === 'search') {
-                        actions.filterLibrary(); 
-                    }
+                if (app.currentView === 'game-library' && app.keyboardMode === 'search') {
+                    this.filterLibrary(); 
                 }
+                setTimeout(() => this.updateCursorVisuals(), 0);
             },
 
         getCompatConfig(state) {
@@ -3626,33 +3662,8 @@ document.addEventListener('alpine:init', () => {
         }
 
 
-        if (app.isProfileSelectorOpen) {
+        if (app.isProfileSelectorOpen && !app.isKeyboardOpen) {
             e.stopImmediatePropagation(); 
-
-            if (app.isCreatingProfile) {
-                
-                if (key === 'Escape') {
-                    actions.cancelCreateProfile();
-                    return;
-                }
-                if (key === 'Enter') {
-                    actions.submitNewProfile();
-                    return;
-                }
-                return;
-            }
-
-            if (app.isRenamingProfile) {
-                if (key === 'Escape') {
-                    actions.cancelRenameProfile();
-                    return;
-                }
-                if (key === 'Enter') {
-                    actions.submitProfileRename();
-                    return;
-                }
-                return;
-            }
             
             if (key === 'ArrowDown') {
                 app.focusedProfileIndex = Math.min(app.focusedProfileIndex + 1, app.profilesList.length - 1);
@@ -3752,7 +3763,12 @@ document.addEventListener('alpine:init', () => {
             }
 
             if (key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
-                const targetVar = 'librarySearch';
+                let targetVar = 'librarySearch';
+                if (app.keyboardMode === 'rename') {
+                    targetVar = 'renameInput';
+                } else if (app.keyboardMode === 'create_profile' || app.keyboardMode === 'rename_profile') {
+                    targetVar = 'newProfileName';
+                }
                 const currentText = app[targetVar] || "";
                 const pos = app.searchCursorPos;
 
@@ -4003,6 +4019,23 @@ document.addEventListener('alpine:init', () => {
         await Alpine.store('actions').loadUserSounds();
         await Alpine.store('actions').checkAbgxTool();
         await Alpine.store('actions').verifyAbgxTool();
+
+        let mouseTimer;
+            const hideCursor = () => {
+                document.body.style.cursor = 'none';
+            };
+
+
+            document.addEventListener('mousemove', () => {
+                document.body.style.cursor = 'default';
+                clearTimeout(mouseTimer);
+                mouseTimer = setTimeout(hideCursor, 5000);
+            });
+
+
+            window.electronAPI.onGamepadInput(() => {
+                hideCursor();
+            });
 
         window.electronAPI.onWindowBlur(() => {
             Alpine.store('actions').manageBGM('pause');
@@ -4266,35 +4299,31 @@ const getMoveAction = (axis, value) => {
             }
 
             if (message.event === 'button_start' && message.value === 1) {
-                
-
+    
                 if (app.isLbPressed) {
                     console.log("Combo Activated: LB + Start -> Opening Guide");
                     actions.toggleGuide();
-                    
-
                     app.inputLocked = true;
                     setTimeout(() => app.inputLocked = false, 300);
-                    return;
+                    return; 
                 }
 
-
+                if (app.isKeyboardOpen) {
+                    console.log("Keyboard is open: Start acts as DONE");
+                    actions.handleKeyboardSpecial('DONE'); 
+                    return;
+                }
+                
                 if (app.isProfileSelectorOpen && !app.isCreatingProfile && !app.isRenamingProfile) {
                     actions.startRenameProfilePrompt();
                     return;
                 }
 
-
-                if (app.isKeyboardOpen && app.keyboardMode === 'rename') {
-                    actions.handleKeyboardSpecial('DONE'); 
-                    return;
-                }
-
-
-                if (app.currentView === 'game-library' && !app.isKeyboardOpen && !app.isGuideOpen) {
+                if (app.currentView === 'game-library' && !app.isGuideOpen) {
                     actions.startRename();
                     return;
                 }
+
                 return;
             }
             if (app.currentView === 'settings-core' && app.focusedIndex === 11 && !app.isGuideOpen) {
@@ -4501,6 +4530,19 @@ const getMoveAction = (axis, value) => {
 
                 else if (message.event === 'button_start' && message.value === 1) {
                     actions.startRenameProfilePrompt();
+                }
+
+                else if (message.event === 'button_right_bumper' && message.value === 1) {
+                    actions.loginFocusedProfile();
+                }
+                else if (message.event === 'button_left_bumper' && message.value === 1) {
+                    actions.logoutFocusedProfile();
+                }
+
+                else if (message.event === 'button_back' && message.value === 1) {
+                    if (app.isProfileSelectorOpen && !app.isCreatingProfile) {
+                        actions.deleteFocusedProfile();
+                    }
                 }
                 
                 return;
