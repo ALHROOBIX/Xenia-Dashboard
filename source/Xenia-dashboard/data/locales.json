@@ -26,7 +26,14 @@
       "rename": "Rename",
       "Login": "Login",
       "Logout": "Logout",
-      "Delete": "Delete"
+      "Delete": "Delete",
+      "accents": "Accents",
+      "right": "Right",
+      "left": "Left",
+      "backspace": "Backspace",
+      "space": "Space",
+      "symbols": "Symbols",
+      "caps": "Caps Lock"
     },
     "dashboard_menu": {
       "myxbox": "MY XENIA",
@@ -289,7 +296,14 @@
       "rename": "إعادة تسمية",
       "Login": "تسجيل الدخول",
       "Logout": "تسجيل الخروج",
-      "Delete": "حذف"
+      "Delete": "حذف",
+      "accents": "اللهجات",
+      "right": "يمين",
+      "left": "يسار",
+      "backspace": "التراجع",
+      "space": "مسافة",
+      "symbols": "الرموز",
+      "caps": "حروف كبيرة"
     },
     "dashboard_menu": {
       "myxbox": "جهازي زينيا",
@@ -573,7 +587,14 @@
       "rename": "重命名",
       "Login": "登录",
       "Logout": "登出",
-      "Delete": "删除"
+      "Delete": "删除",
+      "accents": "口音",
+      "right": "右边",
+      "left": "左",
+      "backspace": "退格键",
+      "space": "空格键",
+      "symbols": "符号",
+      "caps": "大写锁定"
     },
     "dashboard_menu": {
       "myxbox": "我的 XENIA",
@@ -856,7 +877,14 @@
       "rename": "名前を変更",
       "Login": "ログイン",
       "Logout": "ログアウト",
-      "Delete": "削除"
+      "Delete": "削除",
+      "accents": "アクセント",
+      "right": "正しい",
+      "left": "左",
+      "backspace": "バックスペース",
+      "space": "スペースキー",
+      "symbols": "シンボル",
+      "caps": "キャップスロック"
     },
     "dashboard_menu": {
       "myxbox": "私のXENIA",
@@ -1139,7 +1167,14 @@
       "rename": "이름 변경",
       "Login": "로그인",
       "Logout": "로그아웃",
-      "Delete": "삭제"
+      "Delete": "삭제",
+      "accents": "악센트",
+      "right": "오른쪽",
+      "left": "왼쪽",
+      "backspace": "백스페이스",
+      "space": "스페이스바",
+      "symbols": "심볼",
+      "caps": "캡스록"
     },
     "dashboard_menu": {
       "myxbox": "나의 XENIA",
@@ -1422,7 +1457,14 @@
       "rename": "Переименовать",
       "Login": "Войти",
       "Logout": "Выйти",
-      "Delete": "Удалить"
+      "Delete": "Удалить",
+      "accents": "Акценты",
+      "right": "Правильно",
+      "left": "Лево",
+      "backspace": "Бэкспейс",
+      "space": "Пробел",
+      "symbols": "Символы",
+      "caps": "Caps Lock"
     },
     "dashboard_menu": {
       "myxbox": "МОЙ XENIA",
@@ -1705,7 +1747,14 @@
       "rename": "Umbenennen",
       "Login": "Anmelden",
       "Logout": "Abmelden",
-      "Delete": "Löschen"
+      "Delete": "Löschen",
+      "accents": "Akzente",
+      "right": "Richtig",
+      "left": "Links",
+      "backspace": "Rücktaste",
+      "space": "Leertaste",
+      "symbols": "Symbole",
+      "caps": "Feststelltaste"
     },
     "dashboard_menu": {
       "myxbox": "MEIN XENIA",
@@ -1988,7 +2037,14 @@
       "rename": "Renomear",
       "Login": "Entrar",
       "Logout": "Sair",
-      "Delete": "Excluir"
+      "Delete": "Excluir",
+      "accents": "Sotaques",
+      "right": "Correto",
+      "left": "Esquerda",
+      "backspace": "Backspace",
+      "space": "Espaço",
+      "symbols": "Símbolos",
+      "caps": "Fixa"
     },
     "dashboard_menu": {
       "myxbox": "MEU XENIA",
@@ -2271,7 +2327,14 @@
       "rename": "Renombrar",
       "Login": "Iniciar Sesión",
       "Logout": "Cerrar Sesión",
-      "Delete": "Eliminar"
+      "Delete": "Eliminar",
+      "accents": "Acentos",
+      "right": "Correcto",
+      "left": "Izquierda",
+      "backspace": "Retroceso",
+      "space": "Espacio",
+      "symbols": "Símbolos",
+      "caps": "Bloq Mayús"
     },
     "dashboard_menu": {
       "myxbox": "MI XENIA",
@@ -2554,7 +2617,14 @@
       "rename": "Yeniden Adlandır",
       "Login": "Giriş Yap",
       "Logout": "Çıkış Yap",
-      "Delete": "Sil"
+      "Delete": "Sil",
+      "accents": "Aksan işaretleri",
+      "right": "Doğru",
+      "left": "Sol",
+      "backspace": "Geri tuşu",
+      "space": "Boşluk",
+      "symbols": "Semboller",
+      "caps": "Büyük harf kilidi"
     },
     "dashboard_menu": {
       "myxbox": "XENIA'M",
@@ -2837,7 +2907,14 @@
       "rename": "Rinomina",
       "Login": "Accedi",
       "Logout": "Esci",
-      "Delete": "Elimina"
+      "Delete": "Elimina",
+      "accents": "Accenti",
+      "right": "Giusto",
+      "left": "Sinistra",
+      "backspace": "Backspace",
+      "space": "Spazio",
+      "symbols": "Simboli",
+      "caps": "Bloc Maiusc"
     },
     "dashboard_menu": {
       "myxbox": "IL MIO XENIA",
@@ -3120,7 +3197,14 @@
       "rename": "Renommer",
       "Login": "Connexion",
       "Logout": "Déconnexion",
-      "Delete": "Supprimer"
+      "Delete": "Supprimer",
+      "accents": "Accents",
+      "right": "Correct",
+      "left": "Gauche",
+      "backspace": "Retour arrière",
+      "space": "Espace",
+      "symbols": "Symboles",
+      "caps": "Verrouillage Maj"
     },
     "dashboard_menu": {
       "myxbox": "MON XENIA",
