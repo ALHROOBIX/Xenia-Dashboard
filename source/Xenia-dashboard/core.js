@@ -92,7 +92,8 @@ document.addEventListener('alpine:init', () => {
         downloadStatuses: {
             win: { status: 'idle', percentage: 0, step: 'idle' },
             linux: { status: 'idle', percentage: 0, step: 'idle' },
-            patches: { status: 'idle', percentage: 0, step: 'idle' }
+            patches: { status: 'idle', percentage: 0, step: 'idle' },
+            optimized: { status: 'idle', percentage: 0, step: 'idle' }
         },
         focusedList: 'master', 
         masterMenu: [], masterIndex: 1, detailMenu: [], detailIndex: 0,        
@@ -171,7 +172,8 @@ document.addEventListener('alpine:init', () => {
             { id: 'download-patches', name: 'Download Game Patches', icon: 'assets/icons/xenia canary.png' },
             { id: 'open-xenia-dash', name: 'Open Xenia Dashboard', icon: 'assets/icons/xenia canary.png' },
             { id: 'art-source', name: 'Metadata Source', icon: 'assets/icons/database.png'},
-            {id: 'app-update', name: 'Check for Dashboard Updates', icon: 'assets/icons/icon.png'}
+            {id: 'app-update', name: 'Check for Dashboard Updates', icon: 'assets/icons/icon.png'},
+            { id: 'download-optimized', name: 'Optimized Settings Database', icon: 'assets/icons/Optimized-Settings.webp' }
             
         ],
 
@@ -354,7 +356,7 @@ document.addEventListener('alpine:init', () => {
         ach_lock: false,
         appUpdateInfo: {
             status: 'idle',
-            currentVer: '1.1.8',
+            currentVer: '1.2.0',
             remoteVer: '---',
             message: 'Press (Y) to check for updates',
             percentage: 0
@@ -362,6 +364,60 @@ document.addEventListener('alpine:init', () => {
     });
 
     Alpine.store('actions', {
+
+               async downloadOptimizedSettings() {
+            const app = Alpine.store('app');
+            if (app.downloadStatuses.optimized.status !== 'idle' && app.downloadStatuses.optimized.step !== 'done') return;
+
+            this.playSound('select');
+            app.downloadStatuses.optimized = { status: 'Preparing...', percentage: 0, step: 'download' };
+            
+            const result = await window.electronAPI.downloadOptimizedSettings();
+            if (result.success) {
+                this.playSound('channelUp');
+            } else {
+                app.downloadStatuses.optimized.status = "Error: " + result.error;
+                app.downloadStatuses.optimized.step = 'error';
+            }
+        },
+
+        async applyOptimizedSettings() {
+            const app = Alpine.store('app');
+            const game = app.filteredLibraryGames[app.focusedIndex];
+
+            if (!game.titleID) {
+                alert("Title ID required to apply settings.");
+                return;
+            }
+
+            this.playSound('select');
+            
+            const configRes = await window.electronAPI.manageGameConfig({ action: 'load', titleID: game.titleID });
+            
+            if (configRes.success) {
+                const result = await window.electronAPI.applyOptimizedSettings({
+                    titleID: game.titleID,
+                    gameConfigPath: configRes.path
+                });
+
+                if (result.success) {
+                    alert(`Optimized settings applied to ${game.name}!`);
+                    this.playSound('channelUp');
+                    if (app.currentView === 'settings-config') this.loadXeniaConfig();
+                } else {
+                    alert("Setting not found in Database.");
+                }
+            }
+        },
+        
+        async syncOptimizedDatabase() {
+            const app = Alpine.store('app');
+            if (app.downloadStatuses.optimized.status !== 'idle' && app.downloadStatuses.optimized.step !== 'done') return;
+
+            this.playSound('select');
+            app.downloadStatuses.optimized = { status: 'Syncing...', percentage: 0, step: 'download' };
+            await window.electronAPI.invoke('download-optimized-settings');
+        },
 
         async checkAppUpdate() {
             const app = Alpine.store('app');
@@ -3614,6 +3670,14 @@ document.addEventListener('alpine:init', () => {
             return;
         }
 
+        if (key === 'p' || key === 'P') {
+            if (app.currentView === 'game-library' && !app.isKeyboardOpen && !app.isGuideOpen) {
+                actions.applyOptimizedSettings();
+                e.preventDefault();
+                return;
+            }
+        }
+
         if (app.currentView === 'settings-core' && app.focusedIndex === 11 && !app.isGuideOpen) {
     
 
@@ -4269,11 +4333,16 @@ const getMoveAction = (axis, value) => {
                     if (app.showGameInfoOverlay && !app.isKeyboardOpen) {
                         app.ltLock = true;
                         actions.handleTranslationClick();
-                        console.log(`[Input] LT Pressed. Executing Translation Toggle.`);
+                        console.log(`[LT] Action: Translation Toggle`);
+                    }
+                    else if (app.currentView === 'game-library' && !app.showGameInfoOverlay && !app.isKeyboardOpen && !app.isArtManagerOpen) {
+                        app.ltLock = true;
+                        actions.applyOptimizedSettings(); 
+                        console.log(`[LT] Action: Applying Optimized Settings`);
                     }
                 } 
                 else if (message.value < 0.1) {
-                    app.ltLock = false;
+                    app.ltLock = false; 
                 }
             }
             
