@@ -29,6 +29,8 @@
                             item.id === 'open-xenia-dash' ? $store.app.t('core_config.open_dashboard') :
                             item.id === 'art-source' ? $store.app.t('core_config.art_source') :
                             item.id === 'app-update' ? $store.app.t('core_config.app_update_title') :
+                            item.id === 'download-optimized' ? $store.app.t('core_config.optimized_settings') :
+
 
                             item.name
                         "></span>
@@ -97,7 +99,7 @@
                             style="color: var(--nxe-green-light); font-weight: bold; font-size: 1.2rem;"
                             x-text="$store.app.settings.linuxLaunchMethod"
                         ></p>
-                        <p style="color: var(--nxe-text-secondary); font-size: 1rem;">(For Linux users only). Press <span style="color: var(--nxe-btn-a);">(A)</span> to cycle the method:</p>
+                        <p style="color: var(--nxe-text-secondary); font-size: 1rem;"> <span x-text="$store.app.t('core_config.Linux')">(For Linux users only).</span> <span x-text="$store.app.t('core_config.press')">Press</span> <span style="color: var(--nxe-btn-a);">(A)</span> <span x-text="$store.app.t('core_config.cycle_method')"> cycle the method:</span></p>
                         <p style="color: var(--nxe-text-secondary); font-size: 1rem;">Native -> Wine -> Proton</p>
                     </div>
                 </template>
@@ -113,13 +115,13 @@
                             style="color: var(--nxe-text-secondary); font-size: 1rem;"
                             x-show="$store.app.settings.linuxLaunchMethod === 'proton'"
                         >
-                            Path to your 'proton' executable (e.g., in .steam/steam/...).
+                            <span x-text="$store.app.t('core_config.linuxLaunchMethod')">Path to your 'proton' executable</span> (e.g., in .steam/steam/...).
                         </p>
                         <p 
                             style="color: #888; font-size: 1rem;"
                             x-show="$store.app.settings.linuxLaunchMethod !== 'proton'"
                         >
-                            (This setting is only required if 'Linux Launch Method' is set to 'Proton').
+                            <span x-text="$store.app.t('core_config.nonlinuxLaunchMethod')">(This setting is only required if 'Linux Launch Method' is set to 'Proton').</span>
                         </p>
                     </div>
                 </template>
@@ -185,7 +187,7 @@
                         </div>
 
                         <p style="color: var(--nxe-text-secondary); font-size: 0.9rem; margin-top: 15px;">
-                            <span x-show="$store.app.downloadStatuses.win.status === 'idle'">Press <span style="color: var(--nxe-btn-a);">(A)</span> to <span x-text="$store.app.xeniaUpdateInfo.win.btnText"></span>.</span>
+                            <span x-show="$store.app.downloadStatuses.win.status === 'idle'"><span x-text="$store.app.t('core_config.press')">Press</span> <span style="color: var(--nxe-btn-a);">(A)</span> to <span x-text="$store.app.xeniaUpdateInfo.win.btnText"></span>.</span>
                             <span x-show="$store.app.downloadStatuses.win.status !== 'idle' && $store.app.downloadStatuses.win.step !== 'done'" style="color: #f2c40e;" x-text="$store.app.t('generic.processing')">Processing... Please wait.</span>
                             <span x-show="$store.app.downloadStatuses.win.step === 'done'" style="color: #59c853;">Success!</span>
                         </p>
@@ -234,7 +236,7 @@
                         </div>
 
                         <p style="color: var(--nxe-text-secondary); font-size: 0.9rem; margin-top: 15px;">
-                            <span x-show="$store.app.downloadStatuses.linux.status === 'idle'">Press <span style="color: var(--nxe-btn-a);">(A)</span> to <span x-text="$store.app.xeniaUpdateInfo.linux.btnText"></span>.</span>
+                            <span x-show="$store.app.downloadStatuses.linux.status === 'idle'"><span x-text="$store.app.t('core_config.press')">Press</span> <span style="color: var(--nxe-btn-a);">(A)</span> to <span x-text="$store.app.xeniaUpdateInfo.linux.btnText"></span>.</span>
                             <span x-show="$store.app.downloadStatuses.linux.status !== 'idle' && $store.app.downloadStatuses.linux.step !== 'done'" style="color: #f2c40e;" x-text="$store.app.t('generic.processing')">Processing... Please wait.</span>
                             <span x-show="$store.app.downloadStatuses.linux.step === 'done'" style="color: #59c853;">Success!</span>
                         </p>
@@ -244,9 +246,9 @@
                 <template x-if="$store.app.focusedIndex === 8">
                     <div>
                         <h3 x-text="$store.app.t('core_config.download_patches')">Download Game Patches</h3>
-                        <p>Downloads the latest game patches from the Xenia Canary team.</p>
+                        <p x-text="$store.app.t('core_config.download_patches_desc')">Downloads the latest game patches from the Xenia Canary team.</p>
                         <p style="color: var(--nxe-text-secondary); font-size: 1rem;">
-                           Patches will be installed in: <br>
+                           <span x-text="$store.app.t('core_config.patches_install_location')">Patches will be installed in:</span> <br>
                            <span style="color: white;">.../xenia-win/patches</span> & <span style="color: white;">.../xenia-linux/patches</span>
                         </p>
                         
@@ -275,7 +277,7 @@
                         </div>
                         
                         <p style="color: var(--nxe-text-secondary); font-size: 0.9rem; margin-top: 15px;">
-                            Press <span style="color: var(--nxe-btn-a);">(A)</span> to Download.
+                            <span x-text="$store.app.t('core_config.press')">Press</span> <span style="color: var(--nxe-btn-a);">(A)</span> <span x-text="$store.app.t('core_config.to_download')">to Download</span>.</span>
                         </p>
                     </div>
                 </template>
@@ -388,6 +390,28 @@
                         </p>
                     </div>
                 </template>
+                <template x-if="$store.app.coreSettingsItems[$store.app.focusedIndex].id === 'download-optimized'">
+                    <div>
+                        <h3 x-text="$store.app.t('core_config.optimized_settings')"></h3>
+                        <p x-text="$store.app.t('core_config.download_optimized_desc')"></p>
+                        
+                        <div style="min-height: 80px; display: flex; flex-direction: column; justify-content: center; margin-top: 20px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px;">
+                            <p style="font-weight: bold; font-size: 1.1rem; margin: 0 0 10px 0;"
+                            :style="{ color: $store.app.downloadStatuses.optimized.step === 'done' ? '#59c853' : 
+                                                $store.app.downloadStatuses.optimized.step === 'error' ? '#ff6b6b' : '#fff' }"
+                            x-text="$store.app.downloadStatuses.optimized.status === 'idle' ? 'Ready to Download' : $store.app.downloadStatuses.optimized.status">
+                            </p>
+
+                            <div class="nxe-progress-bar" x-show="$store.app.downloadStatuses.optimized.percentage > 0 && $store.app.downloadStatuses.optimized.step !== 'done'">
+                                <div class="nxe-progress-bar-fill" :style="{ width: $store.app.downloadStatuses.optimized.percentage + '%' }"></div>
+                            </div>
+                        </div>
+
+                        <p style="color: var(--nxe-text-secondary); font-size: 0.9rem; margin-top: 20px;">
+                            <span x-text="$store.app.t('core_config.press')">Press</span> <span style="color: var(--nxe-btn-a); font-weight: bold;">(A)</span> <span x-text="$store.app.t('generic.download-optimized')">to Download and Install Database.</span>
+                        </p>
+                    </div>
+                </template>
             </div>
         </div>
     </div> 
@@ -395,7 +419,10 @@
     <footer class="nxe-footer-left">
         <div class="footer-button" id="btn-a">
             <span class="button-icon a">A</span> 
-            <span x-text="$store.app.focusedIndex === 5 ? $store.app.t('generic.edit') : $store.app.t('generic.select')">Select</span>
+            <span x-text="$store.app.coreSettingsItems[$store.app.focusedIndex].id === 'download-optimized' ? 'Download' : 
+                        ($store.app.focusedIndex === 5 ? $store.app.t('generic.edit') : $store.app.t('generic.select'))">
+                Select
+            </span>
         </div>
         <div class="footer-button" id="btn-b" @click.prevent="$store.actions.goBack()">
             <span class="button-icon b">B</span> 
