@@ -702,6 +702,89 @@ function sendProgress(payload) {
 
 function registerIpcHandlers() {
 
+    ipcMain.handle('download-optimized-settings', async () => {
+    const downloadUrl = 'https://github.com/xenia-manager/optimized-settings/archive/refs/heads/main.zip';
+    const targetDir = path.join(CONFIG_DIR, 'assets', 'optimized-settings');
+    const tempDownloadDir = path.join(CONFIG_DIR, 'temp_downloads');
+    const zipPath = path.join(tempDownloadDir, 'opt-settings.zip');
+    const extractTemp = path.join(tempDownloadDir, 'extracted_full'); 
+
+    try {
+        await fs.mkdir(tempDownloadDir, { recursive: true });
+        if (fsSync.existsSync(extractTemp)) await fs.rm(extractTemp, { recursive: true, force: true });
+
+        sendProgress({ type: 'optimized', status: 'Downloading Database...', percentage: 20 });
+
+        const response = await axios({ url: downloadUrl, method: 'GET', responseType: 'stream' });
+        const writer = fsSync.createWriteStream(zipPath);
+        response.data.pipe(writer);
+        await new Promise((r, j) => { writer.on('finish', r); writer.on('error', j); });
+
+        sendProgress({ type: 'optimized', status: 'Extracting files...', percentage: 50 });
+
+        await decompress(zipPath, extractTemp);
+
+        const rootEntries = await fs.readdir(extractTemp);
+        const rootFolderName = rootEntries[0]; 
+        const sourceSettingsPath = path.join(extractTemp, rootFolderName, 'settings');
+
+        if (!fsSync.existsSync(sourceSettingsPath)) {
+            throw new Error("Could not find 'settings' folder inside the ZIP.");
+        }
+
+        sendProgress({ type: 'optimized', status: 'Moving Settings to Assets...', percentage: 80 });
+
+        if (fsSync.existsSync(targetDir)) await fs.rm(targetDir, { recursive: true, force: true });
+        
+        try {
+            await fs.rename(sourceSettingsPath, targetDir);
+        } catch (e) {
+            await fs.cp(sourceSettingsPath, targetDir, { recursive: true });
+        }
+
+        if (fsSync.existsSync(extractTemp)) await fs.rm(extractTemp, { recursive: true, force: true });
+        if (fsSync.existsSync(zipPath)) await fs.unlink(zipPath);
+
+        sendProgress({ type: 'optimized', status: 'Cleanup Complete! Ready.', percentage: 100, step: 'done' });
+        return { success: true };
+
+    } catch (e) {
+        console.error("[Optimized Settings Error]:", e.message);
+        if (fsSync.existsSync(extractTemp)) try { await fs.rm(extractTemp, { recursive: true }); } catch(err){}
+        return { success: false, error: e.message };
+    }
+});
+
+ipcMain.handle('apply-optimized-settings', async (event, { titleID, gameConfigPath }) => {
+    const cleanID = titleID.toUpperCase().trim();
+    const jsonPath = path.join(CONFIG_DIR, 'assets', 'optimized-settings', `${cleanID}.json`);
+    
+    try {
+        if (!fsSync.existsSync(jsonPath)) {
+            return { success: false, error: `No settings found for ID: ${cleanID}` };
+        }
+
+        const gameDir = path.dirname(gameConfigPath);
+        if (!fsSync.existsSync(gameDir)) {
+            await fs.mkdir(gameDir, { recursive: true });
+        }
+
+        const rawData = await fs.readFile(jsonPath, 'utf-8');
+        const jsonData = JSON.parse(rawData);
+
+        const result = await runPythonScript('patch_manager', [
+            'apply_optimized', 
+            gameConfigPath, 
+            JSON.stringify(jsonData)
+        ]);
+
+        return result;
+
+    } catch (e) {
+        return { success: false, error: `Critical Error: ${e.message}` };
+    }
+});
+
     ipcMain.handle('check-app-update', async () => {
         try {
             const currentVersion = app.getVersion();
