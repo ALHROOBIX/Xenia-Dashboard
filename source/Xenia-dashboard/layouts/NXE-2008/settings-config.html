@@ -74,21 +74,21 @@
                                         </label>
                                     </template>
 
-                                    <template x-if="option.type === 'number'">
-                                        <input 
-                                            type="number" 
-                                            class="nxe-config-input"
-                                            :id="$store.app.configCategories?.[$store.app.focusedConfigCategoryIndex] + '_' + option.key"
-                                            x-model.number="$store.app.xeniaConfig[$store.app.configCategories[$store.app.focusedConfigCategoryIndex]][option.key]"
-                                        >
-                                    </template>
-
                                     <template x-if="option.type === 'string'">
                                         <input 
                                             type="text" 
                                             class="nxe-config-input"
-                                            :id="$store.app.configCategories?.[$store.app.focusedConfigCategoryIndex] + '_' + option.key"
-                                            x-model="$store.app.xeniaConfig?.[$store.app.configCategories?.[$store.app.focusedConfigCategoryIndex]]?.[option.key]"
+                                            :id="$store.app.configCategories[$store.app.focusedConfigCategoryIndex] + '_' + option.key"
+                                            x-model="$store.app.xeniaConfig[$store.app.configCategories[$store.app.focusedConfigCategoryIndex]][option.key]"
+                                        >
+                                    </template>
+
+                                    <template x-if="option.type === 'number'">
+                                        <input 
+                                            type="number" 
+                                            class="nxe-config-input"
+                                            :id="$store.app.configCategories[$store.app.focusedConfigCategoryIndex] + '_' + option.key"
+                                            x-model.number="$store.app.xeniaConfig[$store.app.configCategories[$store.app.focusedConfigCategoryIndex]][option.key]"
                                         >
                                     </template>
                                 </div>
