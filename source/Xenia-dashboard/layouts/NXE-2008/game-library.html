@@ -38,24 +38,24 @@
                 <div class="nxe-blade-gloss"></div>
                 <div class="nxe-blade-content">
                 
-                    <div class="nxe-blade-cover-art">
-                         <div class="game-art-fill" 
-                            :style="`background-image: url('${game.coverUrl || 'assets/icons/placeholder.png'}')` ">
-                        </div>
-    
-                        <img src="assets/images/cover-game.webp" 
-                            class="cover-frame-img" 
-                            x-show="!game.isArcade && !game.isGOD">
-    
-                        <img src="assets/images/cover-game-XBLA.webp" 
-                            class="cover-frame-img" 
-                            x-show="game.isArcade">
-    
-                        <img src="assets/images/cover-game-GOD.webp" 
-                            class="cover-frame-img" 
-                            x-show="game.isGOD">
+                <div class="nxe-blade-cover-art">
+                    <div class="game-art-fill" 
+                        :style="`background-image: url('${game.coverUrl || 'assets/icons/placeholder.png'}')` ">
                     </div>
 
+                    <img src="assets/images/cover-game.webp" 
+                        class="cover-frame-img" 
+                        x-show="!game.isArcade && !game.isGOD">
+
+                    <img src="assets/images/cover-game-XBLA.webp" 
+                        class="cover-frame-img" 
+                        x-show="game.isArcade">
+
+                    <img src="assets/images/cover-game-GOD.webp" 
+                        class="cover-frame-img" 
+                        x-show="game.isGOD">
+                </div>
+                    
                     <div class="library-status-bar" 
                          :class="{
                             'info-active': $store.app.showGameInfoOverlay && $store.app.focusedIndex === index
@@ -108,6 +108,11 @@
         <div class="footer-button" id="btn-x" x-show="$store.app.focusedGamePatchInfo && $store.app.focusedGamePatchInfo.fileName" @click.prevent="$store.actions.loadView('patches-manager')">
             <span class="button-icon x">X</span>
             <span x-text="$store.app.t('library.patches')">Patches</span>
+        </div>
+        <div class="footer-button" id="btn-opt" x-show="$store.app.filteredLibraryGames[$store.app.focusedIndex].titleID"
+            @click.prevent="$store.actions.applyOptimizedSettings()">
+            <span class="button-icon lt-icon">LT</span>
+            <span x-text="$store.app.t('library.apply_optimized_settings')">Apply optimized_settings</span>
         </div>
         <div class="footer-button" id="btn-lb" @click.prevent="$store.actions.openGameConfig()">
             <span class="button-icon lb-icon">LB</span>
@@ -217,8 +222,8 @@
 
                         <h4 style="margin-top: 20px;" x-text="$store.app.t('library.description')">Description</h4>
                         <p x-show="$store.app.gameExtendedInfo.loading" style="color:#888;" x-text="$store.app.t('generic.loading')">Loading...</p>
-
-                        <div class="description-container">
+<!--this-->
+                            <div class="description-container">
                                 <p x-show="!$store.app.gameExtendedInfo.loading" 
                                 x-text="$store.app.gameExtendedInfo.description"
                                 :style="($store.app.gameExtendedInfo.translatedDescription && $store.app.language === 'ar') 
@@ -281,12 +286,14 @@
                     </div>
                 </div>
                 <div class="info-card-footer" :class="$store.app.locale === 'ar' ? 'is-rtl' : ''">
+                    <!-- زر الترجمة -->
                     <span class="footer-button" id="btn-Translate" @click.prevent="$store.actions.handleTranslationClick()">
                         <span class="button-icon lt-icon">LT</span>
                         <span x-text="$store.app.gameExtendedInfo.isTranslating ? '...' : ($store.app.gameExtendedInfo.translatedDescription ? $store.app.t('library.Original') : $store.app.t('library.Translate'))">
                             Translate
                         </span>
                     </span>
+                    <!-- زر الإغلاق -->
                     <span class="footer-button" id="btn-info">
                         <span class="button-icon rb-icon">RB</span>
                         <span x-text="$store.app.t('library.Close')">Close</span>
