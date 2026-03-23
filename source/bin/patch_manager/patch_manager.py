@@ -4,21 +4,16 @@ import tomlkit
 import tomlkit.items
 from pathlib import Path
 
-
 def toml_to_dict(item):
-
 
     if isinstance(item, tomlkit.items.AoT):
         return [toml_to_dict(v) for v in item]
-        
 
     if isinstance(item, (tomlkit.items.Table, tomlkit.items.InlineTable, dict)):
         return {k: toml_to_dict(v) for k, v in item.items()}
-        
 
     if isinstance(item, list):
         return [toml_to_dict(v) for v in item]
-        
 
     return item
 
@@ -27,25 +22,20 @@ def dict_to_toml(data):
     if isinstance(data, dict):
         tbl = tomlkit.table()
         for k, v in data.items():
-
             tbl.add(k, dict_to_toml(v))
         return tbl
-    
 
     if isinstance(data, list):
-
         if len(data) > 0 and all(isinstance(i, dict) for i in data):
-
             aot = tomlkit.aot()
             for item_dict in data:
                 aot.append(dict_to_toml(item_dict))
             return aot
         else:
-
             return [dict_to_toml(v) for v in data]
-            
 
     return data
+
 
 def load_patches(file_path):
     try:
@@ -58,7 +48,7 @@ def load_patches(file_path):
         patch_list = []
         if "patch" in data and isinstance(data["patch"], tomlkit.items.AoT):
             for i, patch_item in enumerate(data["patch"]):
-                patch_data = toml_to_dict(patch_item) 
+                patch_data = toml_to_dict(patch_item)
                 patch_data["id"] = f"complex_patch_{i}"
                 patch_list.append(patch_data)
         else:
@@ -93,7 +83,7 @@ def save_patches(file_path, patches_json, header_json):
         if len(patch_list) == 0:
             pass
         elif patch_list[0]["id"].startswith("complex_patch_"):
-            aot = tomlkit.aot() 
+            aot = tomlkit.aot()
             for p_dict in patch_list:
                 del p_dict["id"]
                 toml_table = dict_to_toml(p_dict)
@@ -112,6 +102,36 @@ def save_patches(file_path, patches_json, header_json):
 
 
 
+def apply_optimized(file_path, json_str):
+
+    try:
+        p = Path(file_path)
+
+        if p.exists():
+            raw_content = p.read_text(encoding='utf-8')
+            doc = tomlkit.parse(raw_content)
+        else:
+            doc = tomlkit.document()
+
+        opt_data = json.loads(json_str)
+
+        for section_key, values in opt_data.items():
+            if section_key not in doc:
+                doc[section_key] = tomlkit.table()
+
+            section = doc[section_key]
+
+            for k, v in values.items():
+                section[k] = v
+
+        p.write_text(tomlkit.dumps(doc), encoding='utf-8')
+        print(json.dumps({"success": True}))
+
+    except Exception as e:
+        print(json.dumps({"success": False, "error": f"Apply Optimized Error: {str(e)}"}))
+
+
+
 def load_config(file_path):
 
     try:
@@ -119,7 +139,7 @@ def load_config(file_path):
         if not p.exists():
             print(json.dumps({"success": False, "error": "Config file not found"}))
             return
-        
+
         raw_content = p.read_text(encoding='utf-8')
         data = tomlkit.parse(raw_content)
         config_dict = toml_to_dict(data)
@@ -135,27 +155,35 @@ def save_config(file_path, config_json):
             print(json.dumps({"success": False, "error": "Config file not found"}))
             return
 
-
         raw_content = p.read_text(encoding='utf-8')
         doc = tomlkit.parse(raw_content)
-        
-
         new_data = json.loads(config_json)
-        
 
         for category_key, options_dict in new_data.items():
-            if category_key in doc and isinstance(doc[category_key], tomlkit.items.Table):
-                for option_key, option_value in options_dict.items():
-                    if option_key in doc[category_key]:
+            if category_key not in doc:
+                doc[category_key] = tomlkit.table()
 
-                        doc[category_key][option_key] = option_value
-        
+            section = doc[category_key]
+
+            for option_key, option_value in options_dict.items():
+                if option_key in section:
+                    original_value = section[option_key]
+
+                    if isinstance(original_value, int) and isinstance(option_value, str):
+                        try: option_value = int(option_value)
+                        except: pass
+                    elif isinstance(original_value, float) and isinstance(option_value, str):
+                        try: option_value = float(option_value)
+                        except: pass
+                    elif isinstance(original_value, bool) and isinstance(option_value, str):
+                        option_value = option_value.lower() == "true"
+
+                section[option_key] = option_value
 
         p.write_text(tomlkit.dumps(doc), encoding='utf-8')
         print(json.dumps({"success": True}))
     except Exception as e:
         print(json.dumps({"success": False, "error": f"Save Config Error: {str(e)}"}))
-
 
 if __name__ == "__main__":
     command = sys.argv[1]
@@ -163,18 +191,22 @@ if __name__ == "__main__":
 
     if command == "load_patches":
         load_patches(file_path)
-        
+
     elif command == "save_patches":
         patches_data = sys.argv[3]
         header_data = sys.argv[4]
         save_patches(file_path, patches_data, header_data)
-        
+
     elif command == "load_config":
         load_config(file_path)
-        
+
     elif command == "save_config":
         config_data = sys.argv[3]
         save_config(file_path, config_data)
-        
+
+    elif command == "apply_optimized":
+        json_data = sys.argv[3]
+        apply_optimized(file_path, json_data)
+
     else:
         print(json.dumps({"success": False, "error": "Unknown command"}))
