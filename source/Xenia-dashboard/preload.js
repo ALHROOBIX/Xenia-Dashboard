@@ -74,6 +74,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     deleteProfile: (xuid) => ipcRenderer.invoke('delete-profile', xuid),
     checkAppUpdate: () => ipcRenderer.invoke('check-app-update'),
     downloadAppUpdate: (platform) => ipcRenderer.invoke('download-app-update', platform),
+    downloadOptimizedSettings: () => ipcRenderer.invoke('download-optimized-settings'),
+    applyOptimizedSettings: (payload) => ipcRenderer.invoke('apply-optimized-settings', payload),
     quitApp: () => ipcRenderer.invoke('quit-app')
 });
 
