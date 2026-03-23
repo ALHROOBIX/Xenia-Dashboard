@@ -33,7 +33,8 @@
       "backspace": "Backspace",
       "space": "Space",
       "symbols": "Symbols",
-      "caps": "Caps Lock"
+      "caps": "Caps Lock",
+      "download-optimized": "Download Optimized Settings Database"
     },
     "dashboard_menu": {
       "myxbox": "MY XENIA",
@@ -151,7 +152,17 @@
       "press": "Press",
       "check": "to Check or",
       "update": "to Update.",
-      "downloading": "Downloading & Installing... The app will restart automatically."
+      "downloading": "Downloading & Installing... The app will restart automatically.",
+      "optimized_settings": "Optimized Game Settings",
+      "download_optimized_desc": "Download a curated collection of performance-enhancing configuration files for specific Xbox 360 games.",
+      "patches_install_location": "Patches will be installed in:",
+      "download_patches_desc": "Downloads the latest game patches from the Xenia Canary team.",
+      "to_download": "to Download.",
+      "linuxLaunchMethod": "Path to your 'proton' executable",
+      "nonlinuxLaunchMethod": "(This setting is only required if 'Linux Launch Method' is set to 'Proton').",
+      "Linux": "(For Linux users only).",
+      "cycle_method": "to cycle the method:"
+
     },
     "colors": {
       "title": "Interface Colors",
@@ -238,7 +249,8 @@
       "Original": "Original",
       "zar_scan": "Scan ZAR Title ID",
       "loading": "Loading...",
-      "rename": "Rename"
+      "rename": "Rename",
+      "apply_optimized_settings": "Apply Optimized Settings"
       
     },
     "art": {
@@ -303,7 +315,8 @@
       "backspace": "التراجع",
       "space": "مسافة",
       "symbols": "الرموز",
-      "caps": "حروف كبيرة"
+      "caps": "حروف كبيرة",
+      "download-optimized": "تحميل قاعدة إعدادات محسنة"
     },
     "dashboard_menu": {
       "myxbox": "جهازي زينيا",
@@ -443,7 +456,16 @@
       "press": "اضغط",
       "check": "للتحقق أو",
       "update": "للتحديث.",
-      "downloading": "جاري التحميل والتثبيت... سيتم إعادة تشغيل التطبيق تلقائياً."
+      "downloading": "جاري التحميل والتثبيت... سيتم إعادة تشغيل التطبيق تلقائياً.",
+      "optimized_settings": "إعدادات الألعاب المحسنة",
+      "download_optimized_desc": "قم بتنزيل مجموعة مختارة من ملفات التكوين التي تعزز الأداء لألعاب Xbox 360 محددة.",
+      "patches_install_location": "سيتم تثبيت التصحيحات في:",
+      "download_patches_desc": "يقوم بتنزيل أحدث ملفات التصحيح للألعاب من فريق Xenia Canary.",
+      "to_download": "لتحميل.",
+      "linuxLaunchMethod": "مسار ملف 'proton' التنفيذي",
+      "nonlinuxLaunchMethod": "(هذا الإعداد مطلوب فقط إذا تم تعيين 'طريقة تشغيل Linux' إلى 'Proton').",
+      "Linux": "(للمستخدمين الذين يستخدمون Linux فقط).",
+      "cycle_method": "للتبديل بين الطرق:"
     },
     "colors": {
       "title": "ألوان الواجهة",
@@ -530,7 +552,8 @@
       "Original": "الأصلي",
       "zar_scan": "فحص معرف ZAR",
       "loading": "جاري التحميل...",
-      "rename": "إعادة تسمية"
+      "rename": "إعادة تسمية",
+      "apply_optimized_settings": "تطبيق الإعدادات المحسنة"
     },
     "art": {
       "loading": "جاري البحث في SteamGridDB...",
@@ -594,7 +617,8 @@
       "backspace": "退格键",
       "space": "空格键",
       "symbols": "符号",
-      "caps": "大写锁定"
+      "caps": "大写锁定",
+      "download-optimized": "下载优化设置数据库"
     },
     "dashboard_menu": {
       "myxbox": "我的 XENIA",
@@ -733,7 +757,16 @@
       "press": "按",
       "check": "检查或",
       "update": "更新。",
-      "downloading": "正在下载和安装... 应用将自动重启。"
+      "downloading": "正在下载和安装... 应用将自动重启。",
+      "optimized_settings": "优化的游戏设置",
+      "download_optimized_desc": "下载为特定 Xbox 360 游戏精选的性能增强配置文件集合。",
+      "patches_install_location": "补丁将安装在：",
+      "download_patches_desc": "从 Xenia Canary 团队下载最新的游戏补丁。",
+      "to_download": "下载。",
+      "linuxLaunchMethod": "您的 'proton' 可执行文件路径",
+      "nonlinuxLaunchMethod": "（仅当 'Linux 启动方式' 设置为 'Proton' 时才需要此设置）。",
+      "Linux": "（仅适用于 Linux 用户）。",
+      "cycle_method": "切换方法："
     },
     "colors": {
       "title": "界面颜色",
@@ -819,7 +852,8 @@
       "Original": "原始",
       "zar_scan": "扫描 ZAR ID",
       "loading": "加载中...",
-      "rename": "重命名"
+      "rename": "重命名",
+      "apply_optimized_settings": "应用优化设置"
     },
     "art": {
       "loading": "正在从 SteamGridDB 搜索...",
@@ -884,7 +918,8 @@
       "backspace": "バックスペース",
       "space": "スペースキー",
       "symbols": "シンボル",
-      "caps": "キャップスロック"
+      "caps": "キャップスロック",
+      "download-optimized": "最適化された設定データベースをダウンロード"
     },
     "dashboard_menu": {
       "myxbox": "私のXENIA",
@@ -1023,7 +1058,17 @@
       "press": "押す",
       "check": "確認するか",
       "update": "更新する。",
-      "downloading": "ダウンロードとインストール中... アプリは自動的に再起動します。"
+      "downloading": "ダウンロードとインストール中... アプリは自動的に再起動します。",
+      "optimized_settings": "最適化されたゲーム設定",
+      "download_optimized_desc": "特定のXbox 360ゲームのパフォーマンスを向上させるために選択された構成ファイルのコレクションをダウンロードします。",
+      "patches_install_location": "パッチはここにインストールされます：",
+      "download_patches_desc": "Xenia Canaryチームから最新のゲームパッチをダウンロードします。",
+      "to_download": "ダウンロードする。",
+      "linuxLaunchMethod": "あなたの 'proton' 実行ファイルのパス",
+      "nonlinuxLaunchMethod": "（'Linux起動方法'が'Proton'に設定されている場合にのみ必要）。",
+      "Linux": "（Linuxユーザー専用）。",
+      "cycle_method": "方法を切り替える："
+
     },
     "colors": {
       "title": "インターフェースカラー",
@@ -1109,7 +1154,8 @@
       "Original": "オリジナル",
       "zar_scan": "ZAR IDをスキャン",
       "loading": "読み込み中...",
-      "rename": "名前を変更"
+      "rename": "名前を変更",
+      "apply_optimized_settings": "最適化設定を適用"
     },
     "art": {
       "loading": "SteamGridDBから検索中...",
@@ -1174,7 +1220,8 @@
       "backspace": "백스페이스",
       "space": "스페이스바",
       "symbols": "심볼",
-      "caps": "캡스록"
+      "caps": "캡스록",
+      "download-optimized": "최적화된 설정 데이터베이스 다운로드"
     },
     "dashboard_menu": {
       "myxbox": "나의 XENIA",
@@ -1313,7 +1360,16 @@
       "press": "누르세요",
       "check": "확인하거나",
       "update": "업데이트하세요.",
-      "downloading": "다운로드 및 설치 중... 앱이 자동으로 재시작됩니다."
+      "downloading": "다운로드 및 설치 중... 앱이 자동으로 재시작됩니다.",
+      "optimized_settings": "최적화된 게임 설정",
+      "download_optimized_desc": "특정 Xbox 360 게임에 대한 성능 향상 구성 파일 모음을 다운로드합니다.",
+      "patches_install_location": "게임 패치는 여기에 설치됩니다:",
+      "download_patches_desc": "Xenia Canary 팀에서 최신 게임 패치를 다운로드합니다.",
+      "to_download": "다운로드하세요.",
+      "linuxLaunchMethod": "당신의 'proton' 실행 파일 경로",
+      "nonlinuxLaunchMethod": "('Linux 실행 방법'이 'Proton'으로 설정된 경우에만 필요합니다).",
+      "Linux": "(Linux 사용자 전용).",
+      "cycle_method": "방법을 전환하려면:"
     },
     "colors": {
       "title": "인터페이스 색상",
@@ -1399,7 +1455,8 @@
       "Original": "원본",
       "zar_scan": "ZAR 타이틀 ID 스캔",
       "loading": "로딩 중...",
-      "rename": "이름 변경"
+      "rename": "이름 변경",
+      "apply_optimized_settings": "최적화된 설정 적용"
     },
     "art": {
       "loading": "SteamGridDB에서 가져오는 중...",
@@ -1464,7 +1521,8 @@
       "backspace": "Бэкспейс",
       "space": "Пробел",
       "symbols": "Символы",
-      "caps": "Caps Lock"
+      "caps": "Caps Lock",
+      "download-optimized": "Загрузить оптимизированную базу данных настроек"
     },
     "dashboard_menu": {
       "myxbox": "МОЙ XENIA",
@@ -1603,7 +1661,16 @@
       "press": "Нажмите",
       "check": "проверить или",
       "update": "обновить.",
-      "downloading": "Загрузка и установка... Приложение автоматически перезапустится."
+      "downloading": "Загрузка и установка... Приложение автоматически перезапустится.",
+      "optimized_settings": "Оптимизированные настройки игры",
+      "download_optimized_desc": "Загрузите набор конфигурационных файлов для улучшения производительности конкретных игр Xbox 360.",
+      "patches_install_location": "Патчи для игр будут установлены здесь:",
+      "download_patches_desc": "Загрузите последние патчи для игр от команды Xenia Canary.",
+      "to_download": "Загрузить.",
+      "linuxLaunchMethod": "Ваш путь к файлу 'proton'",
+      "nonlinuxLaunchMethod": "(Только если 'Метод запуска Linux' установлен на 'Proton').",
+      "Linux": "(Только для пользователей Linux).",
+      "cycle_method": "Нажмите для переключения метода:"
     },
     "colors": {
       "title": "Цвета интерфейса",
@@ -1689,7 +1756,8 @@
       "Original": "Оригинал",
       "zar_scan": "Сканировать ZAR ID",
       "loading": "Загрузка...",
-      "rename": "Переименовать"
+      "rename": "Переименовать",
+      "apply_optimized_settings": "Применить оптимизированные настройки"
     },
     "art": {
       "loading": "Поиск в SteamGridDB...",
@@ -1754,7 +1822,8 @@
       "backspace": "Rücktaste",
       "space": "Leertaste",
       "symbols": "Symbole",
-      "caps": "Feststelltaste"
+      "caps": "Feststelltaste",
+      "download-optimized": "Optimierte Einstellungsdatenbank herunterladen"
     },
     "dashboard_menu": {
       "myxbox": "MEIN XENIA",
@@ -1893,7 +1962,16 @@
       "press": "Drücke",
       "check": "überprüfen oder",
       "update": "aktualisieren.",
-      "downloading": "Herunterladen und installieren... App wird automatisch neu gestartet."
+      "downloading": "Herunterladen und installieren... App wird automatisch neu gestartet.",
+      "optimized_settings": "Optimierte Spieleinstellungen",
+      "download_optimized_desc": "Laden Sie eine Sammlung von Konfigurationsdateien herunter, um die Leistung bestimmter Xbox 360-Spiele zu verbessern.",
+      "patches_install_location": "Patches für Spiele werden hier installiert:",
+      "download_patches_desc": "Laden Sie die neuesten Patches für Spiele von der Xenia Canary-Team herunter.",
+      "to_download": "Herunterladen.",
+      "linuxLaunchMethod": "Ihr Pfad zur 'proton'-Datei",
+      "nonlinuxLaunchMethod": "(Nur wenn 'Linux-Startmethode' auf 'Proton' eingestellt ist).",
+      "Linux": "(Nur für Linux-Benutzer).",
+      "cycle_method": "Drücke zum Wechseln der Methode:"
     },
     "colors": {
       "title": "Oberflächenfarben",
@@ -1979,7 +2057,8 @@
       "Original": "Original",
       "zar_scan": "ZAR-Titel-ID scannen",
       "loading": "Laden...",
-      "rename": "Umbenennen"
+      "rename": "Umbenennen",
+      "apply_optimized_settings": "Optimierte Einstellungen anwenden"
     },
     "art": {
       "loading": "Wird von SteamGridDB abgerufen...",
@@ -2044,7 +2123,8 @@
       "backspace": "Backspace",
       "space": "Espaço",
       "symbols": "Símbolos",
-      "caps": "Fixa"
+      "caps": "Fixa",
+      "download-optimized": "Baixar banco de dados de configurações otimizadas"
     },
     "dashboard_menu": {
       "myxbox": "MEU XENIA",
@@ -2183,7 +2263,16 @@
       "press": "Pressione",
       "check": "verificar ou",
       "update": "atualizar.",
-      "downloading": "Baixando e instalando... O aplicativo será reiniciado automaticamente. "
+      "downloading": "Baixando e instalando... O aplicativo será reiniciado automaticamente. ",
+      "optimized_settings": "Configurações Otimizadas de Jogos",
+      "download_optimized_desc": "Baixe uma coleção de arquivos de configuração para melhorar o desempenho de jogos específicos do Xbox 360.",
+      "patches_install_location": "Patches para jogos serão instalados aqui:",
+      "download_patches_desc": "Baixe os patches mais recentes para jogos da equipe Xenia Canary.",
+      "to_download": "Baixar.",
+      "linuxLaunchMethod": "Seu caminho para o arquivo 'proton'",
+      "nonlinuxLaunchMethod": "(Somente se 'Método de Inicialização Linux' estiver definido como 'Proton').",
+      "Linux": "(Somente para usuários Linux).",
+      "cycle_method": "Pressione para alternar método:"
     },
     "colors": {
       "title": "Cores da Interface",
@@ -2269,7 +2358,8 @@
       "Original": "Original",
       "zar_scan": "Escanear ID ZAR",
       "loading": "Carregando...",
-      "rename": "Renomear"
+      "rename": "Renomear",
+      "apply_optimized_settings": "Aplicar Configurações Otimizadas"
     },
     "art": {
       "loading": "Buscando do SteamGridDB...",
@@ -2334,7 +2424,8 @@
       "backspace": "Retroceso",
       "space": "Espacio",
       "symbols": "Símbolos",
-      "caps": "Bloq Mayús"
+      "caps": "Bloq Mayús",
+      "download-optimized": "Descargar base de datos de configuraciones optimizadas"
     },
     "dashboard_menu": {
       "myxbox": "MI XENIA",
@@ -2473,7 +2564,16 @@
       "press": "Presiona",
       "check": "verificar o",
       "update": "actualizar.",
-      "downloading": "Descargando e instalando... La aplicación se reiniciará automáticamente."
+      "downloading": "Descargando e instalando... La aplicación se reiniciará automáticamente.",
+      "optimized_settings": "Configuraciones Optimizadas de Juegos",
+      "download_optimized_desc": "Descarga una colección de archivos de configuración para mejorar el rendimiento de juegos específicos de Xbox 360.",
+      "patches_install_location": "Los parches para juegos se instalarán aquí:",
+      "download_patches_desc": "Descarga los parches más recientes para juegos del equipo Xenia Canary.",
+      "to_download": "Descargar.",
+      "linuxLaunchMethod": "Su ruta al archivo 'proton'",
+      "nonlinuxLaunchMethod": "(Solo si 'Método de Inicio Linux' está configurado como 'Proton').",
+      "Linux": "(Solo para usuarios de Linux).",
+      "cycle_method": "Presiona para alternar método:"
     },
     "colors": {
       "title": "Colores de Interfaz",
@@ -2559,7 +2659,8 @@
       "Original": "Original",
       "zar_scan": "Escanear ID ZAR",
       "loading": "Cargando...",
-      "rename": "Renombrar"
+      "rename": "Renombrar",
+      "apply_optimized_settings": "Aplicar Configuraciones Optimizadas"
     },
     "art": {
       "loading": "Obteniendo de SteamGridDB...",
@@ -2624,7 +2725,8 @@
       "backspace": "Geri tuşu",
       "space": "Boşluk",
       "symbols": "Semboller",
-      "caps": "Büyük harf kilidi"
+      "caps": "Büyük harf kilidi",
+      "download-optimized": "Optimize Edilmiş Ayarlar veritabanını indir"
     },
     "dashboard_menu": {
       "myxbox": "XENIA'M",
@@ -2763,7 +2865,16 @@
       "press": "Kontrol etmek veya",
       "check": "güncellemek için basın.",
       "update": "güncellemek için basın.",
-      "downloading": "İndiriliyor ve kuruluyor... Uygulama otomatikmanatik olarak yeniden başlayacak. "
+      "downloading": "İndiriliyor ve kuruluyor... Uygulama otomatikmanatik olarak yeniden başlayacak. ",
+      "optimized_settings": "Oyunlar için Optimize Edilmiş Ayarlar",
+      "download_optimized_desc": "Belirli Xbox 360 oyunlarının performansını artırmak için bir dizi yapılandırma dosyası indirin.",
+      "patches_install_location": "Oyun yamaları buraya kurulacak:",
+      "download_patches_desc": "Xenia Canary ekibinden oyunlar için en son yamaları indirin.",
+      "to_download": "İndirmek için basın.",
+      "linuxLaunchMethod": "'proton' dosyanızın yolu",
+      "nonlinuxLaunchMethod": "(Yalnızca 'Linux Başlatma Yöntemi' 'Proton' olarak ayarlanmışsa).",
+      "Linux": "(Yalnızca Linux kullanıcıları için).",
+      "cycle_method": "Yöntemi değiştirmek için basın:"
     },
     "colors": {
       "title": "Arayüz Renkleri",
@@ -2849,7 +2960,8 @@
       "Original": "Orijinal",
       "zar_scan": "ZAR Kimliğini Tara",
       "loading": "Yükleniyor...",
-      "rename": "Yeniden Adlandır"
+      "rename": "Yeniden Adlandır",
+      "apply_optimized_settings": "Optimize Edilmiş Ayarları Uygula"
     },
     "art": {
       "loading": "SteamGridDB'den alınıyor...",
@@ -2914,7 +3026,8 @@
       "backspace": "Backspace",
       "space": "Spazio",
       "symbols": "Simboli",
-      "caps": "Bloc Maiusc"
+      "caps": "Bloc Maiusc",
+      "download-optimized": "Scarica database di impostazioni ottimizzate"
     },
     "dashboard_menu": {
       "myxbox": "IL MIO XENIA",
@@ -3053,7 +3166,16 @@
       "press": "Premi per controllare o",
       "check": "aggiornare.",
       "update": "aggiornare.",
-      "downloading": "Scaricamento e installazione in corso... L'app si riavvierà automaticamente."
+      "downloading": "Scaricamento e installazione in corso... L'app si riavvierà automaticamente.",
+      "optimized_settings": "Impostazioni Ottimizzate per i Giochi",
+      "download_optimized_desc": "Scarica una serie di file di configurazione per migliorare le prestazioni di specifici giochi Xbox 360.",
+      "patches_install_location": "Le patch dei giochi saranno installate qui:",
+      "download_patches_desc": "Scarica le patch più recenti per i giochi dal team di Xenia Canary.",
+      "to_download": "Premi per scaricare.",
+      "linuxLaunchMethod": "'proton' file path",
+      "nonlinuxLaunchMethod": "(Only if 'Linux Launch Method' is set to 'Proton').",
+      "Linux": "(Only for Linux users).",
+      "cycle_method": "Premi per cambiare metodo:"
     },
     "colors": {
       "title": "Colori Interfaccia",
@@ -3139,7 +3261,8 @@
       "Original": "Originale",
       "zar_scan": "Scansiona ID ZAR",
       "loading": "Caricamento in corso...",
-      "rename": "Rinomina"
+      "rename": "Rinomina",
+      "apply_optimized_settings": "Applica Impostazioni Ottimizzate"
     },
     "art": {
       "loading": "Recupero da SteamGridDB...",
@@ -3204,7 +3327,8 @@
       "backspace": "Retour arrière",
       "space": "Espace",
       "symbols": "Symboles",
-      "caps": "Verrouillage Maj"
+      "caps": "Verrouillage Maj",
+      "download-optimized": "Télécharger la base de données d'options optimisées"
     },
     "dashboard_menu": {
       "myxbox": "MON XENIA",
@@ -3343,7 +3467,16 @@
       "press": "Appuyez pour vérifier ou",
       "check": "mettre à jour.",
       "update": "mettre à jour.",
-      "downloading": "Téléchargement et installation en cours... L'application redémarrera automatiquement."
+      "downloading": "Téléchargement et installation en cours... L'application redémarrera automatiquement.",
+      "optimized_settings": "Paramètres Optimisés pour les Jeux",
+      "download_optimized_desc": "Télécharger une série de fichiers de configuration pour améliorer les performances de certains jeux Xbox 360.",
+      "patches_install_location": "Les correctifs de jeux seront installés ici :",
+      "download_patches_desc": "Télécharger les derniers correctifs pour les jeux du team de Xenia Canary.",
+      "to_download": "Appuyez pour télécharger.",
+      "linuxLaunchMethod": "Chemin du fichier 'proton'",
+      "nonlinuxLaunchMethod": "(Uniquement si 'Méthode de Démarrage Linux' est réglée sur 'Proton').",
+      "Linux": "(Uniquement pour les utilisateurs Linux).",
+      "cycle_method": "Appuyez pour changer de méthode :"
     },
     "colors": {
       "title": "Couleurs de l'Interface",
@@ -3429,7 +3562,8 @@
       "Original": "Original",
       "zar_scan": "Analyser l'ID ZAR",
       "loading": "Chargement en cours...",
-      "rename": "Renommer"
+      "rename": "Renommer",
+      "apply_optimized_settings": "Appliquer les Paramètres Optimisés"
     },
     "art": {
       "loading": "Récupération depuis SteamGridDB...",
