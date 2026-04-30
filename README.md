@@ -120,6 +120,43 @@ This project stands on the shoulders of giants. Special thanks to these incredib
 
 ---
 
+# XENIA DASHBOARD Game Directory Structure Guide (XBLA & GOD)
+
+---
+
+## 1️⃣ Arcade Games (XBLA)
+Arcade games are characterized by always being located inside a subfolder named `000D0000`.
+
+**Correct Path:**
+`[Game ID] / 000D0000 / [Game File]`
+
+* **Example:** `58410846 / 000D0000 / B1234567890ABCDEF...`
+* *Note:* The game file consists of a long string of random alphanumeric characters. **Do NOT rename this file.**
+
+---
+
+## 2️⃣ GOD Games (Games on Demand)
+These are digital versions or converted disc games. They are always located inside a subfolder named `00007000`.
+
+**Correct Path:**
+`[Game ID] / 00007000 / [Game File]`
+
+* **Example:** `4d5308d2 / 00007000 / C234567890ABCDEF1...`
+* *Note:* In addition to the game file, you may find an additional folder ending with the `.data` extension next to the file.
+
+---
+
+## 🔍 Terminology Explained
+| Term | Description |
+| :--- | :--- |
+| **Game ID** | A unique 8-character folder (alphanumeric) for each game. |
+| **000D0000** | The dedicated folder for Arcade games and DLCs. |
+| **00007000** | The dedicated folder for Full Games converted to GOD format. |
+| **Game File** | The core file that appears with random characters; renaming it will break the game. |
+
+---
+
+
 ## 📥 Download abgx360
 
 <p align="center">
