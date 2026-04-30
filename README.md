@@ -73,7 +73,31 @@ This project stands on the shoulders of giants. Special thanks to these incredib
   <h2>⚠️ Disclaimer</h2>
   <p><strong>This project is a third-party frontend and is not affiliated with the official Xenia Project or Microsoft.</strong></p>
 </div>
+---
 
+## 🚀 Installation & Setup The themes | التثبيت وأعداد الثيم
+
+| How to Install | طريقة التثبيت |
+| :--- | ---: |
+| 1. Download the theme file from the Releases tab.<br>2. Extract the `NEX-metro` folder into the `systems` folder located inside your main **Xenia Dashboard** directory.<br>3. Launch the Xenia Dashboard program.<br>4. Go to **Settings > Themes**.<br>5. You will see the new theme there; select it to apply! | <div dir="rtl">1. قم بتحميل ملف الثيم.<br>2. استخرج المجلد `NEX-metro` بداخل مجلد `systems` الموجود في مسار برنامج **Xenia Dashboard** الأساسي.<br>3. قم بتشغيل برنامج Xenia Dashboard.<br>4. اذهب إلى **الإعدادات (Settings) > الثيمات (Themes)**.<br>5. سوف يظهر الثيم الجديد هناك، قم باختياره لتفعيله فوراً!</div> |
+<br/>
+<div align="center">
+
+| Download Link |
+|---------------|
+| 🔗 [Download Theme](https://github.com/0xErrorVoid/Xenia-Dashboard-Metro-ui-Theme/releases/tag/v.1) |
+
+</div>
+<blockquote>
+  💡 <b>Note:</b> Players can now design their own custom themes! You have full freedom to customize the Xenia Dashboard interface to your liking and share your creations with the community.<br><br>
+  ⚠️ <b>Important Warning:</b> For your safety, only download and use themes from trusted creators and sources.
+</blockquote>
+<div dir="rtl" align="right">
+  <blockquote>
+    💡 <b>ملاحظة:</b> أصبح الآن بإمكان اللاعبين تصميم ثيماتهم (Themes) الخاصة بحرية تامة! يمكنك تخصيص واجهة Xenia Dashboard بالكامل لتناسب ذوقك، ومشاركة إبداعاتك مع مجتمع اللاعبين.<br><br>
+    ⚠️ <b>تنبيه هام:</b> لضمان أمانك، لا تقم بتحميل أو استخدام أي ثيمات إلا من أشخاص ومصادر موثوقة.
+  </blockquote>
+</div>
 ---
 
 ## ✨ Key Features
