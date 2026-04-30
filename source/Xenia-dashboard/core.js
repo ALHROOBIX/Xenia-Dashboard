@@ -4233,34 +4233,32 @@ document.addEventListener('alpine:init', () => {
 
 
         if (app.currentView === 'achievements') {
-            if (e.key === 'ArrowRight') {
-                e.preventDefault();
-                actions.moveFocus(1);
-            } else if (e.key === 'ArrowLeft') {
-                e.preventDefault();
-                actions.moveFocus(-1);
-            }
-        }
-
-        if (app.currentView === 'achievements') {
-            
             if (app.isAchievementOverlayOpen) {
                 if (key === 'Escape' || key === 'Backspace') {
+                    e.preventDefault(); 
                     actions.closeAchievementOverlay();
                     return;
                 }
-                if (key === 'ArrowUp') actions.moveAchievementGridFocus(-1, 0);
-                if (key === 'ArrowDown') actions.moveAchievementGridFocus(1, 0);
-                if (key === 'ArrowLeft') actions.moveAchievementGridFocus(0, -1);
-                if (key === 'ArrowRight') actions.moveAchievementGridFocus(0, 1);
-                return;
+                
+                if (key === 'ArrowUp') { e.preventDefault(); actions.moveAchievementGridFocus(-1, 0); return; }
+                if (key === 'ArrowDown') { e.preventDefault(); actions.moveAchievementGridFocus(1, 0); return; }
+                if (key === 'ArrowLeft') { e.preventDefault(); actions.moveAchievementGridFocus(0, -1); return; }
+                if (key === 'ArrowRight') { e.preventDefault(); actions.moveAchievementGridFocus(0, 1); return; }
+                
+                return; 
             }
 
-            
-            if (key === 'Enter') {
+            if (key === 'ArrowRight') {
+                e.preventDefault();
+                actions.moveFocus(1);
+            } else if (key === 'ArrowLeft') {
+                e.preventDefault();
+                actions.moveFocus(-1);
+            } else if (key === 'Enter') {
+                e.preventDefault();
                 actions.openAchievementOverlay();
-                return;
             }
+            return; 
         }
 
 
