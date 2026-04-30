@@ -923,7 +923,7 @@ body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; heigh
     width: 65px;  flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 17px; letter-spacing: 1px; writing-mode: vertical-rl; transition: background 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), color 0.4s ease;
 }
 .guide-blade:not(.is-right) .blade-spine { transform: rotate(180deg); border-right: 1px solid rgba(0,0,0,0.15); }
-.guide-blade.is-right .blade-spine { transform: rotate(0deg); border-left: 1px solid rgba(0,0,0,0.15); }
+.guide-blade.is-right .blade-spine { transform: rotate(180deg); border-left: 1px solid rgba(0,0,0,0.15); }
 
 .blade-settings .blade-spine { background: linear-gradient(to bottom, #dce2e2 0%, #c3c9c9 50%, #a4abab 100%); color: #34383b; }
 .blade-home .blade-spine { background: linear-gradient(to bottom, #dce2e2 0%, #c3c9c9 50%, #a4abab 100%); color: #34383b; border-right: 1px solid #222; }
