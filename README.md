@@ -73,6 +73,7 @@ This project stands on the shoulders of giants. Special thanks to these incredib
   <h2>⚠️ Disclaimer</h2>
   <p><strong>This project is a third-party frontend and is not affiliated with the official Xenia Project or Microsoft.</strong></p>
 </div>
+
 ---
 
 ## 🚀 Installation & Setup The themes | التثبيت وأعداد الثيم
@@ -98,6 +99,7 @@ This project stands on the shoulders of giants. Special thanks to these incredib
     ⚠️ <b>تنبيه هام:</b> لضمان أمانك، لا تقم بتحميل أو استخدام أي ثيمات إلا من أشخاص ومصادر موثوقة.
   </blockquote>
 </div>
+
 ---
 
 ## ✨ Key Features
