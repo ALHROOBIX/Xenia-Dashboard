@@ -8,7 +8,7 @@ document.addEventListener('alpine:init', () => {
         y: { delay: null, interval: null }
     };
 
-
+    
     const DEFAULT_PRESETS = [
         { 
             id: 'xbox-classic', name: 'NXE Classic', 
@@ -19,7 +19,7 @@ document.addEventListener('alpine:init', () => {
                 text: '#ffffff', textSec: '#cccccc',
                 panel: '#000000', alert: '#ff6b6b',
                 btnA: '#59c853', btnB: '#e5443a', btnX: '#3a82e5', btnY: '#f2c40e'
-            } 
+            }
         },
         { 
             id: 'blades-orange', name: 'Blades Orange', 
@@ -64,10 +64,10 @@ document.addEventListener('alpine:init', () => {
             if (late[i] > (curr[i] || 0)) return true;
             if (late[i] < (curr[i] || 0)) return false;
         }
-        return false;
+        return false; 
     }
 
-
+    
     Alpine.store('app', {
         currentView: 'dashboard',
         currentViewHTML: '<h1>Loading...</h1>', 
@@ -179,7 +179,7 @@ document.addEventListener('alpine:init', () => {
 
         soundSettings: {
             masterVolume: 1.0, 
-            bgmVolume: 0.5,   
+            bgmVolume: 0.5,    
             bgmFile: null,     
             files: {
                 select: 'default',
@@ -206,7 +206,9 @@ document.addEventListener('alpine:init', () => {
             { id: 'panelLeft', name: 'Tab Left', type: 'file' },
             { id: 'panelRight', name: 'Tab Right', type: 'file' }
         ],
+
         activeSoundElement: null,
+
         audioCache: {},
         focusedCollection: null, focusedIndex: 0, selectedIndexForAnimation: -1, gameSelectionAnimating: false,
         focusedGamePatchInfo: null, patchList: [], patchHeader: {}, patchesLoadingError: null,
@@ -220,6 +222,7 @@ document.addEventListener('alpine:init', () => {
 
 
         librarySearch: '', 
+
         isKeyboardOpen: false,
         keyboardRow: 1, 
         keyboardCol: 0,
@@ -227,6 +230,7 @@ document.addEventListener('alpine:init', () => {
         isSymbols: false,
         isAccents: false,
         searchCursorPos: 0,
+        
         
         keyboardLayouts: {
             normal: [
@@ -256,6 +260,7 @@ document.addEventListener('alpine:init', () => {
             ]
 
         },
+        
         get currentKeys() {
             if (this.isSymbols) return this.keyboardLayouts.symbols;
             if (this.isAccents) return this.keyboardLayouts.accents; 
@@ -264,16 +269,19 @@ document.addEventListener('alpine:init', () => {
         },
 
         showGameInfoOverlay: false,
+        
         isGuideOpen: false,
-        guideTabIndex: 1,
+        guideTabIndex: 1, 
         guideMenuIndex: 0,
         guideTabs: [
             { id: 'home', name: 'Xbox Guide' },
-            { id: 'games', name: 'Games' }
+            { id: 'games', name: 'Games' },
+            { id: 'settings', name: 'Settings' }
         ],
         inputLocked: false,
 
 
+        
         xeniaUpdateInfo: {
             win: { 
                 status: 'idle', 
@@ -294,7 +302,10 @@ document.addEventListener('alpine:init', () => {
         language: 'en',
         translations: {}, 
 
+        
         t(key) {
+            
+            
             const keys = key.split('.');
             let current = this.translations[this.language];
             
@@ -327,13 +338,15 @@ document.addEventListener('alpine:init', () => {
         editingGameInfo: null, 
 
         
+        
+        
         isArtManagerOpen: false,
         artManagerData: {
             gameIndex: -1,     
             gameName: '',      
             selectedTab: 'cover', 
             source: 'steam',   
-            assets: [],       
+            assets: [],        
             loading: false,
             focusedAssetIndex: 0, 
             error: null
@@ -349,23 +362,55 @@ document.addEventListener('alpine:init', () => {
         isProfileSelectorOpen: false,
         achievementsGamesList: [],
         isCreatingProfile: false, 
-        : '',
+        isRenamingProfile: false, 
+        newProfileName: '',
         isAchievementOverlayOpen: false,
         selectedAchievementGame: null,
         focusedAchievementIndex: 0,
         ach_lock: false,
+        renameInput: '',       
+        keyboardMode: 'search', 
         appUpdateInfo: {
-            status: 'idle',
-            currentVer: '1.2.0',
+            status: 'idle', 
+            currentVer: '1.2.1',
             remoteVer: '---',
             message: 'Press (Y) to check for updates',
             percentage: 0
         }
     });
 
+    
+    Alpine.store('hooks', {
+        listeners: {},
+
+        
+        on(eventName, callback) {
+            if (!this.listeners[eventName]) {
+                this.listeners[eventName] = [];
+            }
+            this.listeners[eventName].push(callback);
+            console.log(`[Hooks] External theme registered for: ${eventName}`);
+        },
+
+        
+        emit(eventName, data = {}) {
+            if (this.listeners[eventName]) {
+                
+                this.listeners[eventName].forEach(callback => {
+                    try {
+                        callback(data);
+                    } catch (e) {
+                        console.error(`[Hooks] Error in external theme executing ${eventName}:`, e);
+                    }
+                });
+            }
+        }
+    });
+
+    
     Alpine.store('actions', {
 
-               async downloadOptimizedSettings() {
+        async downloadOptimizedSettings() {
             const app = Alpine.store('app');
             if (app.downloadStatuses.optimized.status !== 'idle' && app.downloadStatuses.optimized.step !== 'done') return;
 
@@ -381,16 +426,72 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
+        
+        getThemeIcon(originalPath) {
+            if (!originalPath) return originalPath;
+            const app = Alpine.store('app');
+            const themeData = app.themesList.find(t => t.name === app.currentTheme);
+            
+            
+            if (themeData && themeData.type === 'external' && themeData.customIcons) {
+                const fileName = originalPath.split(/[\\/]/).pop(); 
+                
+                
+                if (themeData.customIcons.includes(fileName)) {
+                    
+                    return `app-sys://${app.currentTheme}/assets/icons/${fileName}`;
+                }
+            }
+            return originalPath; 
+        },
+        
+        applyThemeIconsToMenus() {
+            const app = Alpine.store('app');
+            
+            
+            const menusToUpdate = ['settingsMenu', 'aboutMenu', 'coreSettingsItems'];
+            menusToUpdate.forEach(menuName => {
+                if (app[menuName]) {
+                    app[menuName] = app[menuName].map(item => ({
+                        ...item,
+                        originalIcon: item.originalIcon || item.icon, 
+                        icon: this.getThemeIcon(item.originalIcon || item.icon) 
+                    }));
+                }
+            });
+            
+            
+            if (app.masterMenu && app.masterMenu.length > 0) {
+                app.masterMenu = app.masterMenu.map(master => ({
+                    ...master,
+                    detailMenu: master.detailMenu.map(detail => ({
+                        ...detail,
+                        originalIcon: detail.originalIcon || detail.icon,
+                        icon: this.getThemeIcon(detail.originalIcon || detail.icon)
+                    }))
+                }));
+                this.updateDetailMenu(); 
+            }
+        },
+
         async applyOptimizedSettings() {
             const app = Alpine.store('app');
             const game = app.filteredLibraryGames[app.focusedIndex];
 
-            if (!game.titleID) {
+            
+            if (!game || !game.titleID) {
                 alert("Title ID required to apply settings.");
                 return;
             }
 
+            
+            
+            if (!game.hasOptimizedSettings) {
+                return; 
+            }
+
             this.playSound('select');
+            
             
             const configRes = await window.electronAPI.manageGameConfig({ action: 'load', titleID: game.titleID });
             
@@ -403,20 +504,20 @@ document.addEventListener('alpine:init', () => {
                 if (result.success) {
                     alert(`Optimized settings applied to ${game.name}!`);
                     this.playSound('channelUp');
+                    
                     if (app.currentView === 'settings-config') this.loadXeniaConfig();
                 } else {
                     alert("Setting not found in Database.");
                 }
             }
         },
-        
         async syncOptimizedDatabase() {
             const app = Alpine.store('app');
             if (app.downloadStatuses.optimized.status !== 'idle' && app.downloadStatuses.optimized.step !== 'done') return;
 
             this.playSound('select');
             app.downloadStatuses.optimized = { status: 'Syncing...', percentage: 0, step: 'download' };
-            await window.electronAPI.invoke('download-optimized-settings');
+            await window.electronAPI.downloadOptimizedSettings();
         },
 
         async checkAppUpdate() {
@@ -427,18 +528,18 @@ document.addEventListener('alpine:init', () => {
             const result = await window.electronAPI.checkAppUpdate();
             
             if (result.success) {
-
+                
                 app.appUpdateInfo.currentVer = result.currentVersion;
                 app.appUpdateInfo.remoteVer = result.latestVersion;
                 
-
+                
                 const hasNewUpdate = isNewerVersion(result.currentVersion, result.latestVersion);
 
                 if (hasNewUpdate) {
                     app.appUpdateInfo.status = 'update-available';
                     app.appUpdateInfo.message = `New Version ${result.latestVersion} available!`;
                 } else {
-
+                    
                     app.appUpdateInfo.status = 'up-to-date';
                     app.appUpdateInfo.message = 'Dashboard is up to date.';
                 }
@@ -469,9 +570,10 @@ document.addEventListener('alpine:init', () => {
 
             this.playSound('panelUnfold');
             app.keyboardMode = 'rename';
-            app.renameInput = game.name;
+            app.renameInput = game.name; 
             app.searchCursorPos = app.renameInput.length;
             app.isKeyboardOpen = true;
+            
             
             setTimeout(() => this.updateCursorVisuals(), 50);
         },
@@ -488,11 +590,13 @@ document.addEventListener('alpine:init', () => {
                 });
 
                 if (result.success) {
+                    
                     game.name = newName;
                     this.updateGameDetails();
                     this.playSound('channelUp');
                 }
             }
+            
             
             app.isKeyboardOpen = false;
             app.keyboardMode = 'search';
@@ -501,6 +605,7 @@ document.addEventListener('alpine:init', () => {
 
         openAchievementOverlay() {
             const app = Alpine.store('app');
+            
             const game = app.achievementsGamesList[app.focusedIndex];
             if (game && !game.loading) {
                 app.selectedAchievementGame = game;
@@ -554,8 +659,8 @@ document.addEventListener('alpine:init', () => {
                 app.achievementsGamesList = result.games.map(g => ({
                     ...g,
                     realAchievements: [],
-                    earnedCount: 0,   
-                    totalAchCount: 0, 
+                    earnedCount: 0,    
+                    totalAchCount: 0,  
                     earnedScore: 0,    
                     loading: true
                 }));
@@ -568,10 +673,12 @@ document.addEventListener('alpine:init', () => {
                         if (achRes.success && achRes.achievements) {
                             game.realAchievements = achRes.achievements;
                             
+                            
                             const unlockedList = achRes.achievements.filter(a => a.unlocked === true);
                             
                             game.earnedCount = unlockedList.length; 
                             game.totalAchCount = achRes.achievements.length; 
+                            
                             
                             game.earnedScore = unlockedList.reduce((sum, a) => {
                                 return sum + (Number(a.score) || 0);
@@ -580,12 +687,14 @@ document.addEventListener('alpine:init', () => {
                     } catch (e) {
                         console.error(`Error loading achievements for ${game.titleID}:`, e);
                     } finally {
+                        
                         game.loading = false;
                     }
                 }
             }
         },
 
+        
 
         async refreshCurrentGame() {
             const app = Alpine.store('app');
@@ -594,15 +703,17 @@ document.addEventListener('alpine:init', () => {
 
             if (!currentGame || currentGame.loading) return;
 
+            
             currentGame.loading = true;
 
             try {
+                
                 const achRes = await window.electronAPI.getGameAchievements(currentGame.titleID, xuid, true);
                 
                 if (achRes.success && achRes.achievements) {
                     currentGame.realAchievements = achRes.achievements;
                     
-                    // 3. إعادة حساب الأرقام بعد التحديث
+                    
                     const unlockedList = achRes.achievements.filter(a => a.unlocked === true);
                     currentGame.earnedCount = unlockedList.length;
                     currentGame.totalAchCount = achRes.achievements.length;
@@ -626,20 +737,23 @@ document.addEventListener('alpine:init', () => {
             app.searchCursorPos = 0;
             app.keyboardRow = 0;
             app.keyboardCol = 0;
-            app.isKeyboardOpen = true;
+            app.isKeyboardOpen = true; 
             
             setTimeout(() => this.updateCursorVisuals(), 50);
         },
         cancelCreateProfile() {
             const app = Alpine.store('app');
             
+            
             app.isCreatingProfile = false; 
+            
             
             app.isProfileSelectorOpen = true; 
             
             this.playSound('back');
         },
 
+        
         async submitNewProfile() {
             const app = Alpine.store('app');
             if (!app.newProfileName.trim()) return;
@@ -648,11 +762,14 @@ document.addEventListener('alpine:init', () => {
             const result = await window.electronAPI.createProfile(app.newProfileName);
             
             if (result.success) {
+                
                 app.isCreatingProfile = false; 
                 
-                await this.refreshProfileData();
+                
+                await this.refreshProfileData(); 
             }
         },
+        
 
         startRenameProfilePrompt() {
             const app = Alpine.store('app');
@@ -661,16 +778,16 @@ document.addEventListener('alpine:init', () => {
 
             this.playSound('panelUnfold');
             app.newProfileName = profile.gamertag; 
-            app.keyboardMode = 'rename_profile';
+            app.keyboardMode = 'rename_profile'; 
             app.searchCursorPos = app.newProfileName.length;
             app.keyboardRow = 0;
             app.keyboardCol = 0;
-            app.isKeyboardOpen = true;
+            app.isKeyboardOpen = true; 
             
             setTimeout(() => this.updateCursorVisuals(), 50);
         },
 
-
+        
         cancelRenameProfile() {
             const app = Alpine.store('app');
             app.isRenamingProfile = false;
@@ -678,14 +795,14 @@ document.addEventListener('alpine:init', () => {
             this.playSound('back');
         },
 
-
+        
         async submitProfileRename() {
             const app = Alpine.store('app');
             const profile = app.profilesList[app.focusedProfileIndex];
             if (!app.newProfileName.trim() || !profile) return;
 
             this.playSound('select');
-
+            
             const result = await window.electronAPI.renameProfile({ 
                 xuid: profile.xuid, 
                 newName: app.newProfileName 
@@ -693,15 +810,17 @@ document.addEventListener('alpine:init', () => {
             
             if (result.success) {
                 app.isRenamingProfile = false;
-                await this.refreshProfileData();
+                await this.refreshProfileData(); 
             }
         },
 
+        
+        
         async loginFocusedProfile() {
             const app = Alpine.store('app');
             const profile = app.profilesList[app.focusedProfileIndex];
             if (profile && profile.slot === null) {
-
+                
                 const usedSlots = app.profilesList.map(p => p.slot).filter(s => s !== null);
                 let targetSlot = [0, 1, 2, 3].find(s => !usedSlots.includes(s));
                 
@@ -713,7 +832,7 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
-
+        
         async logoutFocusedProfile() {
             const app = Alpine.store('app');
             const profile = app.profilesList[app.focusedProfileIndex];
@@ -724,7 +843,8 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
-                async handleProfileClick(profile) {
+        
+        async handleProfileClick(profile) {
             if (profile.slot !== null) {
                 await this.switchActiveProfile(profile.slot);
             } else {
@@ -738,6 +858,7 @@ document.addEventListener('alpine:init', () => {
             
             if (!profile || app.focusedProfileIndex === app.profilesList.length) return;
 
+            
             if (profile.slot === app.activeProfileSlot) {
                 alert("Cannot delete the active profile. Switch to another profile first.");
                 return;
@@ -753,7 +874,7 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
-
+        
         scrollToFocusedElement(elementId) {
             const el = document.getElementById(elementId);
             if (el) {
@@ -761,13 +882,16 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
+        
         moveProfileFocus(direction) {
             const app = Alpine.store('app');
             let newIndex = app.focusedProfileIndex + direction;
             
+            
             if (newIndex >= 0 && newIndex < app.profilesList.length) {
                 app.focusedProfileIndex = newIndex;
                 this.playSound('focus');
+                
                 
                 this.scrollToFocusedElement('profile-item-' + newIndex);
             }
@@ -776,16 +900,20 @@ document.addEventListener('alpine:init', () => {
         updateAchievementScroll() {
             const track = document.querySelector('.achievements-track');
             if (track) {
+                
                 const offset = this.app.focusedIndex * -450; 
                 track.style.transform = `translateX(${offset}px)`;
             }
         },
 
+        
         async openProfileSelector() {
             const app = Alpine.store('app');
             this.playSound('panelUnfold');
             
+            
             await this.refreshProfileData(); 
+            
             
             app.focusedProfileIndex = app.profilesList.findIndex(p => p.slot === app.activeProfileSlot);
             if (app.focusedProfileIndex === -1) app.focusedProfileIndex = 0;
@@ -795,16 +923,18 @@ document.addEventListener('alpine:init', () => {
                 
         async loadAllProfiles() {
             const app = Alpine.store('app');
+            
             const result = await window.electronAPI.getAllUserProfiles();
             
             if (result.success) {
                 app.profilesList = result.profiles;
                 app.activeProfileSlot = result.activeSlot;
                 
+                
                 const active = result.profiles.find(p => p.slot === result.activeSlot);
                 if (active) {
                     app.playerTag = active.gamertag;
-                    app.gamerscore = active.total_gamerscore;
+                    app.gamerscore = active.total_gamerscore; 
                 }
             }
         },
@@ -818,6 +948,7 @@ document.addEventListener('alpine:init', () => {
             
             const result = await window.electronAPI.setActiveProfileSlot(slot);
             if (result.success) {
+                
                 const profile = app.profilesList.find(p => p.slot === slot);
                 if (profile) {
                     await window.electronAPI.set('xuid', profile.xuid);
@@ -855,6 +986,7 @@ document.addEventListener('alpine:init', () => {
                 const result = await window.electronAPI.scanZarTitleID(game.path);
                 
                 if (result.success) {
+                    
                     game.titleID = result.titleID;
                     if (result.art) {
                         game.coverUrl = result.art.coverUrl;
@@ -863,6 +995,7 @@ document.addEventListener('alpine:init', () => {
                         game.iconUrl = result.art.iconUrl;
                     }
 
+                    
                     this.updateGameDetails();
                     this.playSound('channelUp');
                 } else {
@@ -883,17 +1016,20 @@ document.addEventListener('alpine:init', () => {
             if (action === 'pause') {
                 bgmPlayer.pause();
             } else if (action === 'play') {
+                
                 if (!app.isGameRunning) {
                     bgmPlayer.play().catch(e => console.log("BGM play blocked"));
                 }
             }
         },
+        
         async translateDescription() {
             const app = Alpine.store('app');
             const info = app.gameExtendedInfo;
 
             if (!info.description || info.isTranslating) return;
 
+            
             if (!info.originalDescription) {
                 info.originalDescription = info.description;
             }
@@ -901,7 +1037,7 @@ document.addEventListener('alpine:init', () => {
             this.playSound('focus');
             info.isTranslating = true;
 
-
+            
             const result = await window.electronAPI.translateText(info.originalDescription, app.language);
 
             if (result.success) {
@@ -915,9 +1051,11 @@ document.addEventListener('alpine:init', () => {
         handleTranslationClick() {
             const info = Alpine.store('app').gameExtendedInfo;
 
+            
             if (info.translatedDescription) {
                 this.revertToOriginal();
             } 
+            
             else {
                 this.translateDescription();
             }
@@ -927,6 +1065,7 @@ document.addEventListener('alpine:init', () => {
             const app = Alpine.store('app');
             const status = await window.electronAPI.checkAbgxStatus();
             app.abgxStatus = status;
+            
             
             if (!status.exists) {
                 app.showAbgxNotify = true;
@@ -938,6 +1077,7 @@ document.addEventListener('alpine:init', () => {
             app.abgxStatus = result;
         },
 
+        
         revertToOriginal() {
             const app = Alpine.store('app');
             const info = app.gameExtendedInfo;
@@ -952,17 +1092,22 @@ document.addEventListener('alpine:init', () => {
             const app = Alpine.store('app');
             const current = app.settings.artSource || 'LocalDB';
             
+            
             const next = (current === 'LocalDB') ? 'SteamGridDB' : 'LocalDB';
             
+            
             app.settings.artSource = next;
+            
             
             await window.electronAPI.set('artSource', next);
             
             this.playSound('select');
         },
 
+        
         openArtManager() {
             const app = Alpine.store('app');
+            
             
             if (app.isArtManagerOpen) return; 
 
@@ -971,6 +1116,7 @@ document.addEventListener('alpine:init', () => {
 
             this.playSound('panelUnfold');
             app.isArtManagerOpen = true;
+            
             
             app.artManagerData = {
                 gameIndex: app.focusedIndex,
@@ -992,6 +1138,7 @@ document.addEventListener('alpine:init', () => {
             app.isArtManagerOpen = false;
         },
 
+        
         async fetchArtAssets() {
             const app = Alpine.store('app');
             const game = app.filteredLibraryGames[app.artManagerData.gameIndex];
@@ -1000,12 +1147,16 @@ document.addEventListener('alpine:init', () => {
             app.artManagerData.assets = [];
             app.artManagerData.error = null;
 
+            
+            
             const currentSource = app.settings.artSource || 'LocalDB';
             
             console.log(`[Art Manager] Fetching for "${game.name}" using source: [${currentSource}]`);
 
             try {
-
+                
+                
+                
                 if (currentSource === 'SteamGridDB') {
                     const result = await window.electronAPI.searchSteamGridDBAssets({
                         gameName: app.artManagerData.cleanName, 
@@ -1018,18 +1169,28 @@ document.addEventListener('alpine:init', () => {
                         app.artManagerData.error = result.error || "No results from SteamGridDB";
                     }
                 } 
-
+                
+                
+                
                 else if (currentSource === 'LocalDB') {
+                    
                     if (!game.titleID) {
                         throw new Error("Game has no Title ID. Cannot search Local DB.");
                     }
 
+                    
                     const result = await window.electronAPI.getLocalGameMetadata(game.titleID);
                     
                     if (result.found && result.metadata && result.metadata.assets) {
                         const tab = app.artManagerData.selectedTab; 
                         let targetUrl = '';
 
+                        
+                        
+                        
+                        
+                        
+                        
                         
                         if (tab === 'cover') targetUrl = result.metadata.assets.cover;
                         if (tab === 'hero')  targetUrl = result.metadata.assets.hero; 
@@ -1039,6 +1200,7 @@ document.addEventListener('alpine:init', () => {
                         
                         
                         if (targetUrl) {
+                            
                             app.artManagerData.assets = [{
                                 thumb: targetUrl,
                                 full: targetUrl
@@ -1059,6 +1221,7 @@ document.addEventListener('alpine:init', () => {
             app.artManagerData.loading = false;
         },
 
+        
         changeArtTab(direction) {
             const app = Alpine.store('app');
             const tabs = app.artTabs;
@@ -1081,6 +1244,7 @@ document.addEventListener('alpine:init', () => {
             let cols = 1;
 
             if (gridContainer) {
+                
                 const computedStyle = window.getComputedStyle(gridContainer);
                 const gridColumns = computedStyle.gridTemplateColumns.split(' ');
                 cols = gridColumns.length;
@@ -1089,25 +1253,32 @@ document.addEventListener('alpine:init', () => {
             let currentIndex = app.artManagerData.focusedAssetIndex;
             let newIndex = currentIndex;
 
+            
             if (colDir !== 0) {
                 newIndex += colDir;
             } 
+            
+            
             else if (rowDir !== 0) {
                 const target = currentIndex + (rowDir * cols);
+                
                 
                 if (target >= 0 && target < assets.length) {
                     newIndex = target;
                 } else {
+                    
                     return; 
                 }
             }
 
+            
             if (newIndex < 0) newIndex = 0;
             if (newIndex >= assets.length) newIndex = assets.length - 1;
 
             if (newIndex !== currentIndex) {
                 app.artManagerData.focusedAssetIndex = newIndex;
                 this.playSound('focus');
+                
                 
                 setTimeout(() => {
                     const el = document.getElementById('art-item-' + newIndex);
@@ -1116,9 +1287,11 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
+        
         async applyArtAsset(url, isLocal = false) {
             const app = Alpine.store('app');
             const game = app.filteredLibraryGames[app.artManagerData.gameIndex];
+            
             
             this.playSound('select');
             
@@ -1130,12 +1303,15 @@ document.addEventListener('alpine:init', () => {
             });
 
             if (result.success) {
+                
                 if (app.artManagerData.selectedTab === 'cover') game.coverUrl = result.path;
                 if (app.artManagerData.selectedTab === 'hero') game.heroUrl = result.path;
                 if (app.artManagerData.selectedTab === 'logo') game.logoUrl = result.path;
                 if (app.artManagerData.selectedTab === 'icon') game.iconUrl = result.path;
                 
+                
                 this.updateGameDetails();
+                
                 
                 this.closeArtManager();
             } else {
@@ -1143,10 +1319,12 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
+        
         async browseLocalArtAsset() {
             const app = Alpine.store('app');
             const filePath = await window.electronAPI.openImageFile();
             if (filePath) {
+                
                 const artProtocolUrl = `file://${filePath.replace(/\\/g, '/')}`;
                 await this.applyArtAsset(artProtocolUrl, true);
             }
@@ -1154,46 +1332,47 @@ document.addEventListener('alpine:init', () => {
         playSound(soundKey) {
             const app = Alpine.store('app');
             
-
+            
             let targetId = soundKey + '-sound';
             const kebabKey = soundKey.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
             
-
+            
             let audioElement = app.audioCache[soundKey];
 
-
+            
             if (!audioElement) {
                 audioElement = document.getElementById(targetId) || document.getElementById(kebabKey + '-sound');
                 
                 if (audioElement) {
                     app.audioCache[soundKey] = audioElement;
                 } else {
-                    return;
+                    return; 
                 }
             }
 
-
+            
+            
             if (app.activeSoundElement && app.activeSoundElement !== audioElement) {
                 app.activeSoundElement.pause();
                 app.activeSoundElement.currentTime = 0;
             }
 
-
+            
             const vol = (app.soundSettings && app.soundSettings.masterVolume !== undefined) 
                         ? app.soundSettings.masterVolume : 1.0;
 
             audioElement.volume = vol;
-            audioElement.currentTime = 0;
+            audioElement.currentTime = 0; 
             
             audioElement.play().then(() => {
-
+                
                 app.activeSoundElement = audioElement;
-            }).catch(e => {});
+            }).catch(e => {  });
 
-
+            
         },
 
-  
+    
     async updateMusicVolume(direction) {
         const app = Alpine.store('app');
         const bgmPlayer = document.getElementById('bgm-player');
@@ -1206,26 +1385,34 @@ document.addEventListener('alpine:init', () => {
         if (newVol !== app.soundSettings.bgmVolume) {
             app.soundSettings.bgmVolume = newVol;
             
+            
             if (bgmPlayer) bgmPlayer.volume = newVol;
+            
             
             await window.electronAPI.set('bgmVolume', newVol);
         }
     },
 
+    
     async updateMasterVolume(direction) {
         const app = Alpine.store('app');
         
+        
         let newVol = app.soundSettings.masterVolume + (direction * 0.1);
+        
         
         if (newVol > 1) newVol = 1;
         if (newVol < 0) newVol = 0;
+        
         
         newVol = Math.round(newVol * 10) / 10;
 
         if (newVol !== app.soundSettings.masterVolume) {
             app.soundSettings.masterVolume = newVol;
             
+            
             await window.electronAPI.set('soundVolume', newVol);
+            
             
             this.playSound('focus'); 
         }
@@ -1243,7 +1430,17 @@ document.addEventListener('alpine:init', () => {
                 const filePath = await window.electronAPI.openAudioFile();
                 
                 if (filePath) {
+                    
+                    const themeData = app.themesList.find(t => t.name === app.currentTheme);
+                    const isExternal = themeData && themeData.type === 'external';
+                    let themeMods = {};
 
+                    if (isExternal) {
+                        themeMods = await window.electronAPI.get('mods_' + app.currentTheme) || {};
+                        if (!themeMods.soundFiles) themeMods.soundFiles = {};
+                    }
+
+                    
                     if (item.id === 'bgmFile') {
                         app.soundSettings.bgmFile = filePath;
                         
@@ -1253,14 +1450,18 @@ document.addEventListener('alpine:init', () => {
                             bgmPlayer.volume = app.soundSettings.bgmVolume;
                             bgmPlayer.play().catch(e => console.error("BGM Play Error:", e));
                         }
-                        await window.electronAPI.set('bgmFile', filePath);
-                    } 
-
-                    else {
-
-                        app.soundSettings.files[item.id] = filePath;
                         
-
+                        
+                        if (isExternal) {
+                            themeMods.bgmFile = filePath;
+                            await window.electronAPI.set('mods_' + app.currentTheme, themeMods);
+                        } else {
+                            await window.electronAPI.set('bgmFile', filePath);
+                        }
+                    } 
+                    
+                    else {
+                        app.soundSettings.files[item.id] = filePath;
                         const kebabKey = item.id.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
                         let el = document.getElementById(item.id + '-sound') || document.getElementById(kebabKey + '-sound');
 
@@ -1268,81 +1469,60 @@ document.addEventListener('alpine:init', () => {
                             el.src = `file://${filePath.replace(/\\/g, '/')}`;
                             el.load();
                             el.onloadeddata = () => {
-                                this.playSound(item.id);
+                                this.playSound(item.id); 
                                 el.onloadeddata = null; 
                             };
                         }
-
-                        const rawSoundFiles = JSON.parse(JSON.stringify(app.soundSettings.files));
-                        await window.electronAPI.set('soundFiles', rawSoundFiles);
                         
-                        console.log("[Audio] New sound saved to JSON:", item.id);
+                        
+                        if (isExternal) {
+                            themeMods.soundFiles[item.id] = filePath;
+                            await window.electronAPI.set('mods_' + app.currentTheme, themeMods);
+                        } else {
+                            const rawSoundFiles = JSON.parse(JSON.stringify(app.soundSettings.files));
+                            await window.electronAPI.set('soundFiles', rawSoundFiles);
+                        }
+                        console.log("[Audio] New sound saved for:", isExternal ? app.currentTheme : "Global");
                     }
                 }
             }, 100);
         },
+        
         async resetSoundSettings() {
             const app = Alpine.store('app');
-            
             console.log("[Audio] Resetting sound settings...");
 
+            const themeData = app.themesList.find(t => t.name === app.currentTheme);
+            const isExternal = themeData && themeData.type === 'external';
+
+            
             try {
-                await window.electronAPI.set('bgmFile', null);
+                if (isExternal) {
+                    let themeMods = await window.electronAPI.get('mods_' + app.currentTheme) || {};
+                    themeMods.bgmFile = null;
+                    themeMods.soundFiles = null; 
+                    await window.electronAPI.set('mods_' + app.currentTheme, themeMods);
+                } else {
+                    await window.electronAPI.set('bgmFile', null);
+                    const defaultFiles = {
+                        select: 'default', back: 'default', focus: 'default',
+                        channelUp: 'default', channelDown: 'default',
+                        panelLeft: 'default', panelRight: 'default', panelUnfold: 'default'
+                    };
+                    await window.electronAPI.set('soundFiles', defaultFiles);
+                }
                 
                 await window.electronAPI.set('soundVolume', 1.0);
                 await window.electronAPI.set('bgmVolume', 0.5);
-                
-                
-                const defaultFiles = {
-                    select: 'default', back: 'default', focus: 'default',
-                    channelUp: 'default', channelDown: 'default',
-                    panelLeft: 'default', panelRight: 'default', panelUnfold: 'default'
-                };
-                await window.electronAPI.set('soundFiles', defaultFiles);
-                
-                console.log("[Audio] Settings saved to disk successfully.");
+                console.log("[Audio] Settings reset and saved to disk.");
             } catch (e) {
                 console.error("[Audio] Failed to save reset settings:", e);
             }
 
-            app.soundSettings.masterVolume = 1.0;
-            app.soundSettings.bgmVolume = 0.5;
-            app.soundSettings.bgmFile = null;
-            app.soundSettings.files = {
-                select: 'default', back: 'default', focus: 'default',
-                channelUp: 'default', channelDown: 'default',
-                panelLeft: 'default', panelRight: 'default', panelUnfold: 'default'
-            };
-
-            const bgmPlayer = document.getElementById('bgm-player');
-            if (bgmPlayer) {
-                bgmPlayer.pause();
-                bgmPlayer.currentTime = 0;
-                bgmPlayer.removeAttribute('src'); 
-                bgmPlayer.load(); 
-                console.log("[Audio] BGM Player stopped and cleared.");
-            }
+            
+            await this.loadUserSounds();
 
             
-            const soundKeys = ['select', 'back', 'focus', 'channelUp', 'channelDown', 'panelLeft', 'panelRight', 'panelUnfold'];
-            
-            for (const key of soundKeys) {
-                try {
-                    const kebabKey = key.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
-                    const fileName = key.replace(/([A-Z])/g, '-$1').toLowerCase();
-                    
-                    let el = document.getElementById(key + '-sound');
-                    if (!el) el = document.getElementById(kebabKey + '-sound');
-                    
-                    if (el) {
-                        el.src = `assets/audio/${fileName}.wav`;
-                        el.load();
-                    }
-                } catch (err) {
-                    console.warn(`[Audio] Failed to reset element for ${key}:`, err);
-                }
-            }
-
             try {
                 const feedback = new Audio('assets/audio/panel-unfold.wav');
                 feedback.volume = 1.0; 
@@ -1362,18 +1542,32 @@ document.addEventListener('alpine:init', () => {
         async loadUserSounds() {
             const app = Alpine.store('app');
             
+            const themeData = app.themesList.find(t => t.name === app.currentTheme);
+            const isExternal = themeData && themeData.type === 'external';
+
             const savedVol = await window.electronAPI.get('soundVolume');
             const savedBgmVol = await window.electronAPI.get('bgmVolume');
-            const savedBgmFile = await window.electronAPI.get('bgmFile');
-            const savedFiles = await window.electronAPI.get('soundFiles');
+            
+            let savedBgmFile = null;
+            let savedFiles = null;
+
+            
+            if (isExternal) {
+                let themeMods = await window.electronAPI.get('mods_' + app.currentTheme) || {};
+                savedBgmFile = themeMods.bgmFile || null;
+                savedFiles = themeMods.soundFiles || null;
+            } else {
+                savedBgmFile = await window.electronAPI.get('bgmFile');
+                savedFiles = await window.electronAPI.get('soundFiles');
+            }
 
             if (savedVol !== undefined && savedVol !== null) app.soundSettings.masterVolume = parseFloat(savedVol);
             if (savedBgmVol !== undefined && savedBgmVol !== null) app.soundSettings.bgmVolume = parseFloat(savedBgmVol);
             
+            
+            const bgmPlayer = document.getElementById('bgm-player');
             if (savedBgmFile && savedBgmFile.length > 3 && savedBgmFile !== "null") {
                 app.soundSettings.bgmFile = savedBgmFile;
-                
-                const bgmPlayer = document.getElementById('bgm-player');
                 if (bgmPlayer) {
                     bgmPlayer.src = `file://${savedBgmFile.replace(/\\/g, '/')}`;
                     bgmPlayer.volume = app.soundSettings.bgmVolume;
@@ -1381,21 +1575,50 @@ document.addEventListener('alpine:init', () => {
                 }
             } else {
                 app.soundSettings.bgmFile = null;
+                if (bgmPlayer) {
+                    bgmPlayer.pause();
+                    bgmPlayer.removeAttribute('src'); 
+                }
             }
 
+            
             app.audioCache = {}; 
-            if (savedFiles) {
-                app.soundSettings.files = { ...app.soundSettings.files, ...savedFiles };
-                for (const [key, path] of Object.entries(savedFiles)) {
+            const defaultFiles = {
+                select: 'default', back: 'default', focus: 'default',
+                channelUp: 'default', channelDown: 'default',
+                panelLeft: 'default', panelRight: 'default', panelUnfold: 'default'
+            };
+            
+            
+            app.soundSettings.files = { ...defaultFiles, ...(savedFiles || {}) };
+            
+            
+            for (const [key, path] of Object.entries(app.soundSettings.files)) {
+                const kebabKey = key.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+                const fileName = key.replace(/([A-Z])/g, '-$1').toLowerCase();
+                
+                let el = document.getElementById(key + '-sound');
+                if (!el) el = document.getElementById(kebabKey + '-sound');
+                
+                if (el) {
+                    
+                    if (!el.dataset.originalSrc) {
+                        el.dataset.originalSrc = el.getAttribute('src');
+                    }
+
                     if (path && path !== 'default') {
-                        const kebabKey = key.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
-                        let el = document.getElementById(key + '-sound');
-                        if (!el) el = document.getElementById(kebabKey + '-sound');
-                        if (el) {
-                            el.src = `file://${path.replace(/\\/g, '/')}`;
-                            el.load(); 
+                        
+                        el.src = `file://${path.replace(/\\/g, '/')}`; 
+                    } else {
+                        
+                        if (el.dataset.originalSrc) {
+                            el.src = el.dataset.originalSrc;
+                        } else {
+                            
+                            el.src = `app-core://assets/audio/${fileName}.wav`; 
                         }
                     }
+                    el.load(); 
                 }
             }
         },
@@ -1403,31 +1626,39 @@ document.addEventListener('alpine:init', () => {
         async changeUserAvatar() {
             const app = Alpine.store('app');
             
+            
             this.playSound('panelUnfold');
 
             await this.refreshProfileData();
 
+            
             const currentIndex = app.profilesList.findIndex(p => p.slot === app.activeProfileSlot);
             app.focusedProfileIndex = currentIndex !== -1 ? currentIndex : 0;
 
+            
             app.isProfileSelectorOpen = true;
         },
         async browseNewGamerpic() {
             const app = Alpine.store('app');
+            
             const targetProfile = app.profilesList[app.focusedProfileIndex];
             if (!targetProfile) return;
 
             this.playSound('select');
 
+            
             const filePath = await window.electronAPI.openImageFile();
             
             if (filePath) {
-                await window.electronAPI.set(`customAvatar_slot_${targetProfile.slot}`,'file://' + filePath);
+                
+                await window.electronAPI.set(`customAvatar_slot_${targetProfile.slot}`, filePath);
+                
                 
                 await this.refreshProfileData();
             }
         },
 
+        
         async launchXeniaDashboard() {
             const app = Alpine.store('app');
             const xeniaPath = app.settings.xeniaPath;
@@ -1459,17 +1690,21 @@ document.addEventListener('alpine:init', () => {
                 app.profilesList = res.profiles;
                 app.activeProfileSlot = res.activeSlot;
 
+                
                 const active = res.profiles.find(p => p.slot === res.activeSlot) || res.profiles[0];
                 if (active) {
                     app.playerTag = active.gamertag;
                     app.gamerscore = active.total_gamerscore;
                     
+                    
                     const pic = await window.electronAPI.getUserGamerpic(active.xuid, active.slot);
                     app.userAvatar = pic.success ? pic.url : null;
                 }
 
+                
                 for (let profile of app.profilesList) {
                     const pPic = await window.electronAPI.getUserGamerpic(profile.xuid, profile.slot);
+                    
                     profile.avatar = pPic.success ? `${pPic.url}?t=${Date.now()}` : null;
                 }
             }
@@ -1482,10 +1717,13 @@ document.addEventListener('alpine:init', () => {
 
             this.playSound('select');
 
+            
             const filePath = await window.electronAPI.openImageFile();
             
             if (filePath) {
+                
                 await window.electronAPI.set(`customAvatar_slot_${targetProfile.slot}`, filePath);
+                
                 
                 await this.refreshProfileData();
                 this.playSound('select');
@@ -1494,6 +1732,7 @@ document.addEventListener('alpine:init', () => {
 
         async updateDatabase() {
             const app = Alpine.store('app');
+            
             alert("Downloading latest database...");
             const result = await window.electronAPI.updateLocalDB();
             if (result.success) {
@@ -1503,12 +1742,14 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
+                
         async performDeepScan() {
             const app = Alpine.store('app');
             const game = app.filteredLibraryGames[app.focusedIndex];
 
             if (!game) return;
 
+            
             const btnText = document.getElementById('deep-scan-text');
             if(btnText) btnText.innerText = "Scanning...";
             
@@ -1518,9 +1759,12 @@ document.addEventListener('alpine:init', () => {
                 const result = await window.electronAPI.deepScanGame(game.path);
                 
                 if (result.success && result.titleID) {
+                    
                     game.titleID = result.titleID;
                     
+                    
                     this.updateGameDetails();
+                    
                     
                     this.playSound('channelUp'); 
                     
@@ -1531,6 +1775,7 @@ document.addEventListener('alpine:init', () => {
             } catch (e) {
                 alert(`Error: ${e.message}`);
             } finally {
+                
                 if(btnText) btnText.innerText = "Deep Scan";
             }
         },
@@ -1546,10 +1791,13 @@ document.addEventListener('alpine:init', () => {
 
             this.playSound('select');
             
+            
             app.configMode = 'game';
             app.editingGameInfo = { name: game.name, titleID: game.titleID };
             
+            
             await this.loadView('settings-config');
+            
             
             app.xeniaConfig = {};
             app.configCategories = [];
@@ -1573,6 +1821,7 @@ document.addEventListener('alpine:init', () => {
                 
                 
                 
+                
             } catch (e) {
                 console.error("Failed to load game config:", e);
                 app.xeniaConfigError = e.message;
@@ -1582,6 +1831,7 @@ document.addEventListener('alpine:init', () => {
         
         filterLibrary() {
             const app = Alpine.store('app');
+            
             if (!app.gamesList) {
                 app.filteredLibraryGames = [];
                 return;
@@ -1607,6 +1857,7 @@ document.addEventListener('alpine:init', () => {
         } catch (e) { return dateString; }
     },
 
+    
     getTimeDifference(dateString) {
         try {
             const now = new Date();
@@ -1619,17 +1870,21 @@ document.addEventListener('alpine:init', () => {
         } catch(e) { return "New"; }
     },
 
+    
     async checkXeniaUpdates(platform) {
         const app = Alpine.store('app');
         const infoKey = platform; 
+        
         
         app.xeniaUpdateInfo[infoKey].btnText = 'Checking...';
         
         try {
             const result = await window.electronAPI.checkXeniaUpdate(platform);
             
+            
             if (result.success) {
                 const data = app.xeniaUpdateInfo[infoKey];
+                
                 
                 data.remoteVer = result.remote.tag; 
                 data.remoteDate = this.formatDate(result.remote.date);
@@ -1642,6 +1897,7 @@ document.addEventListener('alpine:init', () => {
                     data.localDate = 'Not Installed';
                 }
 
+                
                 if (result.status === 'not-installed') {
                     data.status = 'not-installed';
                     data.btnText = 'Install Now';
@@ -1674,10 +1930,13 @@ document.addEventListener('alpine:init', () => {
             app.xeniaUpdateInfo[infoKey].message = 'Connection Error.';
         }
     },
+        
         async downloadXenia(platform) {
             const app = Alpine.store('app');
             
+            
             const statusKey = platform; 
+            
             
             if (app.downloadStatuses[statusKey].status.includes('Downloading') || app.downloadStatuses[statusKey].status.includes('Extracting')) {
                 return;
@@ -1685,24 +1944,30 @@ document.addEventListener('alpine:init', () => {
 
             this.playSound('select');
             
+            
             app.downloadStatuses[statusKey] = { status: 'Preparing...', percentage: 0, step: 'connect', type: statusKey };
             
             try {
                 const result = await window.electronAPI.downloadXenia(platform);
                 
                 if (result.success) {
+                    
                     if (result.newPath) {
                         app.settings.xeniaPath = result.newPath;
+                        
                         
                         await this.initializeAppSettings();
                     }
 
                     app.downloadStatuses[statusKey] = { status: 'idle', percentage: 100, step: 'done', type: statusKey }; 
                     
+                    
                     await this.checkXeniaUpdates(platform);
+                    
                     
                     app.xeniaUpdateInfo[statusKey].message = "Successfully Installed & Configured!";
                     app.xeniaUpdateInfo[statusKey].color = "#59c853";
+                    
                     
                     this.playSound('channelUp');
 
@@ -1718,10 +1983,12 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
+        
         async loadView(viewName) {
             const app = Alpine.store('app');
             if (app.isPageTransitioning) return;
             app.isPageTransitioning = true;
+            
             
             this.manageCoverLoading(viewName);
             
@@ -1746,13 +2013,16 @@ document.addEventListener('alpine:init', () => {
             await new Promise(r => setTimeout(r, 400)); 
             host.classList.remove('nxe-page-slide-in');
             app.isPageTransitioning = false;
+            Alpine.store('hooks').emit('onViewChange', { previousView: previousView, newView: viewName });
         },
 
+        
         async goBack() {
             const app = Alpine.store('app');
             if (app.isPageTransitioning || app.viewStack.length === 0) return;
             app.isPageTransitioning = true;
             this.playSound('panelLeft');
+            
             
             const targetView = app.viewStack[app.viewStack.length - 1];
             this.manageCoverLoading(targetView);
@@ -1782,8 +2052,8 @@ document.addEventListener('alpine:init', () => {
                 app.currentConfigOptions = []; 
                 app.configOptionIndex = 0; 
                 app.configSaveStatus = 'idle';
-                app.configMode = 'global';
-                app.editingGameInfo = null;
+                app.configMode = 'global';      
+                app.editingGameInfo = null;     
             }
             
             try {
@@ -1806,6 +2076,10 @@ document.addEventListener('alpine:init', () => {
             const app = Alpine.store('app');
             if (app.isPageTransitioning) return;
             app.isPageTransitioning = true;
+            
+            
+            const previousView = app.currentView;
+
             const host = document.getElementById('view-host');
             this.playSound('panelRight');
             host.classList.add('nxe-page-blur-out');
@@ -1825,13 +2099,20 @@ document.addEventListener('alpine:init', () => {
             await new Promise(r => setTimeout(r, 400)); 
             host.classList.remove('nxe-page-slide-in');
             app.isPageTransitioning = false;
+
+            
+            Alpine.store('hooks').emit('onViewChange', { previousView: previousView, newView: viewName });
         },
+
         async goBack() {
             const app = Alpine.store('app');
             if (app.isPageTransitioning || app.viewStack.length === 0) return;
             app.isPageTransitioning = true;
             this.playSound('panelLeft');
             
+            
+            const targetView = app.currentView;
+
             if (app.currentView === 'settings-colors') {
                 this.loadUserColors(); 
             }
@@ -1865,22 +2146,31 @@ document.addEventListener('alpine:init', () => {
             await new Promise(r => setTimeout(r, 400)); 
             host.classList.remove('nxe-page-unblur-in');
             app.isPageTransitioning = false;
+
+            
+            Alpine.store('hooks').emit('onViewChange', { previousView: targetView, newView: app.currentView });
         },
+        
         
         applyColorTheme(themeColors) {
             if (!themeColors) return;
             const root = document.documentElement;
+            
             root.style.setProperty('--nxe-brand-primary', themeColors.primary);
             root.style.setProperty('--nxe-brand-light', themeColors.light);
             root.style.setProperty('--nxe-brand-dark', themeColors.dark);
+            
             root.style.setProperty('--nxe-bg-top', themeColors.bgTop);
             root.style.setProperty('--nxe-bg-bottom', themeColors.bgBottom);
             root.style.setProperty('--nxe-list-bg-top', themeColors.listBgTop || '#2d3235');
             root.style.setProperty('--nxe-list-bg-bottom', themeColors.listBgBottom || '#202326');
+            
             root.style.setProperty('--nxe-text-primary', themeColors.text || '#ffffff');
             root.style.setProperty('--nxe-text-secondary', themeColors.textSec || '#cccccc');
+            
             root.style.setProperty('--nxe-panel-color', themeColors.panel || '#000000');
             root.style.setProperty('--nxe-alert-color', themeColors.alert || '#ff6b6b');
+            
             root.style.setProperty('--nxe-btn-a', themeColors.btnA || '#59c853');
             root.style.setProperty('--nxe-btn-b', themeColors.btnB || '#e5443a');
             root.style.setProperty('--nxe-btn-x', themeColors.btnX || '#3a82e5');
@@ -1898,11 +2188,24 @@ document.addEventListener('alpine:init', () => {
         async saveThemeSelection(index) {
             const app = Alpine.store('app');
             const preset = app.colorPresets[index];
-            app.activeColorThemeId = preset.id;
+            const colorsToApply = preset.id === 'custom' ? app.customColors : preset.colors;
+
+            this.applyColorTheme(colorsToApply);
+
             
-            await window.electronAPI.set('activeColorThemeId', preset.id);
-            if (preset.id === 'custom') {
-                await window.electronAPI.set('userCustomColors', app.customColors);
+            app.activeColorThemeId = preset.id;
+
+            const themeData = app.themesList.find(t => t.name === app.currentTheme);
+            if (themeData && themeData.type === 'external') {
+                let themeMods = await window.electronAPI.get('mods_' + app.currentTheme) || {};
+                themeMods.colors = { ...colorsToApply };
+                themeMods.activeColorThemeId = preset.id; 
+                await window.electronAPI.set('mods_' + app.currentTheme, themeMods);
+            } else {
+                await window.electronAPI.set('activeColorThemeId', preset.id);
+                if (preset.id === 'custom') {
+                    await window.electronAPI.set('userCustomColors', app.customColors);
+                }
             }
             
             this.playSound('select');
@@ -1910,42 +2213,75 @@ document.addEventListener('alpine:init', () => {
             host.style.filter = "brightness(1.5)";
             setTimeout(() => host.style.filter = "", 150);
         },
+        
         async loadUserColors() {
             const app = Alpine.store('app');
             const userSavedThemes = await window.electronAPI.get('userSavedThemes') || [];
             const savedCustom = await window.electronAPI.get('userCustomColors');
             if (savedCustom) app.customColors = savedCustom;
 
+            
+            const basePresets = app.customBasePresets || DEFAULT_PRESETS;
+
             app.colorPresets = [
-                ...DEFAULT_PRESETS,
+                ...basePresets,
                 ...userSavedThemes,
                 { id: 'custom', name: 'Create Custom Theme', colors: null }
             ];
 
-            const savedId = await window.electronAPI.get('activeColorThemeId');
-            if (savedId) app.activeColorThemeId = savedId;
+            const themeData = app.themesList.find(t => t.name === app.currentTheme);
             
-            let preset = app.colorPresets.find(p => p.id === app.activeColorThemeId);
-            if (!preset) {
-                preset = app.colorPresets[0];
-                app.activeColorThemeId = preset.id;
-                await window.electronAPI.set('activeColorThemeId', preset.id);
-            }
-            
-            if (preset.id === 'custom') {
-                this.applyColorTheme(app.customColors);
+            if (themeData && themeData.type === 'external') {
+                let themeMods = await window.electronAPI.get('mods_' + app.currentTheme) || {};
+                
+                if (themeMods.activeColorThemeId) {
+                    app.activeColorThemeId = themeMods.activeColorThemeId;
+                }
+
+                if (themeMods.colors) {
+                    this.applyColorTheme(themeMods.colors);
+                    app.customColors = { ...themeMods.colors };
+                } else {
+                    this.applyColorTheme(basePresets[0].colors);
+                }
             } else {
-                this.applyColorTheme(preset.colors);
+                const savedId = await window.electronAPI.get('activeColorThemeId');
+                if (savedId) app.activeColorThemeId = savedId;
+                
+                let preset = app.colorPresets.find(p => p.id === app.activeColorThemeId);
+                if (!preset) {
+                    preset = app.colorPresets[0];
+                    app.activeColorThemeId = preset.id;
+                }
+                
+                if (preset.id === 'custom') {
+                    this.applyColorTheme(app.customColors);
+                } else {
+                    this.applyColorTheme(preset.colors);
+                }
             }
         },
         async updateCustomColor(key, value) {
             const app = Alpine.store('app');
             app.customColors[key] = value;
-            if (app.activeColorThemeId === 'custom') {
-                this.applyColorTheme(app.customColors);
+            this.applyColorTheme(app.customColors);
+
+            
+            app.activeColorThemeId = 'custom';
+
+            const themeData = app.themesList.find(t => t.name === app.currentTheme);
+            if (themeData && themeData.type === 'external') {
+                let themeMods = await window.electronAPI.get('mods_' + app.currentTheme) || {};
+                if (!themeMods.colors) themeMods.colors = {};
+                themeMods.colors[key] = value;
+                themeMods.activeColorThemeId = 'custom'; 
+                await window.electronAPI.set('mods_' + app.currentTheme, themeMods);
+            } else {
+                await window.electronAPI.set('activeColorThemeId', 'custom');
+                await window.electronAPI.set('userCustomColors', app.customColors);
             }
-            await window.electronAPI.set('userCustomColors', app.customColors);
         },
+
 
         async saveNewCustomPreset() {
             const app = Alpine.store('app');
@@ -1972,8 +2308,11 @@ document.addEventListener('alpine:init', () => {
 
             app.newThemeName = '';
 
+            
+            const basePresets = app.customBasePresets || DEFAULT_PRESETS;
+
             app.colorPresets = [
-                ...DEFAULT_PRESETS,
+                ...basePresets,
                 ...userSavedThemes,
                 { id: 'custom', name: 'Create Custom Theme', colors: null }
             ];
@@ -2002,16 +2341,19 @@ document.addEventListener('alpine:init', () => {
             userSavedThemes = userSavedThemes.filter(t => t.id !== item.id);
             await window.electronAPI.set('userSavedThemes', userSavedThemes);
 
+            
+            const basePresets = app.customBasePresets || DEFAULT_PRESETS;
+
             app.colorPresets = [
-                ...DEFAULT_PRESETS,
+                ...basePresets,
                 ...userSavedThemes,
                 { id: 'custom', name: 'Create Custom Theme', colors: null }
             ];
 
             if (app.activeColorThemeId === item.id) {
-                app.activeColorThemeId = 'xbox-classic';
-                await window.electronAPI.set('activeColorThemeId', 'xbox-classic');
-                this.applyColorTheme(DEFAULT_PRESETS[0].colors);
+                app.activeColorThemeId = basePresets[0].id;
+                await window.electronAPI.set('activeColorThemeId', basePresets[0].id);
+                this.applyColorTheme(basePresets[0].colors);
             }
 
             if (app.focusedIndex >= app.colorPresets.length) {
@@ -2022,13 +2364,33 @@ document.addEventListener('alpine:init', () => {
             this.playSound('back'); 
         },
 
+        
+        async _saveDisplaySetting(key, pathKey, filePath) {
+            const app = Alpine.store('app');
+            const themeData = app.themesList.find(t => t.name === app.currentTheme);
+
+            if (themeData && themeData.type === 'external') {
+                
+                let themeMods = await window.electronAPI.get('mods_' + app.currentTheme) || {};
+                if (!themeMods.displaySettings) themeMods.displaySettings = {};
+                
+                themeMods.displaySettings[pathKey] = filePath;
+                
+                
+                await window.electronAPI.set('mods_' + app.currentTheme, themeMods);
+            } else {
+                
+                await window.electronAPI.set(key, filePath);
+            }
+        },
+
         async changeWallpaper() {
             const app = Alpine.store('app');
             const filePath = await window.electronAPI.openImageFile();
             if (filePath) {
-                await window.electronAPI.set('userWallpaper', filePath);
+                await this._saveDisplaySetting('userWallpaper', 'wallpaperPath', filePath);
                 app.displaySettings.wallpaperPath = filePath;
-                app.displaySettings.wallpaperName = filePath.split(/[\\/]/).pop(); 
+                app.displaySettings.wallpaperName = filePath.split(/[\\/]/).pop();
                 this.applyDisplaySettings();
                 this.playSound('select');
             }
@@ -2037,7 +2399,7 @@ document.addEventListener('alpine:init', () => {
             const app = Alpine.store('app');
             const filePath = await window.electronAPI.openImageFile();
             if (filePath) {
-                await window.electronAPI.set('userStage', filePath);
+                await this._saveDisplaySetting('userStage', 'stagePath', filePath);
                 app.displaySettings.stagePath = filePath;
                 app.displaySettings.stageName = filePath.split(/[\\/]/).pop();
                 this.applyDisplaySettings();
@@ -2048,7 +2410,7 @@ document.addEventListener('alpine:init', () => {
             const app = Alpine.store('app');
             const filePath = await window.electronAPI.openImageFile();
             if (filePath) {
-                await window.electronAPI.set('userFlourish', filePath);
+                await this._saveDisplaySetting('userFlourish', 'flourishPath', filePath);
                 app.displaySettings.flourishPath = filePath;
                 app.displaySettings.flourishName = filePath.split(/[\\/]/).pop();
                 this.applyDisplaySettings();
@@ -2057,9 +2419,9 @@ document.addEventListener('alpine:init', () => {
         },
         async resetDisplaySettings() {
             const app = Alpine.store('app');
-            await window.electronAPI.set('userWallpaper', null);
-            await window.electronAPI.set('userStage', null);
-            await window.electronAPI.set('userFlourish', null);
+            await this._saveDisplaySetting('userWallpaper', 'wallpaperPath', null);
+            await this._saveDisplaySetting('userStage', 'stagePath', null);
+            await this._saveDisplaySetting('userFlourish', 'flourishPath', null);
             
             app.displaySettings.wallpaperPath = null;
             app.displaySettings.wallpaperName = 'Default';
@@ -2095,30 +2457,43 @@ document.addEventListener('alpine:init', () => {
         },
         async loadDisplaySettings() {
             const app = Alpine.store('app');
-            const savedWallpaper = await window.electronAPI.get('userWallpaper');
-            const savedStage = await window.electronAPI.get('userStage');
-            const savedFlourish = await window.electronAPI.get('userFlourish');
+            const themeData = app.themesList.find(t => t.name === app.currentTheme);
+            const isExternal = themeData && themeData.type === 'external';
 
-            if (savedWallpaper) {
-                const exists = await window.electronAPI.checkPathExists(savedWallpaper);
-                if (exists) {
-                    app.displaySettings.wallpaperPath = savedWallpaper;
-                    app.displaySettings.wallpaperName = savedWallpaper.split(/[\\/]/).pop();
+            let savedWallpaper = null, savedStage = null, savedFlourish = null;
+
+            if (isExternal) {
+                
+                let themeMods = await window.electronAPI.get('mods_' + app.currentTheme) || {};
+                if (themeMods.displaySettings) {
+                    savedWallpaper = themeMods.displaySettings.wallpaperPath;
+                    savedStage = themeMods.displaySettings.stagePath;
+                    savedFlourish = themeMods.displaySettings.flourishPath;
                 }
+            } else {
+                savedWallpaper = await window.electronAPI.get('userWallpaper');
+                savedStage = await window.electronAPI.get('userStage');
+                savedFlourish = await window.electronAPI.get('userFlourish');
             }
-            if (savedStage) {
-                const exists = await window.electronAPI.checkPathExists(savedStage);
-                if (exists) {
-                    app.displaySettings.stagePath = savedStage;
-                    app.displaySettings.stageName = savedStage.split(/[\\/]/).pop();
-                }
+
+            app.displaySettings.wallpaperPath = null;
+            app.displaySettings.wallpaperName = 'Default';
+            app.displaySettings.stagePath = null;
+            app.displaySettings.stageName = 'Default';
+            app.displaySettings.flourishPath = null;
+            app.displaySettings.flourishName = 'Default';
+
+            if (savedWallpaper && await window.electronAPI.checkPathExists(savedWallpaper)) {
+                app.displaySettings.wallpaperPath = savedWallpaper;
+                app.displaySettings.wallpaperName = savedWallpaper.split(/[\\/]/).pop();
             }
-            if (savedFlourish) {
-                const exists = await window.electronAPI.checkPathExists(savedFlourish);
-                if (exists) {
-                    app.displaySettings.flourishPath = savedFlourish;
-                    app.displaySettings.flourishName = savedFlourish.split(/[\\/]/).pop();
-                }
+            if (savedStage && await window.electronAPI.checkPathExists(savedStage)) {
+                app.displaySettings.stagePath = savedStage;
+                app.displaySettings.stageName = savedStage.split(/[\\/]/).pop();
+            }
+            if (savedFlourish && await window.electronAPI.checkPathExists(savedFlourish)) {
+                app.displaySettings.flourishPath = savedFlourish;
+                app.displaySettings.flourishName = savedFlourish.split(/[\\/]/).pop();
             }
             this.applyDisplaySettings();
         },
@@ -2127,9 +2502,14 @@ document.addEventListener('alpine:init', () => {
             if (!themeName) return;
             const app = Alpine.store('app');
             if (themeName === app.currentTheme) return;
+            
             await window.electronAPI.set('currentTheme', themeName);
             app.currentTheme = themeName;
-            window.location.reload(); 
+            
+            this.applyThemeIconsToMenus();
+            
+            
+            await window.electronAPI.reloadAppShell();
         },
         async loadGameLibraryData() {
             const app = Alpine.store('app');
@@ -2145,40 +2525,47 @@ document.addEventListener('alpine:init', () => {
             app.focusedList = null; 
             switch (viewName) {
 
-                case 'achievements':
+            case 'achievements':
+                
+                app.focusedCollection = 'achievementsGamesList'; 
+                app.focusedIndex = 0;
 
-                    app.focusedCollection = 'achievementsGamesList';
-                    app.focusedIndex = 0;
+                
+                const folderPath = app.settings.gameFolderPath;
+                const isPathReady = folderPath && 
+                                    !folderPath.startsWith('Click "Select"') && 
+                                    !folderPath.startsWith('[Not Found]') &&
+                                    !folderPath.startsWith('[Folder Not Valid]');
 
-
-                    const folderPath = app.settings.gameFolderPath;
-                    const isPathReady = folderPath &&
-                    !folderPath.startsWith('Click "Select"') &&
-                    !folderPath.startsWith('[Not Found]') &&
-                    !folderPath.startsWith('[Folder Not Valid]');
-
-                    if (isPathReady && !app.isInitialScanDone) {
-                        console.log('[Fix] Path is valid and first scan triggered.');
-
-                        app.isInitialScanDone = true;
-
-                        this.loadGameLibraryData();
-                    } else {
-                        console.log('[Fix] Scan skipped: Already scanned once or path invalid.');
-                    }
-                    break;
+                
+                
+                if (isPathReady && !app.isInitialScanDone) {
+                    console.log('[Fix] Path is valid and first scan triggered.');
+                    
+                    
+                    app.isInitialScanDone = true; 
+                    
+                    this.loadGameLibraryData();
+                } else {
+                    console.log('[Fix] Scan skipped: Already scanned once or path invalid.');
+                }
+                break;
 
                 case 'language-select':
                 app.focusedCollection = 'languageOptions';
                 
-
+                
+                
                 app.focusedIndex = app.language === 'ar' ? 1 : 0;
+                
                 
                 app.configFocusedPanel = 'categories';
                 break;
 
                 case 'game-library':
-                
+                    
+                    
+                    
                     if (!app.filteredLibraryGames) app.filteredLibraryGames = [];
                     
                     if (app.librarySearch && app.librarySearch.trim() !== '') {
@@ -2189,7 +2576,9 @@ document.addEventListener('alpine:init', () => {
 
                     app.focusedCollection = 'filteredLibraryGames';
                     
+                    
                     if (app.filteredLibraryGames.length > 0) {
+                        
                         if (app.libraryMemoryIndex < app.filteredLibraryGames.length) {
                             app.focusedIndex = app.libraryMemoryIndex;
                         } else {
@@ -2200,10 +2589,12 @@ document.addEventListener('alpine:init', () => {
                         app.focusedIndex = 0;
                     }
                     
+                    
                     setTimeout(() => {
                         this.scrollToFocusedElement('game-item-' + app.focusedIndex);
-                        this.updateGameDetails();
+                        this.updateGameDetails(); 
                     }, 50);
+                    
                     
                     this.loadGameLibraryData(); 
                     break;
@@ -2264,6 +2655,10 @@ document.addEventListener('alpine:init', () => {
             const result = await window.electronAPI.loadDashboardData();
             if (result.success) {
                 app.masterMenu = result.data.masterMenu;
+                
+                
+                this.applyThemeIconsToMenus();
+                
                 this.updateDetailMenu(); 
             } else {
                 app.currentViewHTML = `<h1 style="color:red;">Failed to load dashboard-data.json</h1>`;
@@ -2289,6 +2684,8 @@ document.addEventListener('alpine:init', () => {
                         openTrayItem.name = app.selectedGame.name.replace(/\s*\(.*?\)\s*/g, ' ').replace(/\s*\[.*?\]\s*/g, ' ').trim();
                         openTrayItem.icon = app.selectedGame.iconUrl || app.selectedGame.coverUrl || 'assets/icons/placeholder.png';
 
+                        
+                        
                         openTrayItem.isGameIcon = true; 
                         openTrayItem.isGame = false; 
 
@@ -2316,12 +2713,14 @@ document.addEventListener('alpine:init', () => {
         moveDetail(direction) {
             const app = Alpine.store('app');
             
-
+            
+            
             if (app.detailIndex === 0 && direction === -1) {
-                app.focusedList = 'master';
-                this.playSound('focus');
-                return;
+                app.focusedList = 'master'; 
+                this.playSound('focus');    
+                return;                     
             }
+            
 
             let newIndex = app.detailIndex + direction;
             if (newIndex < 0) newIndex = 0;
@@ -2336,6 +2735,9 @@ document.addEventListener('alpine:init', () => {
             const app = Alpine.store('app');
             const item = app.detailMenu[app.detailIndex];
             if (!item) return;
+            if (item.view === 'none') {
+                return; 
+            }
             if (item.view === 'opentray') {
                 if (app.selectedGame) {
                     this.playSound('select');
@@ -2358,16 +2760,19 @@ document.addEventListener('alpine:init', () => {
                         }
                     }
                 }else {
+                    
 
-
+            
+            
                     window.electronAPI.openFile().then(result => {
-
+                        
+                        
                         const selectedPath = (typeof result === 'string') ? result : result.filePath;
 
                         if (selectedPath) {
                             this.playSound('select');
                             
-
+                            
                             const xeniaPath = app.settings.xeniaPath;
 
                             if (!xeniaPath) {
@@ -2375,6 +2780,8 @@ document.addEventListener('alpine:init', () => {
                                 return;
                             }
 
+                            
+                            
                             window.electronAPI.launchGame(xeniaPath, selectedPath, '');
                         }
                     }).catch(err => console.error("Error selection:", err));
@@ -2401,7 +2808,8 @@ document.addEventListener('alpine:init', () => {
             console.log(`Launching game: ${game.name} (ID: ${game.titleID})`);
             
             try {
-
+                
+                
                 const result = await window.electronAPI.launchGame(xeniaPath, game.path, game.titleID);
                 
                 if (!result.success) console.error("Failed to launch game:", result.error);
@@ -2416,8 +2824,9 @@ document.addEventListener('alpine:init', () => {
             if (savedArtSource) {
                 app.settings.artSource = savedArtSource;
             } else {
-                app.settings.artSource = 'LocalDB';
+                app.settings.artSource = 'LocalDB'; 
             }
+            
             
             let [playerTag, gamerscore, xeniaPath, gameFolder, apiKey, linuxLaunchMethod, protonPath, savedLang] = await Promise.all([
                 window.electronAPI.get('playerTag'),
@@ -2427,7 +2836,7 @@ document.addEventListener('alpine:init', () => {
                 window.electronAPI.get('steamGridDBKey'),
                 window.electronAPI.get('linuxLaunchMethod'), 
                 window.electronAPI.get('protonPath'),
-                window.electronAPI.get('language')
+                window.electronAPI.get('language') 
             ]);
 
             if (playerTag) app.playerTag = playerTag; else await window.electronAPI.set('playerTag', app.playerTag); 
@@ -2445,6 +2854,7 @@ document.addEventListener('alpine:init', () => {
             
             if (protonPath) app.settings.protonPath = protonPath;
 
+            
             if (savedLang) {
                 app.language = savedLang;
                 this.applyDirection(savedLang);
@@ -2455,8 +2865,11 @@ document.addEventListener('alpine:init', () => {
             
             app.xeniaUpdateInfo.win.message = 'Press (Y) to Check for Updates';
             app.xeniaUpdateInfo.linux.message = 'Press (Y) to Check for Updates';
-
+            
+            
+            
             let currentXeniaPath = app.settings.xeniaPath;
+            
             
             if (currentXeniaPath) {
                 currentXeniaPath = currentXeniaPath.replace(/\[Not Found\]\s*/g, '').replace(/\[File Not Valid\]\s*/g, '');
@@ -2466,14 +2879,19 @@ document.addEventListener('alpine:init', () => {
                 const xeniaExists = await window.electronAPI.checkPathExists(currentXeniaPath); 
                 
                 if (!xeniaExists) {
+                    
                     app.settings.xeniaPath = `[Not Found] ${currentXeniaPath}`; 
                 } else {
+                    
                     app.settings.xeniaPath = currentXeniaPath;
                 }
             }
 
-
+            
+            
+            
             let currentGamePath = app.settings.gameFolderPath;
+            
             
             if (currentGamePath) {
                 currentGamePath = currentGamePath.replace(/\[Not Found\]\s*/g, '').replace(/\[Folder Not Valid\]\s*/g, '');
@@ -2489,8 +2907,11 @@ document.addEventListener('alpine:init', () => {
                 }
             }
 
-
+            
+            
+            
             let currentProtonPath = app.settings.protonPath;
+            
             
             if (currentProtonPath) {
                 currentProtonPath = currentProtonPath.replace(/\[Not Found\]\s*/g, '').replace(/\[File Not Valid\]\s*/g, '');
@@ -2544,14 +2965,17 @@ document.addEventListener('alpine:init', () => {
                 }
             }
         },
+        
         async downloadPatches() {
             const app = Alpine.store('app');
+            
             
             if (app.downloadStatuses.patches.status.includes('Downloading') || app.downloadStatuses.patches.status.includes('Extracting')) {
                 return; 
             }
 
             this.playSound('select');
+            
             
             app.downloadStatuses.patches = { status: 'Preparing...', percentage: 0, step: 'connect', type: 'patches' };
             
@@ -2596,13 +3020,17 @@ document.addEventListener('alpine:init', () => {
                 if (result.success) {
                     app.gamesList = result.games; 
                     
-
+                    
+                    
+                    
                     if (app.librarySearch && app.librarySearch.trim() !== '') {
                         
                         this.filterLibrary(); 
                     } else {
+                        
                         app.filteredLibraryGames = result.games;
                     }
+                    
                 }
                 this.updateGameDetails();
             } catch (e) {
@@ -2611,12 +3039,14 @@ document.addEventListener('alpine:init', () => {
             isScanning = false; 
         },
         async scanForThemes() {
-             const app = Alpine.store('app');
+            const app = Alpine.store('app');
             if (app.themesList.length > 0) return;
             const result = await window.electronAPI.scanForThemes();
             if (result.success) {
-                app.themesList = result.themes.map(name => ({ 
-                    name: name,
+                app.themesList = result.themes.map(themeObj => ({ 
+                    name: themeObj.name,
+                    type: themeObj.type, 
+                    customIcons: themeObj.customIcons || [],
                     icon: 'assets/icons/icon-theme.png' 
                 }));
             }
@@ -2630,20 +3060,24 @@ document.addEventListener('alpine:init', () => {
             if (!game) {
                 app.focusedGamePatchInfo = null;
                 app.gameDetails = { title: '', logoUrl: '', heroUrl: 'none' };
+                
                 app.gameExtendedInfo = { description: '', developer: '', genre: '', screenshots: [], loading: false };
                 return;
             }
 
+            
             app.gameDetails.title = game.name;
             app.gameDetails.logoUrl = game.logoUrl || '';
             app.gameDetails.heroUrl = game.heroUrl ? `url('${game.heroUrl}')` : 'none';
 
-
+            
+            
+            
             app.gameExtendedInfo.loading = true;
             app.gameExtendedInfo.screenshots = []; 
             
             if (game.titleID) {
-
+                
                 window.electronAPI.getLocalGameMetadata(game.titleID).then(result => {
                     if (result.found && result.metadata) {
                         app.gameExtendedInfo = {
@@ -2653,11 +3087,12 @@ document.addEventListener('alpine:init', () => {
                             genre: result.metadata.genre || 'Unknown',
                             releaseDate: result.metadata.releaseDate || '',
                             rating: result.metadata.rating || '',
-
+                            
                             screenshots: result.metadata.assets.screenshots || [],
                             loading: false
                         };
                     } else {
+                        
                         app.gameExtendedInfo = { 
                             description: 'No details found in Local Database for this Title ID.', 
                             developer: '', publisher: '', genre: '', rating: '',
@@ -2674,7 +3109,9 @@ document.addEventListener('alpine:init', () => {
                 };
             }
 
-
+            
+            
+            
             const hasFiles = (game.patchFiles && game.patchFiles.length > 0) || game.patchFileName;
 
             if (game.titleID && hasFiles) {
@@ -2699,6 +3136,7 @@ document.addEventListener('alpine:init', () => {
                 };
             }
 
+            
             actions.fetchCompatibilityForGame(game);
         },
         moveFocus(direction) {
@@ -2714,6 +3152,7 @@ document.addEventListener('alpine:init', () => {
                     const collection = app.achievementsGamesList;
                     if (!collection || collection.length === 0) return;
 
+                    
                     let newIndex = app.focusedIndex + direction;
 
                     if (newIndex >= 0 && newIndex < collection.length) {
@@ -2724,6 +3163,7 @@ document.addEventListener('alpine:init', () => {
                     }
                 return;
             }
+            
             
             if (app.focusedCollection === 'displayItems') {
                 let newIndex = app.focusedIndex + direction;
@@ -2749,24 +3189,30 @@ document.addEventListener('alpine:init', () => {
                 app.focusedIndex = newIndex;
                 this.playSound('focus');
                 
-
+                
+                
+                
                 if (app.focusedCollection === 'gamesList' || app.focusedCollection === 'filteredLibraryGames') {
                     
                     app.libraryMemoryIndex = newIndex; 
                     
+                    
                     this.updateGameDetails(); 
 
+                    
                     if (this.compatDebounce) clearTimeout(this.compatDebounce);
                     
                     this.compatDebounce = setTimeout(() => {
+                        
                         const game = app.filteredLibraryGames[newIndex];
                         if (game) this.fetchCompatibilityForGame(game);
                     }, 300);
                 }
                 
+                
                 const idPrefixMap = {
                     'gamesList': 'game-item-',
-                    'filteredLibraryGames': 'game-item-',
+                    'filteredLibraryGames': 'game-item-', 
                     'settingsMenu': 'hub-item-',
                     'coreSettingsItems': 'core-item-',
                     'themesList': 'system-item-',
@@ -2827,12 +3273,14 @@ document.addEventListener('alpine:init', () => {
             let result;
 
             if (app.configMode === 'game' && app.editingGameInfo) {
+                
                 result = await window.electronAPI.manageGameConfig({
                     action: 'save',
                     titleID: app.editingGameInfo.titleID,
                     data: plainConfig
                 });
             } else {
+                
                 result = await window.electronAPI.saveTomlConfig(plainConfig);
             }
 
@@ -2943,20 +3391,24 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
+        
         openPatchManagerSmart() {
             const app = Alpine.store('app');
             
             if (!app.focusedGamePatchInfo || app.focusedGamePatchInfo.availableFiles.length === 0) {
+                
                 return;
             }
 
             const files = app.focusedGamePatchInfo.availableFiles;
 
+            
             if (files.length === 1) {
                 app.focusedGamePatchInfo.fileName = files[0];
                 this.playSound('select');
                 this.loadView('patches-manager');
             } 
+            
             else {
                 this.playSound('panelUnfold');
                 app.patchSelectorFiles = files;
@@ -2965,6 +3417,7 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
+            
             selectPatchFileAndOpen() {
                 const app = Alpine.store('app');
                 const selectedFile = app.patchSelectorFiles[app.patchSelectorIndex];
@@ -3035,6 +3488,7 @@ document.addEventListener('alpine:init', () => {
             
             if (app.isPageTransitioning) return;
             
+            
             if (app.focusedCollection === 'displayItems') {
                 this.playSound('select');
                 if (app.focusedIndex === 0) this.changeWallpaper();
@@ -3049,12 +3503,14 @@ document.addEventListener('alpine:init', () => {
             if (!item) return;
 
             switch (app.focusedCollection) {
+                
                 case 'languageOptions':
                     this.playSound('select');
                     const selectedLang = app.languageOptions[app.focusedIndex].code;
                     this.setLanguage(selectedLang);
                     break;
 
+                
                 case 'settingsMenu':
                     if (item.view) {
                         this.playSound('select');
@@ -3062,6 +3518,7 @@ document.addEventListener('alpine:init', () => {
                     }
                     break;
                     
+                
                 case 'filteredLibraryGames': 
                 case 'gamesList':
                     if (item && item.path && !app.gameSelectionAnimating) {
@@ -3086,10 +3543,15 @@ document.addEventListener('alpine:init', () => {
                     }
                     break;
 
+                
                 case 'coreSettingsItems':
 
                 if (item.id === 'art-source') {
                         actions.toggleArtSource();
+                        break;
+                }
+                if (item.id === 'download-optimized') {
+                        this.downloadOptimizedSettings();
                         break;
                 }
 
@@ -3101,16 +3563,19 @@ document.addEventListener('alpine:init', () => {
                     if (item.view) {
                         this.playSound('select');
                         
+                        
+                        
                         if (item.view === 'settings-config') {
                             const app = Alpine.store('app'); 
                             app.configMode = 'global';
                             app.editingGameInfo = null;
                         }
-                       
+                        
 
                         this.loadView(item.view);
                         break;
                     }
+                    
                     
                     if (item.id === 'linux-launch') {
                         this.playSound('select');
@@ -3124,6 +3589,7 @@ document.addEventListener('alpine:init', () => {
                         break;
                     }
 
+                    
                     if (item.id === 'download-xenia-win') {
                         this.downloadXenia('win'); 
                         break;
@@ -3137,6 +3603,7 @@ document.addEventListener('alpine:init', () => {
                         break;
                     }
 
+                    
                     if (item.id === 'proton-path') {
                         this.playSound('select');
                         this.browseProtonPath();
@@ -3155,10 +3622,12 @@ document.addEventListener('alpine:init', () => {
                     }
                     break;
 
+                
                 case 'themesList': 
                     this.playSound('select');
                     this.applyTheme(item.name);
                     break;
+                
                 
                 case 'colorPresets': 
                     this.saveThemeSelection(app.focusedIndex);
@@ -3167,12 +3636,14 @@ document.addEventListener('alpine:init', () => {
                     }
                     break;
 
+                
                 case 'patchList':
                     this.togglePatch(item);
                     break;
             }
         },
 
+            
             toggleGuide() {
                 const app = Alpine.store('app');
                 app.isGuideOpen = !app.isGuideOpen;
@@ -3187,6 +3658,7 @@ document.addEventListener('alpine:init', () => {
                 }
             },
 
+            
             async performShutdown() {
                 const actions = Alpine.store('actions');
                 actions.playSound('back'); 
@@ -3200,6 +3672,7 @@ document.addEventListener('alpine:init', () => {
                 window.electronAPI.quitApp(); 
             },
 
+            
             moveGuideTab(direction) {
                 const app = Alpine.store('app');
                 let newIndex = app.guideTabIndex + direction;
@@ -3212,7 +3685,7 @@ document.addEventListener('alpine:init', () => {
                 this.playSound('panelLeft'); 
             },
 
-
+            
             moveGuideMenu(direction) {
                 const app = Alpine.store('app');
                 const dir = parseInt(direction);
@@ -3221,13 +3694,18 @@ document.addEventListener('alpine:init', () => {
                 const currentTab = app.guideTabs[app.guideTabIndex].id;
                 let maxIndex = 0;
 
+                
                 if (currentTab === 'home') {
-                    maxIndex = 2;
+                    maxIndex = 2; 
                 } 
                 else if (currentTab === 'games') {
                     const count = app.gamesList.length;
                     maxIndex = count > 0 ? count - 1 : 0;
                 } 
+                else if (currentTab === 'settings') { 
+                    const count = app.settingsMenu.length;
+                    maxIndex = count > 0 ? count - 1 : 0;
+                }
 
                 let newIndex = app.guideMenuIndex + dir;
 
@@ -3238,6 +3716,7 @@ document.addEventListener('alpine:init', () => {
                     app.guideMenuIndex = newIndex;
                     this.playSound('focus');
                     
+                    
                     setTimeout(() => {
                         let elementId = null;
                         
@@ -3247,6 +3726,9 @@ document.addEventListener('alpine:init', () => {
                         else if (currentTab === 'games') {
                             elementId = 'guide-game-' + newIndex;
                         } 
+                        else if (currentTab === 'settings') { 
+                            elementId = 'guide-settings-' + newIndex;
+                        }
                         
                         if (elementId) {
                             const el = document.getElementById(elementId);
@@ -3258,15 +3740,16 @@ document.addEventListener('alpine:init', () => {
                 }
             },
 
+            
             executeGuideAction() {
                 const app = Alpine.store('app');
                 const currentTab = app.guideTabs[app.guideTabIndex].id;
 
                 if (currentTab === 'home') { 
-                    if (app.guideMenuIndex === 0) {
+                    if (app.guideMenuIndex === 0) { 
                         app.isGuideOpen = false;
                         this.playSound('back');
-                    } else if (app.guideMenuIndex === 2) {
+                    } else if (app.guideMenuIndex === 2) { 
                         this.performShutdown();
                         return; 
                     }
@@ -3278,11 +3761,21 @@ document.addEventListener('alpine:init', () => {
                         app.isGuideOpen = false;
                     }
                 }
+                else if (currentTab === 'settings') { 
+                    const settingItem = app.settingsMenu[app.guideMenuIndex];
+                    if (settingItem && settingItem.view) {
+                        app.isGuideOpen = false; 
+                        this.loadView(settingItem.view); 
+                    }
+                }
                 
                 this.playSound('select');
             },
 
-
+            
+            
+            
+            
             updateCursorVisuals() {
                 const app = Alpine.store('app');
                 const input = document.querySelector('.xbox-kb-input');
@@ -3291,21 +3784,21 @@ document.addEventListener('alpine:init', () => {
                 
                 if (!input || !cursor || !container) return;
 
-
-
-                let targetVar = 'librarySearch';
+                
+                
+                let targetVar = 'librarySearch'; 
                 if (app.keyboardMode === 'rename') {
-                    targetVar = 'renameInput';
+                    targetVar = 'renameInput'; 
                 } else if (app.keyboardMode === 'create_profile' || app.keyboardMode === 'rename_profile') {
-                    targetVar = 'newProfileName';
+                    targetVar = 'newProfileName'; 
                 }
                 
                 const currentText = app[targetVar] || "";
 
-
+                
                 let textUpToCursor = currentText.substring(0, app.searchCursorPos);
                 
-
+                
                 const span = document.createElement('span');
                 const inputStyle = window.getComputedStyle(input);
                 const containerStyle = window.getComputedStyle(container);
@@ -3328,26 +3821,29 @@ document.addEventListener('alpine:init', () => {
 
                 const paddingLeft = parseFloat(containerStyle.paddingLeft) || 15;
                 
-
+                
                 cursor.style.left = (paddingLeft + textWidth + 1) + 'px';
                 
-
+                
                 cursor.style.animation = 'none';
                 cursor.offsetHeight; 
                 cursor.style.animation = ''; 
             },
 
-
+            
+            
             moveTextCursor(direction) {
                 const app = Alpine.store('app');
                 
-                let targetVar = 'librarySearch';
+                
+                let targetVar = 'librarySearch'; 
                 if (app.keyboardMode === 'rename') {
-                    targetVar = 'renameInput';
+                    targetVar = 'renameInput'; 
                 } else if (app.keyboardMode === 'create_profile' || app.keyboardMode === 'rename_profile') {
-                    targetVar = 'newProfileName';
+                    targetVar = 'newProfileName'; 
                 }
                 const currentText = app[targetVar] || "";
+                
                 
                 const textLen = currentText.length;
 
@@ -3358,28 +3854,32 @@ document.addEventListener('alpine:init', () => {
 
                 if (newPos !== app.searchCursorPos) {
                     app.searchCursorPos = newPos;
-                    this.updateCursorVisuals();
+                    this.updateCursorVisuals(); 
                     this.playSound('focus');
                 }
             },
 
+            
             toggleKeyboard() {
                 const app = Alpine.store('app');
                 app.isKeyboardOpen = !app.isKeyboardOpen;
                 
                 if (app.isKeyboardOpen) {
                     this.playSound('panelUnfold');
+                    
+                    app.keyboardMode = 'search'; 
+                    
                     app.keyboardRow = 1;
                     app.keyboardCol = 0;
                     app.isCaps = false;
                     app.isSymbols = false;
                     app.isAccents = false;
                     
-                    let targetVar = 'librarySearch';
+                    let targetVar = 'librarySearch'; 
                 if (app.keyboardMode === 'rename') {
-                    targetVar = 'renameInput';
+                    targetVar = 'renameInput'; 
                 } else if (app.keyboardMode === 'create_profile' || app.keyboardMode === 'rename_profile') {
-                    targetVar = 'newProfileName';
+                    targetVar = 'newProfileName'; 
                 }
                     app.searchCursorPos = (app[targetVar] || "").length;
                     
@@ -3389,9 +3889,10 @@ document.addEventListener('alpine:init', () => {
                 }
             },
 
+            
             moveKeyboardFocus(rowDir, colDir) {
                 const app = Alpine.store('app');
-                const layout = app.currentKeys;
+                const layout = app.currentKeys; 
                 
                 let newRow = app.keyboardRow + rowDir;
                 let newCol = app.keyboardCol + colDir;
@@ -3414,6 +3915,7 @@ document.addEventListener('alpine:init', () => {
                 const app = Alpine.store('app');
                 const key = app.currentKeys[app.keyboardRow][app.keyboardCol];
                 
+                
                 let targetVar = 'librarySearch';
                 if (app.keyboardMode === 'rename') targetVar = 'renameInput';
                 if (app.keyboardMode === 'create_profile' || app.keyboardMode === 'rename_profile') targetVar = 'newProfileName';
@@ -3426,6 +3928,7 @@ document.addEventListener('alpine:init', () => {
 
                 this.playSound('focus');
 
+                
                 if (app.currentView === 'game-library' && app.keyboardMode === 'search') {
                     this.filterLibrary(); 
                 }
@@ -3433,7 +3936,7 @@ document.addEventListener('alpine:init', () => {
                 setTimeout(() => this.updateCursorVisuals(), 0);
             },
 
-
+            
             handleKeyboardSpecial(action) {
                 const app = Alpine.store('app');
                 
@@ -3470,6 +3973,7 @@ document.addEventListener('alpine:init', () => {
                     app.isRenamingProfile = false;
                     return;
                 }
+                
                 else if (action === 'CAPS') { app.isCaps = !app.isCaps; this.playSound('focus'); }
                 else if (action === 'SYMBOLS') { app.isSymbols = !app.isSymbols; this.playSound('focus'); }
                 else if (action === 'ACCENTS') { app.isAccents = !app.isAccents; this.playSound('focus'); }
@@ -3480,37 +3984,48 @@ document.addEventListener('alpine:init', () => {
                 setTimeout(() => this.updateCursorVisuals(), 0);
             },
 
+        
         getCompatConfig(state) {
             const config = {
-                'state-playable': { text: 'PLAYABLE', color: '#238636', bg: '#23863690', icon: '✔' },
-                'state-gameplay': { text: 'GAMEPLAY', color: '#d29922', bg: '#d2992290', icon: '🎮' },
                 
-                'state-menus':    { text: 'MENUS',    color: '#9e6a03', bg: '#9e6a0390', icon: '☰' },
-                'state-title':    { text: 'TITLE',    color: '#8b949e', bg: '#8b949e90', icon: '📺' },
+                'state-playable': { text: 'PLAYABLE', color: '#238636', bg: '#23863690', icon: '✔' }, 
+                'state-gameplay': { text: 'GAMEPLAY', color: '#d29922', bg: '#d2992290', icon: '🎮' }, 
                 
-                'state-intro':    { text: 'INTRO',    color: '#da3633', bg: '#da363390', icon: '🎬' },
-                'state-load':     { text: 'LOADS',    color: '#8957e5', bg: '#8957e590', icon: '⏳' },
                 
-                'state-hang':     { text: 'HANG',     color: '#b31d28', bg: '#b31d2890', icon: '❄' },
-                'state-crash':    { text: 'CRASH',    color: '#6e1818', bg: '#6e181890', icon: '💥' },
-                'state-nothing':  { text: 'BROKEN',   color: '#30363d', bg: '#00000090', icon: '❌' },
+                'state-menus':    { text: 'MENUS',    color: '#9e6a03', bg: '#9e6a0390', icon: '☰' }, 
+                'state-title':    { text: 'TITLE',    color: '#8b949e', bg: '#8b949e90', icon: '📺' }, 
+                
+                
+                'state-intro':    { text: 'INTRO',    color: '#da3633', bg: '#da363390', icon: '🎬' }, 
+                'state-load':     { text: 'LOADS',    color: '#8957e5', bg: '#8957e590', icon: '⏳' }, 
+                
+                
+                'state-hang':     { text: 'HANG',     color: '#b31d28', bg: '#b31d2890', icon: '❄' }, 
+                'state-crash':    { text: 'CRASH',    color: '#6e1818', bg: '#6e181890', icon: '💥' }, 
+                'state-nothing':  { text: 'BROKEN',   color: '#30363d', bg: '#00000090', icon: '❌' }, 
+                
                 
                 'unknown':        { text: 'UNK',      color: '#666666', bg: '#33333390', icon: '?' }
             };
             return config[state] || config['unknown'];
         },
 
+        
         async fetchCompatibilityForGame(game) {
             const app = Alpine.store('app');
+            
             
             const gameIndex = app.gamesList.findIndex(g => g.path === game.path);
             const filteredIndex = app.filteredLibraryGames.findIndex(g => g.path === game.path);
             
             if (gameIndex === -1) return;
 
+            
             if (app.gamesList[gameIndex].compatFetched) return;
 
+            
             const loadingConfig = { text: 'LOADING', color: '#888', bg: '#00000090', icon: '⏳' };
+            
             
             app.gamesList[gameIndex].compatConfig = loadingConfig;
             app.gamesList[gameIndex].compatFetched = true;
@@ -3520,6 +4035,7 @@ document.addEventListener('alpine:init', () => {
                 const data = await window.electronAPI.getGameCompatibility(query);
                 const conf = this.getCompatConfig(data.state);
                 
+                
                 app.gamesList[gameIndex].compatConfig = conf;
                 app.gamesList[gameIndex].compatIssues = data.issues;
                 app.gamesList[gameIndex].compatTags = data.tags.map(t => ({ 
@@ -3527,6 +4043,7 @@ document.addEventListener('alpine:init', () => {
                     color: t === '1080p' ? '#2188ff' : '#888' 
                 }));
 
+                
                 if (filteredIndex !== -1) {
                     app.filteredLibraryGames[filteredIndex].compatConfig = conf;
                     app.filteredLibraryGames[filteredIndex].compatIssues = data.issues;
@@ -3549,24 +4066,30 @@ document.addEventListener('alpine:init', () => {
         async deleteFocusedGame() {
             const app = Alpine.store('app');
             
+            
             if (app.currentView !== 'game-library' || app.gamesList.length === 0) return;
 
             const game = app.gamesList[app.focusedIndex];
             if (!game) return;
 
+            
             if (confirm(`Are you sure you want to delete "${game.name}" permanently?`)) {
                 try {
+                    
                     const result = await window.electronAPI.deleteGame(game.path);
                     
                     if (result.success) {
-                        this.playSound('back');
+                        this.playSound('back'); 
+                        
                         
                         app.gamesList.splice(app.focusedIndex, 1);
 
+                        
                         if (app.focusedIndex >= app.gamesList.length) {
                             app.focusedIndex = Math.max(0, app.gamesList.length - 1);
                         }
 
+                        
                         this.updateGameDetails(); 
                         
                     } else {
@@ -3602,13 +4125,13 @@ document.addEventListener('alpine:init', () => {
             this.applyDirection(lang);
         },
 
-       applyDirection(lang) {
+        applyDirection(lang) {
             const html = document.documentElement;
             
-
+            
             const rtlLanguages = ['ar'];
             
-
+            
             const ltrLanguages = ['en', 'zh', 'ja', 'ko', 'ru', 'de', 'pt_BR', 'es', 'tr', 'it', 'fr'];
             
             if (rtlLanguages.includes(lang)) {
@@ -3620,7 +4143,7 @@ document.addEventListener('alpine:init', () => {
                 html.lang = lang;
                 html.classList.remove('is-rtl');
             } else {
-
+                
                 html.setAttribute('dir', 'ltr');
                 html.lang = 'en';
                 html.classList.remove('is-rtl');
@@ -3637,12 +4160,14 @@ document.addEventListener('alpine:init', () => {
     return app.guideTabs[index].name;
 }
 
+
     document.addEventListener('keydown', (e) => {
         const key = e.key;
         const actions = Alpine.store('actions');
         const app = Alpine.store('app');
         
 
+        
         if (key === 'Tab') { 
             e.preventDefault();
             actions.toggleGuide();
@@ -3652,6 +4177,7 @@ document.addEventListener('alpine:init', () => {
         if ((key === 'z' || key === 'Z') && !app.isKeyboardOpen) {
             if (app.currentView === 'game-library') {
                 const game = app.filteredLibraryGames[app.focusedIndex];
+                
                 if (game && game.fileName.toLowerCase().endsWith('.zar') && !game.titleID) {
                     actions.performZarScan();
                     e.preventDefault();
@@ -3660,6 +4186,15 @@ document.addEventListener('alpine:init', () => {
             }
         }
 
+        if ((key === 'i' || key === 'I') && !app.isKeyboardOpen && !app.isGuideOpen) {
+            if (app.currentView === 'game-library') {
+                actions.startRename();
+                e.preventDefault();
+                return;
+            }
+        }
+
+        
         if (app.isGuideOpen) {
             if (key === 'ArrowUp') actions.moveGuideMenu(-1);
             if (key === 'ArrowDown') actions.moveGuideMenu(1);
@@ -3680,14 +4215,14 @@ document.addEventListener('alpine:init', () => {
 
         if (app.currentView === 'settings-core' && app.focusedIndex === 11 && !app.isGuideOpen) {
     
-
+        
             if (key === 'y' || key === 'Y') {
-                e.preventDefault();
+                e.preventDefault(); 
                 actions.checkAppUpdate();
                 actions.playSound('select');
             }
 
-
+            
             if (key === 'Enter') {
                 e.preventDefault();
                 if (app.appUpdateInfo.status === 'update-available') {
@@ -3695,6 +4230,7 @@ document.addEventListener('alpine:init', () => {
                 }
             }
         }
+
 
         if (app.currentView === 'achievements') {
             if (e.key === 'ArrowRight') {
@@ -3707,6 +4243,7 @@ document.addEventListener('alpine:init', () => {
         }
 
         if (app.currentView === 'achievements') {
+            
             if (app.isAchievementOverlayOpen) {
                 if (key === 'Escape' || key === 'Backspace') {
                     actions.closeAchievementOverlay();
@@ -3719,6 +4256,7 @@ document.addEventListener('alpine:init', () => {
                 return;
             }
 
+            
             if (key === 'Enter') {
                 actions.openAchievementOverlay();
                 return;
@@ -3736,23 +4274,28 @@ document.addEventListener('alpine:init', () => {
                 app.focusedProfileIndex = Math.max(app.focusedProfileIndex - 1, 0);
                 actions.playSound('focus');
             } 
+            
             else if (key === 'x' || key === 'X') {
                 actions.changeFocusedProfileAvatar();
             }
+            
             else if (key === 'o' || key === 'O') {
                 actions.createNewProfilePrompt();
             }
 
-            else if (key === '[') {
+            else if (key === '[') { 
+                
                 actions.logoutFocusedProfile();
             }
             else if (key === ']') {
+                
                 actions.loginFocusedProfile();
             }
             
             else if (key === 'Delete') {
                 if (app.isProfileSelectorOpen) actions.deleteFocusedProfile();
             }
+
             
             else if (key === 'Enter' || key === 'a' || key === 'A') {
                 if (app.focusedProfileIndex === app.profilesList.length) {
@@ -3768,11 +4311,13 @@ document.addEventListener('alpine:init', () => {
             return; 
         }
         
+        
         if (app.isPageTransitioning || app.gameSelectionAnimating) {
             e.preventDefault();
             return;
         }
 
+        
         if (app.currentView === 'dashboard' && (key === 'y' || key === 'Y')) {
             actions.changeUserAvatar();
             return;
@@ -3784,9 +4329,11 @@ document.addEventListener('alpine:init', () => {
                 return;
             }
 
+            
             if (key === 'q' || key === 'Q' || key === 'PageUp') { actions.changeArtTab(-1); return; }
             if (key === 'e' || key === 'E' || key === 'PageDown') { actions.changeArtTab(1); return; }
 
+            
             if (key === 'ArrowUp')    { actions.moveArtGridFocus(-1, 0); return; }
             if (key === 'ArrowDown')  { actions.moveArtGridFocus(1, 0); return; }
             if (key === 'ArrowLeft')  { actions.moveArtGridFocus(0, -1); return; }
@@ -3801,7 +4348,10 @@ document.addEventListener('alpine:init', () => {
             return;
         }
 
-
+        
+        
+        
+        
         if (app.isKeyboardOpen) {
             
             
@@ -3809,36 +4359,43 @@ document.addEventListener('alpine:init', () => {
                 e.preventDefault(); 
             }
 
+            
+            
 
+            
             if (key === 'Backspace') {
                 actions.handleKeyboardSpecial('BACKSPACE');
                 return;
             }
 
-
+            
             if (key === ' ') { 
                 actions.handleKeyboardSpecial('SPACE');
                 return;
             }
 
+            
             if (key === 'Enter') {
                 actions.handleKeyboardSpecial('DONE');
                 return;
             }
 
+            
             if (key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
-                let targetVar = 'librarySearch';
+                let targetVar = 'librarySearch'; 
                 if (app.keyboardMode === 'rename') {
-                    targetVar = 'renameInput';
+                    targetVar = 'renameInput'; 
                 } else if (app.keyboardMode === 'create_profile' || app.keyboardMode === 'rename_profile') {
-                    targetVar = 'newProfileName';
+                    targetVar = 'newProfileName'; 
                 }
                 const currentText = app[targetVar] || "";
                 const pos = app.searchCursorPos;
 
+                
                 app[targetVar] = currentText.slice(0, pos) + key + currentText.slice(pos);
                 app.searchCursorPos++;
 
+                
                 
                 if (app.currentView === 'game-library') actions.filterLibrary();
 
@@ -3846,16 +4403,19 @@ document.addEventListener('alpine:init', () => {
                 return; 
             }
 
-
+            
+            
             if (key === 'ArrowUp') actions.moveKeyboardFocus(-1, 0);
             else if (key === 'ArrowDown') actions.moveKeyboardFocus(1, 0);
             else if (key === 'ArrowLeft') actions.moveKeyboardFocus(0, -1);
             else if (key === 'ArrowRight') actions.moveKeyboardFocus(0, 1);
             
-            return;
+            return; 
         }
 
-
+        
+        
+        
         const isInputFocused = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.type === 'checkbox';
         if (isInputFocused) {
             if (key === 'Enter') {
@@ -3872,6 +4432,7 @@ document.addEventListener('alpine:init', () => {
         if (app.currentView === 'settings-audio') {
             const item = app.audioMenu[app.focusedIndex];
 
+            
             if (key === 'y' || key === 'Y') {
                 actions.resetSoundSettings();
                 e.preventDefault();
@@ -3879,41 +4440,53 @@ document.addEventListener('alpine:init', () => {
             }
 
             if (item.type === 'slider') {
+                
                 const dirMultiplier = app.language === 'ar' ? -1 : 1;
 
                 if (key === 'ArrowRight') {
                     const val = 1 * dirMultiplier;
+                    
                     if (item.id === 'volume') actions.updateMasterVolume(val);
                     else if (item.id === 'bgmVolume') actions.updateMusicVolume(val);
                     return; 
                 }
                 if (key === 'ArrowLeft') {
                     const val = -1 * dirMultiplier;
+                    
                     if (item.id === 'volume') actions.updateMasterVolume(val);
                     else if (item.id === 'bgmVolume') actions.updateMusicVolume(val);
                     return;
                 }
             }
 
+            
             if (key === 'Enter') {
                 if (item.type === 'file') {
+                    
                     actions.changeSoundEffect();
                 } else if (item.type === 'slider') {
+                    
                     actions.playSound('select');
                 }
                 return;
             }
 
+            
             if (key === 'Escape' || key === 'Backspace') {
                 actions.goBack();
                 return;
             }
 
+            
             if (key === 'ArrowUp') { actions.moveFocus(-1); return; }
             if (key === 'ArrowDown') { actions.moveFocus(1); return; }
         }
         
+        
+        
+        
 
+        
         if (key === 'r' || key === 'R') {
             if (app.currentView === 'game-library') {
                 app.showGameInfoOverlay = !app.showGameInfoOverlay;
@@ -3923,6 +4496,7 @@ document.addEventListener('alpine:init', () => {
             }
         }
 
+        
         if (key === 'm' || key === 'M') {
             if (app.currentView === 'game-library' && !app.isArtManagerOpen && !app.isKeyboardOpen) {
                 actions.openArtManager();
@@ -3961,11 +4535,13 @@ document.addEventListener('alpine:init', () => {
 
         if (key === 'x' || key === 'X' || key === ' ') {
             
+            
             if (app.currentView === 'settings-colors' && app.colorPresets[app.focusedIndex].id === 'custom') {
                 e.preventDefault();
                 actions.saveNewCustomPreset();
                 return;
             }
+            
             
             if (app.currentView === 'game-library') {
                 const hasPatches = app.focusedGamePatchInfo && 
@@ -3980,11 +4556,15 @@ document.addEventListener('alpine:init', () => {
                 }
             }
             
+            
             if (app.currentView === 'patches-manager') { e.preventDefault(); actions.saveAllPatches(); return; }
             if (app.currentView === 'settings-config') { e.preventDefault(); actions.saveXeniaConfig(); return; }
         }
         e.preventDefault(); 
 
+        
+        
+        
 
         if (app.focusedCollection === 'colorPresets') {
              switch (key) {
@@ -4073,41 +4653,71 @@ document.addEventListener('alpine:init', () => {
         }
     });
 
+    
     async function initializeApp() {
         console.log('[Debug Core.js] 1. Initializing App...');
         await Alpine.store('actions').loadLocales();
         await Alpine.store('actions').loadUserConfig();
+
+        
+        
+        
+        let savedTheme = await window.electronAPI.get('currentTheme');
+        if (savedTheme === null || savedTheme === undefined || savedTheme === '') {
+            savedTheme = 'NXE-2008'; 
+            await window.electronAPI.set('currentTheme', savedTheme); 
+        }
+        
+        const app = Alpine.store('app');
+        app.currentTheme = savedTheme;
+
+        
+        await Alpine.store('actions').scanForThemes();
+
+        
+        const themeStylesheet = document.getElementById('theme-stylesheet');
+        const cssUrl = await window.electronAPI.getThemeCssUrl(savedTheme);
+        themeStylesheet.href = cssUrl;
+        
+
+        
         await Alpine.store('actions').loadDisplaySettings();
         await Alpine.store('actions').loadUserColors();
+        
+        
         await Alpine.store('actions').refreshProfileData();
         await Alpine.store('actions').loadUserSounds();
         await Alpine.store('actions').checkAbgxTool();
         await Alpine.store('actions').verifyAbgxTool();
 
         let mouseTimer;
-            const hideCursor = () => {
-                document.body.style.cursor = 'none';
-            };
+        const hideCursor = () => {
+            document.body.style.cursor = 'none';
+        };
 
+        
+        document.addEventListener('mousemove', () => {
+            document.body.style.cursor = 'default'; 
+            clearTimeout(mouseTimer); 
+            mouseTimer = setTimeout(hideCursor, 5000); 
+        });
 
-            document.addEventListener('mousemove', () => {
-                document.body.style.cursor = 'default';
-                clearTimeout(mouseTimer);
-                mouseTimer = setTimeout(hideCursor, 5000);
-            });
+        
+        window.electronAPI.onGamepadInput(() => {
+            hideCursor();
+        });
 
-
-            window.electronAPI.onGamepadInput(() => {
-                hideCursor();
-            });
-
+        
         window.electronAPI.onWindowBlur(() => {
-            Alpine.store('actions').manageBGM('pause');
+            
+            Alpine.store('actions').manageBGM('pause'); 
+
             if (app.activeSoundElement) {
                 app.activeSoundElement.pause();
                 app.activeSoundElement.currentTime = 0;
             }
 
+            
             if (keyRepeatTimers.x.delay) clearTimeout(keyRepeatTimers.x.delay);
             if (keyRepeatTimers.x.interval) clearInterval(keyRepeatTimers.x.interval);
             if (keyRepeatTimers.y.delay) clearTimeout(keyRepeatTimers.y.delay);
@@ -4121,12 +4731,13 @@ document.addEventListener('alpine:init', () => {
         });
 
         window.electronAPI.onWindowFocus(() => {
-            Alpine.store('actions').manageBGM('play');
+            Alpine.store('actions').manageBGM('play'); 
         });
 
         window.electronAPI.onGameStarted(() => {
             app.isGameRunning = true;
-            Alpine.store('actions').manageBGM('pause');
+            Alpine.store('actions').manageBGM('pause'); 
+
             if (app.activeSoundElement) {
                 app.activeSoundElement.pause();
                 app.activeSoundElement.currentTime = 0;
@@ -4135,26 +4746,21 @@ document.addEventListener('alpine:init', () => {
 
         window.electronAPI.onGameStopped(() => {
             app.isGameRunning = false;
-            Alpine.store('actions').manageBGM('play');
+            Alpine.store('actions').manageBGM('play'); 
         });
 
         setInterval(() => {
-        const app = Alpine.store('app');
-        app.systemTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            const app = Alpine.store('app');
+            
+            app.systemTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
         }, 1000);
         
-        console.log('[Debug Core.js] 2. User config loaded.');
-        let savedTheme = await window.electronAPI.get('currentTheme');
-        if (savedTheme === null || savedTheme === undefined || savedTheme === '') {
-            savedTheme = 'NXE-2008'; 
-            await window.electronAPI.set('currentTheme', savedTheme); 
-        }
-        const app = Alpine.store('app');
-        app.currentTheme = savedTheme;
-        const themeStylesheet = document.getElementById('theme-stylesheet');
-        themeStylesheet.href = `themes/${savedTheme}/style.css`;
-
+        console.log(`[Debug Core.js] 2. User config loaded.`);
+        
+        
+        
         setTimeout(async () => {
+            
             await Alpine.store('actions').scanForGames(true);
         }, 1000);
         
@@ -4168,7 +4774,14 @@ document.addEventListener('alpine:init', () => {
         window.electronAPI.onDownloadProgress((data) => {
             const app = Alpine.store('app');
 
-
+            if (data.type === 'app-update') {
+                app.appUpdateInfo.percentage = data.percentage;
+                app.appUpdateInfo.status = 'downloading';
+                app.appUpdateInfo.message = `Downloading: ${data.percentage}%`;
+                return;
+            }
+            
+            
             if (data.type && app.downloadStatuses && app.downloadStatuses[data.type]) {
                 app.downloadStatuses[data.type] = data;
             } 
@@ -4178,15 +4791,17 @@ document.addEventListener('alpine:init', () => {
         });
         
         window.electronAPI.onControllerReEnabled(() => {
-            console.log("[Controller] Re-enabling with cooldown...");
+            console.log("[Controller] Re-enabling with cooldown..."); 
+            
             
             Alpine.store('app').isControllerLocked = true;
+            
             
             Object.values(keyRepeatTimers.x).forEach(clearTimeout);
             Object.values(keyRepeatTimers.y).forEach(clearTimeout);
             keyRepeatTimers = { x: { delay: null, interval: null }, y: { delay: null, interval: null } };
             
-
+            
             setTimeout(() => {
                 Alpine.store('app').isControllerLocked = false;
                 console.log("[Controller] Unlocked and ready.");
@@ -4196,41 +4811,44 @@ document.addEventListener('alpine:init', () => {
         const REPEAT_DELAY = 400;
         const REPEAT_INTERVAL = 150;
 
-const getMoveAction = (axis, value) => {
-    const actions = Alpine.store('actions');
-    const app = Alpine.store('app');
-    return () => {
-        if (axis === 'x') {
-            if (value === 1) {
-                if (app.focusedList === 'master') { app.focusedList = 'detail'; actions.playSound('focus'); }
-                else if (app.focusedList === 'detail') actions.moveDetail(1);
-                else if (app.currentView === 'game-library') actions.moveFocus(1);
-                else if (app.currentView === 'settings-config' && app.configFocusedPanel === 'categories') { app.configFocusedPanel = 'options'; actions.playSound('focus'); }
-                else if (app.currentView === 'patches-manager' && app.configFocusedPanel === 'categories') { actions.selectFocusedItem(); }
-            } else if (value === -1) {
-                if (app.focusedList === 'detail') actions.moveDetail(-1);
-                else if (app.focusedList === 'master') { app.focusedList = 'detail'; actions.playSound('focus'); }
-                
-                else if (app.currentView === 'game-library') actions.moveFocus(-1);
-                else if (app.currentView === 'settings-config' && app.configFocusedPanel === 'options') { app.configFocusedPanel = 'categories'; actions.playSound('back'); }
-            }
-        } else if (axis === 'y') {
-            if (value === 1) {
-                if (app.focusedCollection === 'colorPresets') { actions.moveFocus(1); actions.previewTheme(app.focusedIndex); }
-                else if (app.focusedList === 'master') actions.moveMaster(1);
-                else if (app.focusedList === 'detail') { app.focusedList = 'master'; actions.moveMaster(1); } 
-                else if (app.currentView === 'settings-config') app.configFocusedPanel === 'categories' ? actions.moveConfigCategory(1) : actions.moveConfigOption(1);
-                else if (app.focusedCollection) actions.moveFocus(1);
-            } else if (value === -1) {
-                if (app.focusedCollection === 'colorPresets') { actions.moveFocus(-1); actions.previewTheme(app.focusedIndex); }
-                else if (app.focusedList === 'master') actions.moveMaster(-1);
-                else if (app.focusedList === 'detail') { app.focusedList = 'master'; actions.moveMaster(-1); }
-                else if (app.currentView === 'settings-config') app.configFocusedPanel === 'categories' ? actions.moveConfigCategory(-1) : actions.moveConfigOption(-1);
-                else if (app.focusedCollection) actions.moveFocus(-1);
-            }
-        }
-    };
-};
+        const getMoveAction = (axis, value) => {
+            const actions = Alpine.store('actions');
+            const app = Alpine.store('app');
+            return () => {
+                if (axis === 'x') {
+                    if (value === 1) { 
+                        if (app.focusedList === 'master') { app.focusedList = 'detail'; actions.playSound('focus'); }
+                        else if (app.focusedList === 'detail') actions.moveDetail(1);
+                        
+                        else if (app.currentView === 'game-library') actions.moveFocus(1);
+                        else if (app.currentView === 'settings-config' && app.configFocusedPanel === 'categories') { app.configFocusedPanel = 'options'; actions.playSound('focus'); }
+                        else if (app.currentView === 'patches-manager' && app.configFocusedPanel === 'categories') { actions.selectFocusedItem(); }
+                    } else if (value === -1) { 
+                        if (app.focusedList === 'detail') actions.moveDetail(-1);
+                        else if (app.focusedList === 'master') { app.focusedList = 'detail'; actions.playSound('focus'); }
+                        
+                        else if (app.currentView === 'game-library') actions.moveFocus(-1);
+                        else if (app.currentView === 'settings-config' && app.configFocusedPanel === 'options') { app.configFocusedPanel = 'categories'; actions.playSound('back'); }
+                    }
+                } else if (axis === 'y') {
+                    if (value === 1) { 
+                        if (app.focusedCollection === 'colorPresets') { actions.moveFocus(1); actions.previewTheme(app.focusedIndex); }
+                        else if (app.focusedList === 'master') actions.moveMaster(1);
+                        else if (app.focusedList === 'detail') { app.focusedList = 'master'; actions.moveMaster(1); } 
+                        else if (app.currentView === 'settings-config') app.configFocusedPanel === 'categories' ? actions.moveConfigCategory(1) : actions.moveConfigOption(1);
+                        
+                        else if (app.focusedCollection) actions.moveFocus(1);
+                    } else if (value === -1) { 
+                        if (app.focusedCollection === 'colorPresets') { actions.moveFocus(-1); actions.previewTheme(app.focusedIndex); }
+                        else if (app.focusedList === 'master') actions.moveMaster(-1);
+                        else if (app.focusedList === 'detail') { app.focusedList = 'master'; actions.moveMaster(-1); }
+                        else if (app.currentView === 'settings-config') app.configFocusedPanel === 'categories' ? actions.moveConfigCategory(-1) : actions.moveConfigOption(-1);
+                        
+                        else if (app.focusedCollection) actions.moveFocus(-1);
+                    }
+                }
+            };
+        };
 
         const stopRepeat = (axis) => {
             if (keyRepeatTimers[axis].delay) clearTimeout(keyRepeatTimers[axis].delay);
@@ -4239,10 +4857,13 @@ const getMoveAction = (axis, value) => {
         };
 
         window.electronAPI.onGamepadInput((message) => {
+            
+            Alpine.store('hooks').emit('onGamepadInput', message);
             const actions = Alpine.store('actions');
             const app = Alpine.store('app');
 
             if (message.event === 'button_left_thumb' && message.value === 1) {
+                
                 if (app.currentView === 'game-library' && !app.isKeyboardOpen) {
                     const game = app.filteredLibraryGames[app.focusedIndex];
                     if (game && game.fileName.toLowerCase().endsWith('.zar') && !game.titleID) {
@@ -4254,9 +4875,10 @@ const getMoveAction = (axis, value) => {
 
 
             if (message.event === 'right_trigger') {
+                
                 if (message.value > 0.8 && !app.rtLock) {
                     if (app.currentView === 'game-library' && !app.isArtManagerOpen && !app.isGuideOpen && !app.isKeyboardOpen) {
-                        app.rtLock = true;
+                        app.rtLock = true; 
                         actions.openArtManager();
                     }
                 } 
@@ -4271,6 +4893,7 @@ const getMoveAction = (axis, value) => {
                     actions.closeArtManager();
                 }
                 
+                
                 if (message.value === 1) {
                     if (message.event === 'button_left_bumper')  actions.changeArtTab(-1);
                     if (message.event === 'button_right_bumper') actions.changeArtTab(1);
@@ -4280,9 +4903,11 @@ const getMoveAction = (axis, value) => {
                     if (!app.dpad_lock) { 
                         actions.moveArtGridFocus(message.value, 0);
                         app.dpad_lock = true; 
+                        
                         setTimeout(() => app.dpad_lock = false, 200); 
                     }
                 }
+                
                 if (message.event === 'dpad_x' && message.value !== 0) {
                     if (!app.dpad_lock) {
                         actions.moveArtGridFocus(0, message.value);
@@ -4290,6 +4915,7 @@ const getMoveAction = (axis, value) => {
                         setTimeout(() => app.dpad_lock = false, 200);
                     }
                 }
+                
                 
                 if (message.event === 'left_stick_y' && Math.abs(message.value) > 0.5) {
                     if(!app.stick_lock_art) {
@@ -4304,6 +4930,7 @@ const getMoveAction = (axis, value) => {
                     }
                 }
 
+                
                 if (message.value === 1) {
                     if (message.event === 'button_a') {
                         const asset = app.artManagerData.assets[app.artManagerData.focusedAssetIndex];
@@ -4314,9 +4941,11 @@ const getMoveAction = (axis, value) => {
 
                 return;
             }
+            
             if (message.event === 'button_right_bumper' && message.value === 1) {
                 
-
+                
+                
                 if (app.currentView === 'game-library' && !app.isKeyboardOpen) {
                     
                     app.showGameInfoOverlay = !app.showGameInfoOverlay;
@@ -4326,15 +4955,18 @@ const getMoveAction = (axis, value) => {
                 }
                 
             }
+            
             if (message.event === 'left_trigger') {
                 const app = Alpine.store('app');
                 
                 if (message.value > 0.8 && !app.ltLock) {
+                    
                     if (app.showGameInfoOverlay && !app.isKeyboardOpen) {
                         app.ltLock = true;
                         actions.handleTranslationClick();
                         console.log(`[LT] Action: Translation Toggle`);
                     }
+                    
                     else if (app.currentView === 'game-library' && !app.showGameInfoOverlay && !app.isKeyboardOpen && !app.isArtManagerOpen) {
                         app.ltLock = true;
                         actions.applyOptimizedSettings(); 
@@ -4348,27 +4980,38 @@ const getMoveAction = (axis, value) => {
             
 
             if (message.event === 'button_left_bumper') {
+                
                 app.isLbPressed = (message.value === 1);
 
+                
                 if (message.value === 1) {
+                    
                     if (app.currentView === 'game-library' && !app.isKeyboardOpen) {
                         setTimeout(() => {
+                            
                             if (!app.isGuideOpen && !app.inputLocked) {
                                 actions.openGameConfig();
                             }
-                        }, 250);
+                        }, 250); 
                     }
                 }
-
+                
+                
             }
 
-
+            
+            
+            
+            
+            
+            
             if (message.event === 'button_left_bumper') {
                 app.isLbPressed = (message.value === 1);
             }
 
             if (message.event === 'button_start' && message.value === 1) {
     
+                
                 if (app.isLbPressed) {
                     console.log("Combo Activated: LB + Start -> Opening Guide");
                     actions.toggleGuide();
@@ -4377,17 +5020,23 @@ const getMoveAction = (axis, value) => {
                     return; 
                 }
 
+                
+                
                 if (app.isKeyboardOpen) {
                     console.log("Keyboard is open: Start acts as DONE");
                     actions.handleKeyboardSpecial('DONE'); 
-                    return;
+                    return; 
                 }
+
+                
+                
                 
                 if (app.isProfileSelectorOpen && !app.isCreatingProfile && !app.isRenamingProfile) {
                     actions.startRenameProfilePrompt();
                     return;
                 }
 
+                
                 if (app.currentView === 'game-library' && !app.isGuideOpen) {
                     actions.startRename();
                     return;
@@ -4395,33 +5044,86 @@ const getMoveAction = (axis, value) => {
 
                 return;
             }
+
+            
             if (app.currentView === 'settings-core' && app.focusedIndex === 11 && !app.isGuideOpen) {
 
-
+                
                 if (message.event === 'button_y' && message.value === 1) {
                     actions.checkAppUpdate();
                     actions.playSound('select');
                 }
 
-
+                
                 if (message.event === 'button_a' && message.value === 1) {
                     if (app.appUpdateInfo.status === 'update-available') {
                         actions.downloadAppUpdate();
                     }
                 }
             }
+            
 
+            
             if (message.event.startsWith('button_') && message.value === 0) return;
 
+            
             if (app.isControllerLocked || app.isPageTransitioning || app.inputLocked) return;
 
+           
 
+            
+            if (message.event === 'button_guide') {
+                actions.toggleGuide();
+                app.inputLocked = true;
+                setTimeout(() => app.inputLocked = false, 300); 
+                return;
+            }
+
+            
+            if (app.isGuideOpen) {
+                let actionTaken = false;
+
+                
+                if (message.event === 'dpad_y') {
+                    if (message.value !== 0) {
+                        actions.moveGuideMenu(message.value); 
+                        actionTaken = true;
+                    }
+                } 
+                
+                else if (message.event === 'dpad_x') {
+                    if (message.value !== 0) {
+                        actions.moveGuideTab(message.value);
+                        actionTaken = true;
+                    }
+                }
+                
+                else if (message.event === 'button_a') {
+                    actions.executeGuideAction();
+                    actionTaken = true;
+                }
+                else if (message.event === 'button_b') {
+                    actions.toggleGuide(); 
+                    actionTaken = true;
+                }
+
+                if (actionTaken) {
+                    app.inputLocked = true;
+                    setTimeout(() => app.inputLocked = false, 150); 
+                }
+                return; 
+            }
+
+             
+            
+            
             if ((app.currentView === 'game-library') && message.event === 'button_right_thumb') {
                 actions.toggleKeyboard();
                 return; 
             }
 
             if (app.isKeyboardOpen) {
+                
                 
                 if (message.event === 'dpad_y' && message.value !== 0) actions.moveKeyboardFocus(message.value, 0);
                 else if (message.event === 'dpad_x' && message.value !== 0) actions.moveKeyboardFocus(0, message.value);
@@ -4439,22 +5141,27 @@ const getMoveAction = (axis, value) => {
                      }
                 }
 
+                
                 else if (message.event === 'button_a') actions.pressKeyboardKey();
                 else if (message.event === 'button_x') actions.handleKeyboardSpecial('BACKSPACE');
                 else if (message.event === 'button_y') actions.handleKeyboardSpecial('SPACE');
                 else if (message.event === 'button_b') actions.toggleKeyboard();
                 
+                
                 else if (message.event === 'button_start') actions.handleKeyboardSpecial('DONE');
                 
-                else if (message.event === 'button_left_thumb') actions.handleKeyboardSpecial('CAPS');
+                else if (message.event === 'button_left_thumb') actions.handleKeyboardSpecial('CAPS'); 
+                
                 
                 else if (message.event === 'button_left_bumper') {
+                    
                     actions.moveTextCursor(-1); 
                 }
                 else if (message.event === 'button_right_bumper') {
                     actions.moveTextCursor(1); 
                 }
 
+                
                 else if (message.event === 'left_trigger' && message.value > 0.5) {
                     if(!app.trig_lock) { 
                         actions.handleKeyboardSpecial('SYMBOLS'); 
@@ -4472,55 +5179,19 @@ const getMoveAction = (axis, value) => {
                 return; 
             }
 
-            if (message.event === 'button_guide') {
-                actions.toggleGuide();
-                app.inputLocked = true;
-                setTimeout(() => app.inputLocked = false, 300); 
-                return;
-            }
-
-            if (app.isGuideOpen) {
-                let actionTaken = false;
-
-                if (message.event === 'dpad_y') {
-                    if (message.value !== 0) {
-                        actions.moveGuideMenu(message.value); 
-                        actionTaken = true;
-                    }
-                } 
-                else if (message.event === 'dpad_x') {
-                    if (message.value !== 0) {
-                        actions.moveGuideTab(message.value);
-                        actionTaken = true;
-                    }
-                }
-                // 
-                else if (message.event === 'button_a') {
-                    actions.executeGuideAction();
-                    actionTaken = true;
-                }
-                else if (message.event === 'button_b') {
-                    actions.toggleGuide(); 
-                    actionTaken = true;
-                }
-
-                if (actionTaken) {
-                    app.inputLocked = true;
-                    setTimeout(() => app.inputLocked = false, 150); 
-                }
-                return; 
-            }
-
         
             if (app.currentView === 'achievements' && !app.isGuideOpen) {
 
+                
                 if (app.isAchievementOverlayOpen) {
 
+                    
                     if (message.event === 'button_b' && message.value === 1) {
                         actions.closeAchievementOverlay();
-                        return;
+                        return; 
                     }
 
+                    
                     if (message.event === 'dpad_y' && message.value !== 0) {
                         actions.moveAchievementGridFocus(message.value, 0); 
                     }
@@ -4528,22 +5199,25 @@ const getMoveAction = (axis, value) => {
                         actions.moveAchievementGridFocus(0, message.value); 
                     }
                     
-                    return;
+                    return; 
                 }
 
                 
                 if (!app.isAchievementOverlayOpen) {
+                    
                     
                     if (message.event === 'button_a' && message.value === 1) {
                         actions.openAchievementOverlay();
                         return;
                     }
 
+                    
                     if (message.event === 'dpad_x' && message.value !== 0) {
                         actions.moveFocus(message.value);
                         return;
                     }
 
+                    
                     if ((message.event === 'button_y' || message.event === 'Y') && message.value !== 0) {
                         actions.refreshCurrentGame();
                         return;
@@ -4552,43 +5226,30 @@ const getMoveAction = (axis, value) => {
             }
 
             if (app.isProfileSelectorOpen) {
-                if (app.isCreatingProfile) {
-                    if (message.event === 'button_b' && message.value === 1) {
-                        actions.cancelCreateProfile();
-                    } 
-                    else if ((message.event === 'button_a' || message.event === 'button_start') && message.value === 1) {
-                        actions.submitNewProfile();
-                    }
-                    return;
-                }
 
-                if (app.isRenamingProfile) {
-                    if (message.event === 'button_b' && message.value === 1) {
-                        actions.cancelRenameProfile();
-                    } 
-                    else if ((message.event === 'button_a' || message.event === 'button_start') && message.value === 1) {
-                        actions.submitProfileRename();
-                    }
-                    return;
-                }
-
-
+                
+                
                 if (message.event === 'dpad_y' && message.value !== 0) {
                     actions.moveProfileFocus(message.value); 
                 }
                 
+                
                 else if (message.event === 'button_a' && message.value === 1) {
                     const selectedProfile = app.profilesList[app.focusedProfileIndex];
+                    
                     if (app.focusedProfileIndex === app.profilesList.length) {
                         actions.createNewProfilePrompt();
                     } 
+                    
                     else if (selectedProfile) {
                         actions.switchActiveProfile(selectedProfile.slot);
                     }
                 }
+                
                 else if (message.event === 'button_y' && message.value === 1) {
                     actions.createNewProfilePrompt();
                 }
+                
                 else if (message.event === 'button_x' && message.value === 1) {
                     actions.changeFocusedProfileAvatar();
                 }
@@ -4602,9 +5263,11 @@ const getMoveAction = (axis, value) => {
                 }
 
                 else if (message.event === 'button_right_bumper' && message.value === 1) {
+                    
                     actions.loginFocusedProfile();
                 }
                 else if (message.event === 'button_left_bumper' && message.value === 1) {
+                    
                     actions.logoutFocusedProfile();
                 }
 
@@ -4614,29 +5277,34 @@ const getMoveAction = (axis, value) => {
                     }
                 }
                 
-                return;
+                return; 
             }
 
-
+            
+            
+            
             if (app.isPatchSelectorOpen) {
+                
                 if (message.event === 'dpad_y') {
-                    if (message.value === -1 && app.patchSelectorIndex > 0) {
+                    if (message.value === -1 && app.patchSelectorIndex > 0) { 
                         app.patchSelectorIndex--;
                         actions.playSound('focus');
-                    } else if (message.value === 1 && app.patchSelectorIndex < app.patchSelectorFiles.length - 1) {
+                    } else if (message.value === 1 && app.patchSelectorIndex < app.patchSelectorFiles.length - 1) { 
                         app.patchSelectorIndex++;
                         actions.playSound('focus');
                     }
                 } 
+                
                 else if (message.event === 'button_a') {
                     actions.selectPatchFileAndOpen();
                 } 
+                
                 else if (message.event === 'button_b' || message.event === 'button_x') {
                     app.isPatchSelectorOpen = false;
                     actions.playSound('back');
                 }
                 
-                return;
+                return; 
             }
             
             if (app.isControllerLocked || app.isPageTransitioning) return;
@@ -4648,7 +5316,7 @@ const getMoveAction = (axis, value) => {
                     
                     if (game && !game.titleID) {
                         actions.performDeepScan();
-                        return;
+                        return; 
                     }
                 }
             }
@@ -4661,39 +5329,46 @@ const getMoveAction = (axis, value) => {
                 if (item.type === 'slider') {
                     const isBgm = (item.id === 'bgmVolume');
                     
+                    
                     const dirMultiplier = app.language === 'ar' ? -1 : 1;
 
                     
                     if (message.event === 'dpad_x') {
                         if (message.value !== 0) {
+                            
                             const val = message.value * dirMultiplier;
                             
                             if (isBgm) actions.updateMusicVolume(val);
                             else actions.updateMasterVolume(val);
                         }
-                        return;
+                        return; 
                     }
                 }
 
+                
                 if (message.event === 'button_a') {
                     if (item.type === 'file') {
                         actions.changeSoundEffect();
                     } else if (item.type === 'slider') {
+                        
                         actions.playSound('select'); 
                     }
                     return;
                 }
 
+                
                 if (message.event === 'button_y') {
                     actions.resetSoundSettings();
                     return;
                 }
 
+                
                 if (message.event === 'button_b') {
                     actions.goBack();
                     return;
                 }
 
+                
                 if (message.event === 'dpad_y') {
                     if (message.value !== 0) actions.moveFocus(message.value);
                     return;
@@ -4707,9 +5382,11 @@ const getMoveAction = (axis, value) => {
                     return;
                 }
                 
-                return;
+                return; 
             }
-
+            
+            
+            
             switch(message.event) {
                 case 'dpad_x':
                 case 'dpad_y':
@@ -4730,6 +5407,12 @@ const getMoveAction = (axis, value) => {
                 case 'button_a':
 
                     if (app.focusedCollection === 'coreSettingsItems') {
+                        const item = app.coreSettingsItems[app.focusedIndex];
+                        
+                        if (item.id === 'download-optimized') { 
+                            actions.downloadOptimizedSettings(); 
+                            return; 
+                        }
                         if (app.focusedIndex === 6) { actions.downloadXenia('win'); return; }
                         if (app.focusedIndex === 7) { actions.downloadXenia('linux'); return; }
                         if (app.focusedIndex === 8) { actions.downloadPatches(); return; }
@@ -4749,32 +5432,41 @@ const getMoveAction = (axis, value) => {
                     break;
                 
                 case 'button_x': 
+                    
                     if (app.currentView === 'settings-colors' && app.colorPresets[app.focusedIndex].id === 'custom') {
                         actions.saveNewCustomPreset();
                     }
 
                     
-
+                    
+                    
+                    
                     else if (app.currentView === 'game-library') {
+                        
                         const hasPatches = app.focusedGamePatchInfo && 
                                            (app.focusedGamePatchInfo.fileName || 
                                            (app.focusedGamePatchInfo.availableFiles && app.focusedGamePatchInfo.availableFiles.length > 0));
 
                         if (hasPatches) {
                             actions.playSound('select');
+                            
                             actions.openPatchManagerSmart(); 
                         }
                     }
+                    
 
+                    
                     else if (app.currentView === 'patches-manager') {
                         actions.saveAllPatches();
                     } 
+                    
                     else if (app.currentView === 'settings-config') {
                         actions.saveXeniaConfig();
                     }
                     break;
 
                 case 'button_y':
+                    
                     if (app.currentView === 'dashboard') {
                         actions.changeUserAvatar();
                     }
@@ -4806,6 +5498,8 @@ const getMoveAction = (axis, value) => {
         app.currentViewHTML = result.html;
         await Alpine.store('actions').loadDashboardData();
         console.log('[Debug Core.js] 6. Initialization complete.');
+
+        Alpine.store('hooks').emit('onAppReady', { theme: app.currentTheme });
         
     }
 

@@ -44,15 +44,15 @@
     
     <script src="cdn.min.js"></script>
 
-    <div id="guide-overlay" 
+   <div id="guide-overlay" 
      class="guide-overlay" 
      x-show="$store.app.isGuideOpen" 
-     x-transition:enter="transition ease-out duration-200"
-     x-transition:enter-start="opacity-0 scale-90"
+     x-transition:enter="transition ease-out duration-300"
+     x-transition:enter-start="opacity-0 scale-95"
      x-transition:enter-end="opacity-100 scale-100"
-     x-transition:leave="transition ease-in duration-150"
+     x-transition:leave="transition ease-in duration-200"
      x-transition:leave-start="opacity-100 scale-100"
-     x-transition:leave-end="opacity-0 scale-90"
+     x-transition:leave-end="opacity-0 scale-95"
      style="display: none;">
 
     <div class="guide-backdrop"></div>
@@ -60,83 +60,113 @@
     <div class="guide-container">
         
         <div class="guide-header-profile">
-            <div class="gamerscore" x-text="$store.app.gamerscore + ' G'"></div>
+            <div class="guide-title" style="font-size: 19px; font-weight: 500; color: #fff; text-shadow: 0 2px 5px rgba(0,0,0,0.8);">XENIA GUIDE</div>
+            
             <div class="guide-gamerpic">
                 <img :src="$store.app.userAvatar" class="player-avatar-img">
             </div>
+            
             <div class="guide-clock" x-text="$store.app.systemTime"></div>
         </div>
 
         <div class="guide-body">
             
-            <div class="guide-blade side left">
-                <span x-text="$store.app.t('guide.xbox_guide')"></span>
+            <div class="guide-blade blade-settings" 
+                 :class="{
+                    'active': $store.app.guideTabs[$store.app.guideTabIndex].id === 'settings',
+                    'is-right': $store.app.guideTabIndex < 0
+                 }">
+                <div class="blade-spine"><span x-text="$store.app.t('guide.settings') || 'Settings'"></span></div>
+                
+                <div class="blade-content" x-show="$store.app.guideTabs[$store.app.guideTabIndex].id === 'settings'">
+                    <ul class="guide-menu scrollable" style="flex: 1; max-height: 250px;">
+                        <template x-for="(item, index) in $store.app.settingsMenu" :key="item.id">
+                            <li :id="'guide-settings-' + index" 
+                                :class="{'selected': $store.app.guideMenuIndex === index}"
+                                @click.prevent="$store.actions.selectFocusedItem()">
+                                <img :src="item.icon" alt="" style="width: 24px; height: 24px; margin-inline-end: 15px;">
+                                <span class="label" x-text="$store.app.t('settings.' + item.id + '_title') || item.name"></span>
+                                <template x-if="item.id === 'language'">
+                                    <span class="guide-lang-badge" x-text="$store.app.language.toUpperCase()"></span>
+                                </template>
+                            </li>
+                        </template>
+                    </ul>
+                    <div class="guide-settings-description">
+                        <template x-for="(item, index) in $store.app.settingsMenu" :key="'desc-' + item.id">
+                            <div x-show="$store.app.guideMenuIndex === index">
+                                <h3 x-text="$store.app.t('settings.' + item.id + '_title') || item.name"></h3>
+                                <p x-text="$store.app.t('settings.' + item.id + '_desc')"></p>
+                            </div>
+                        </template>
+                    </div>
+                </div>
             </div>
 
-            <div class="guide-blade center">
-                
-                <div class="blade-spine">
-                    <span x-text="$store.app.t('guide.' + $store.app.guideTabs[$store.app.guideTabIndex].id) || $store.app.guideTabs[$store.app.guideTabIndex].name"></span>
-                </div>
-
-                <div class="blade-content">
-                    
-                    <ul class="guide-menu" x-show="$store.app.guideTabs[$store.app.guideTabIndex].id === 'home'">
+            <div class="guide-blade blade-home" 
+                 :class="{
+                    'active': $store.app.guideTabs[$store.app.guideTabIndex].id === 'home',
+                    'is-right': $store.app.guideTabIndex < 1
+                 }">
+                <div class="blade-spine"><span x-text="$store.app.t('guide.home') || 'Home'"></span></div>
+                <div class="blade-content" x-show="$store.app.guideTabs[$store.app.guideTabIndex].id === 'home'">
+                    <ul class="guide-menu">
                         <li id="guide-home-0" :class="{'selected': $store.app.guideMenuIndex === 0}">
-                            <span class="label" x-text="$store.app.t('guide.dashboard')">Xbox Dashboard</span>
-                            <span class="hint" x-text="$store.app.t('guide.coming_soon')">(coming soon)</span>
+                            <span class="label" x-text="$store.app.t('guide.dashboard') || 'Xbox Dashboard'"></span>
                         </li>
-                        
                         <li id="guide-home-1" :class="{'selected': $store.app.guideMenuIndex === 1}">
-                            <span class="label" x-text="$store.app.t('guide.quick_launch')">Quick Launch</span>
-                            <span class="hint" x-text="$store.app.t('guide.coming_soon')">(coming soon)</span>
+                            <span class="label" x-text="$store.app.t('guide.quick_launch') || 'Quick Launch'"></span>
                         </li>
-                        
                         <li id="guide-home-2" :class="{'selected': $store.app.guideMenuIndex === 2}">
-                            <span class="label" x-text="$store.app.t('guide.shutdown')">Shutdown System</span>
-                            <span class="hint" x-text="$store.app.t('guide.exit_app')">(Exit App)</span>
+                            <span class="label" x-text="$store.app.t('guide.shutdown') || 'Shutdown System'"></span>
                         </li>
                     </ul>
+                </div>
+            </div>
 
-                    <ul class="guide-menu scrollable" x-show="$store.app.guideTabs[$store.app.guideTabIndex].id === 'games'">
+            <div class="guide-blade blade-games" 
+                 :class="{
+                    'active': $store.app.guideTabs[$store.app.guideTabIndex].id === 'games',
+                    'is-right': $store.app.guideTabIndex < 2
+                 }">
+                <div class="blade-spine"><span x-text="$store.app.t('guide.games') || 'Games'"></span></div>
+                <div class="blade-content" x-show="$store.app.guideTabs[$store.app.guideTabIndex].id === 'games'">
+                    <ul class="guide-menu scrollable">
                         <template x-for="(game, index) in $store.app.gamesList" :key="game.path">
-                            
                             <li :id="'guide-game-' + index" :class="{'selected': $store.app.guideMenuIndex === index}">
-                                
                                 <div class="guide-game-logo-container">
                                     <template x-if="game.logoUrl && game.logoUrl !== ''">
                                         <img :src="game.logoUrl" class="guide-game-logo" :alt="game.name">
                                     </template>
-                                    
                                     <template x-if="!game.logoUrl || game.logoUrl === ''">
                                         <span class="guide-game-text-fallback" x-text="game.name"></span>
                                     </template>
                                 </div>
-
                             </li>
                         </template>
-                        <li x-show="$store.app.gamesList.length === 0" class="empty-msg" x-text="$store.app.t('guide.no_games')">No games found</li>
+                        <li x-show="$store.app.gamesList.length === 0" class="empty-msg" x-text="$store.app.t('guide.no_games') || 'No games found'"></li>
                     </ul>
-
                 </div>
-            </div>
-
-            <div class="guide-blade side right">
-                <span x-text="$store.app.t('guide.games')"></span>
             </div>
 
         </div>
 
         <div class="guide-footer">
-            <div class="footer-btn"><span class="icon-a">A</span> <span x-text="$store.app.t('generic.select')">Select</span></div>
-            <div class="footer-btn"><span class="icon-b">B</span> <span x-text="$store.app.t('generic.close')">Close</span></div>
+            <div class="footer-btn">
+                <span class="icon-a" style="background:#57E610; color:#111; font-weight:bold; border-radius:50%; width:34px; height:34px; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 8px rgba(0,0,0,0.6);">A</span> 
+                <span x-text="$store.app.t('generic.select') || 'Select'"></span>
+            </div>
+            <div class="footer-btn">
+                <span class="icon-b" style="background:#DB1F1F; color:#fff; font-weight:bold; border-radius:50%; width:34px; height:34px; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 8px rgba(0,0,0,0.6);">B</span> 
+                <span x-text="$store.app.t('generic.close') || 'Close'"></span>
+            </div>
         </div>
 
     </div>
-
 </div>
 
 <style>
+    
     .shutdown-crt {
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;
@@ -147,6 +177,7 @@
         transition: opacity 0.1s;
     }
 
+    
     .shutdown-active {
         opacity: 1;
         animation: turn-off 0.7s cubic-bezier(0.23, 1, 0.32, 1) forwards;
@@ -172,12 +203,15 @@
         }
     }
 
+    
     @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
 
+    
     html[dir="rtl"] body {
         font-family: 'Tajawal', 'Segoe UI', sans-serif !important;
     }
 
+    
     html[dir="rtl"] .nxe-settings-wrapper,
     html[dir="rtl"] .marketplace-header,
     html[dir="rtl"] .info-card-header {
@@ -197,6 +231,7 @@
         margin-right: 0; margin-left: 10px;
     }
 
+    
     html[dir="rtl"] .dashboard-drawer,
     html[dir="rtl"] .download-drawer {
         left: -420px; right: auto;
@@ -207,10 +242,12 @@
         transform: translateX(420px);
     }
 
+    
     html[dir="rtl"] .nxe-settings-icon {
         margin-right: 0; margin-left: 15px;
     }
 
+    
     html[dir="rtl"] .search-icon {
         right: 12px; left: auto;
     }
