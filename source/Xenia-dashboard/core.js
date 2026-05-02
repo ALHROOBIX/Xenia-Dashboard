@@ -770,7 +770,7 @@ document.addEventListener('alpine:init', () => {
                 
                 for (const game of app.achievementsGamesList) {
                     try {
-                        const achRes = await window.electronAPI.getGameAchievements(game.titleID, xuid, true);
+                        const achRes = await window.electronAPI.getGameAchievements(game.titleID, xuid);
                         
                         if (achRes.success && achRes.achievements) {
                             game.realAchievements = achRes.achievements;
