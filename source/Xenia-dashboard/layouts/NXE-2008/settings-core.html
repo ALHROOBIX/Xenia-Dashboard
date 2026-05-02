@@ -149,47 +149,65 @@
                     <div>
                         <h3 x-text="$store.app.t('core_config.manager_win')">Xenia Canary (Windows) Manager</h3>
                         
-                        <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                <span style="color: #888;" x-text="$store.app.t('core_config.installed') + ':'">Installed:</span>
-                                <span style="color: white; font-weight: bold;" x-text="$store.app.xeniaUpdateInfo.win.localVer + ' (' + $store.app.xeniaUpdateInfo.win.localDate + ')'"></span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between;">
-                                <span style="color: #888;" x-text="$store.app.t('core_config.latest') + ':'">Latest:</span>
-                                <span style="color: var(--nxe-green-light); font-weight: bold;" x-text="$store.app.xeniaUpdateInfo.win.remoteVer + ' (' + $store.app.xeniaUpdateInfo.win.remoteDate + ')'"></span>
-                            </div>
-                        </div>
-
-                        <div style="min-height: 60px; display: flex; flex-direction: column; justify-content: center;">
-                            <p 
-                                x-show="$store.app.downloadStatuses.win.status === 'idle'"
-                                style="font-weight: bold; font-size: 1.1rem; margin: 0;"
-                                :style="{ color: $store.app.xeniaUpdateInfo.win.color }"
-                                x-text="$store.app.xeniaUpdateInfo.win.message"
-                            ></p>
-
-                            <div x-show="$store.app.downloadStatuses.win.status !== 'idle'">
-                                <p 
-                                    style="font-weight: bold; font-size: 1.1rem; margin-bottom: 5px; transition: color 0.3s;"
-                                    :style="{
-                                        color: $store.app.downloadStatuses.win.step === 'error' ? '#ff6b6b' : 
-                                               $store.app.downloadStatuses.win.step === 'done' ? '#59c853' : 
-                                               $store.app.downloadStatuses.win.step === 'download' ? '#3a82e5' : 
-                                               '#f2c40e' 
-                                    }"
-                                    x-text="$store.app.downloadStatuses.win.status"
-                                ></p>
+                        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                            
+                            <div style="flex: 1; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                                <h4 style="margin: 0 0 10px 0; color: var(--nxe-brand-primary);">Standard Canary</h4>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.85rem;">
+                                    <span style="color: #888;" x-text="$store.app.t('core_config.installed') + ':'">Installed:</span>
+                                    <span style="color: white; font-weight: bold;" x-text="$store.app.xeniaUpdateInfo.win.localVer"></span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+                                    <span style="color: #888;" x-text="$store.app.t('core_config.latest') + ':'">Latest:</span>
+                                    <span style="color: var(--nxe-green-light); font-weight: bold;" x-text="$store.app.xeniaUpdateInfo.win.remoteVer"></span>
+                                </div>
                                 
-                                <div class="nxe-progress-bar" x-show="$store.app.downloadStatuses.win.percentage > 0 && $store.app.downloadStatuses.win.step !== 'done'">
-                                    <div class="nxe-progress-bar-fill" :style="{ width: $store.app.downloadStatuses.win.percentage + '%' }"></div>
+                                
+                                <div style="margin-top: 10px; min-height: 25px;">
+                                    <p x-show="$store.app.downloadStatuses.win.status === 'idle'" style="font-weight: bold; font-size: 0.85rem; margin: 0;" :style="{ color: $store.app.xeniaUpdateInfo.win.color }" x-text="$store.app.xeniaUpdateInfo.win.message"></p>
+                                    <div x-show="$store.app.downloadStatuses.win.status !== 'idle'">
+                                        <p style="font-weight: bold; font-size: 0.85rem; margin-bottom: 5px; color: #3a82e5;" x-text="$store.app.downloadStatuses.win.status"></p>
+                                        <div class="nxe-progress-bar" style="height: 6px;" x-show="$store.app.downloadStatuses.win.percentage > 0 && $store.app.downloadStatuses.win.step !== 'done'">
+                                            <div class="nxe-progress-bar-fill" :style="{ width: $store.app.downloadStatuses.win.percentage + '%' }"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            
+                            <div style="flex: 1; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                                <h4 style="margin: 0 0 10px 0; color: var(--nxe-brand-light);">Netplay Version</h4>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.85rem;">
+                                    <span style="color: #888;" x-text="$store.app.t('core_config.installed') + ':'">Installed:</span>
+                                    <span style="color: white; font-weight: bold;" x-text="$store.app.xeniaUpdateInfo.winNetplay.localVer"></span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+                                    <span style="color: #888;" x-text="$store.app.t('core_config.latest') + ':'">Latest:</span>
+                                    <span style="color: var(--nxe-green-light); font-weight: bold;" x-text="$store.app.xeniaUpdateInfo.winNetplay.remoteVer"></span>
+                                </div>
+                                
+                                
+                                <div style="margin-top: 10px; min-height: 25px;">
+                                    <p x-show="$store.app.downloadStatuses.winNetplay.status === 'idle'" style="font-weight: bold; font-size: 0.85rem; margin: 0;" :style="{ color: $store.app.xeniaUpdateInfo.winNetplay.color }" x-text="$store.app.xeniaUpdateInfo.winNetplay.message"></p>
+                                    <div x-show="$store.app.downloadStatuses.winNetplay.status !== 'idle'">
+                                        <p style="font-weight: bold; font-size: 0.85rem; margin-bottom: 5px; color: #f2c40e;" x-text="$store.app.downloadStatuses.winNetplay.status"></p>
+                                        <div class="nxe-progress-bar" style="height: 6px;" x-show="$store.app.downloadStatuses.winNetplay.percentage > 0 && $store.app.downloadStatuses.winNetplay.step !== 'done'">
+                                            <div class="nxe-progress-bar-fill" style="background: linear-gradient(to right, #f2c40e, #d29922);" :style="{ width: $store.app.downloadStatuses.winNetplay.percentage + '%' }"></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <p style="color: var(--nxe-text-secondary); font-size: 0.9rem; margin-top: 15px;">
-                            <span x-show="$store.app.downloadStatuses.win.status === 'idle'"><span x-text="$store.app.t('core_config.press')">Press</span> <span style="color: var(--nxe-btn-a);">(A)</span> to <span x-text="$store.app.xeniaUpdateInfo.win.btnText"></span>.</span>
-                            <span x-show="$store.app.downloadStatuses.win.status !== 'idle' && $store.app.downloadStatuses.win.step !== 'done'" style="color: #f2c40e;" x-text="$store.app.t('generic.processing')">Processing... Please wait.</span>
-                            <span x-show="$store.app.downloadStatuses.win.step === 'done'" style="color: #59c853;">Success!</span>
+                        <p style="color: var(--nxe-text-secondary); font-size: 0.95rem; margin-top: 5px;">
+                            <span style="display: block; margin-bottom: 5px;">
+                                <span x-text="$store.app.t('core_config.press')">Press</span> 
+                                <span style="color: var(--nxe-btn-a); font-weight: bold;">(A)</span > <span x-text="$store.app.t('core_config.to_update')">to Update</span> <span style="color: white;">Standard Canary</span>.
+                            </span>
+                            <span style="display: block;">
+                                <span x-text="$store.app.t('core_config.press')">Press</span> 
+                                <span style="color: var(--nxe-btn-x); font-weight: bold;">(X)</span> <span x-text="$store.app.t('core_config.to_update')">to Update</span> <span style="color: white;">Netplay Version</span>.
+                            </span>
                         </p>
                     </div>
                 </template>

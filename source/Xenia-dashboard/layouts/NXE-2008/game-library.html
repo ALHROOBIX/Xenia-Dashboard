@@ -43,9 +43,10 @@
                         :style="`background-image: url('${game.coverUrl || 'assets/icons/placeholder.png'}')` ">
                     </div>
 
+                    
                     <img src="assets/images/cover-game.webp" 
                         class="cover-frame-img" 
-                        x-show="!game.isArcade && !game.isGOD">
+                        x-show="!game.isArcade && !game.isGOD && !game.isGameInstall">
 
                     <img src="assets/images/cover-game-XBLA.webp" 
                         class="cover-frame-img" 
@@ -54,6 +55,11 @@
                     <img src="assets/images/cover-game-GOD.webp" 
                         class="cover-frame-img" 
                         x-show="game.isGOD">
+
+                    
+                    <img src="assets/images/cover-game-install.webp" 
+                        class="cover-frame-img" 
+                        x-show="game.isGameInstall">
                 </div>
                     
                     <div class="library-status-bar" 
@@ -109,10 +115,11 @@
             <span class="button-icon x">X</span>
             <span x-text="$store.app.t('library.patches')">Patches</span>
         </div>
-        <div class="footer-button" id="btn-opt" x-show="$store.app.filteredLibraryGames[$store.app.focusedIndex].titleID"
+        <div class="footer-button" id="btn-opt" 
+            x-show="$store.app.filteredLibraryGames[$store.app.focusedIndex] && $store.app.filteredLibraryGames[$store.app.focusedIndex].hasOptimizedSettings"
             @click.prevent="$store.actions.applyOptimizedSettings()">
             <span class="button-icon lt-icon">LT</span>
-            <span x-text="$store.app.t('library.apply_optimized_settings')">Apply optimized_settings</span>
+            <span x-text="$store.app.t('library.apply_optimized_settings') || 'Apply optimized_settings'">Apply optimized_settings</span>
         </div>
         <div class="footer-button" id="btn-lb" @click.prevent="$store.actions.openGameConfig()">
             <span class="button-icon lb-icon">LB</span>
@@ -222,7 +229,7 @@
 
                         <h4 style="margin-top: 20px;" x-text="$store.app.t('library.description')">Description</h4>
                         <p x-show="$store.app.gameExtendedInfo.loading" style="color:#888;" x-text="$store.app.t('generic.loading')">Loading...</p>
-<!--this-->
+
                             <div class="description-container">
                                 <p x-show="!$store.app.gameExtendedInfo.loading" 
                                 x-text="$store.app.gameExtendedInfo.description"
@@ -286,14 +293,14 @@
                     </div>
                 </div>
                 <div class="info-card-footer" :class="$store.app.locale === 'ar' ? 'is-rtl' : ''">
-                    <!-- زر الترجمة -->
+                    
                     <span class="footer-button" id="btn-Translate" @click.prevent="$store.actions.handleTranslationClick()">
                         <span class="button-icon lt-icon">LT</span>
                         <span x-text="$store.app.gameExtendedInfo.isTranslating ? '...' : ($store.app.gameExtendedInfo.translatedDescription ? $store.app.t('library.Original') : $store.app.t('library.Translate'))">
                             Translate
                         </span>
                     </span>
-                    <!-- زر الإغلاق -->
+                    
                     <span class="footer-button" id="btn-info">
                         <span class="button-icon rb-icon">RB</span>
                         <span x-text="$store.app.t('library.Close')">Close</span>
@@ -498,9 +505,11 @@
     <style>
 
 
+        
         .button-icon.L3-icon {
             width: 30px;
             height: 30px;
+            
             background: radial-gradient(circle at 30% 30%, #555 0%, #222 100%);
             border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
@@ -510,13 +519,15 @@
             font-size: 9px;
             font-weight: 900;
             color: #fff;
+            
             box-shadow: 0 2px 4px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.2);
             margin-right: 8px;
             text-shadow: 0 1px 2px #000;
             position: relative;
-            border-bottom: 2px solid #111;
+            border-bottom: 2px solid #111; 
         }
 
+        
         .button-icon.L3-icon::before {
             content: '';
             position: absolute;
@@ -527,26 +538,29 @@
             background: transparent;
         }
 
+        
         #btn-zar-scan:active .L3-icon {
             transform: scale(0.9);
             background: radial-gradient(circle at 30% 30%, #444 0%, #111 100%);
             border-bottom: 1px solid #000;
         }
 
+        
         .search-icon-glass {
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 32px;
+            width: 32px; 
             height: 32px;
-            margin-right: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 50%;
+            margin-right: 12px; 
+            background: rgba(255, 255, 255, 0.05); 
+            border-radius: 50%; 
             transition: all 0.3s ease;
         }
 
+        
         .search-icon-glass img {
-            width: 20px;
+            width: 20px; 
             height: 20px;
             object-fit: contain;
             
@@ -555,13 +569,15 @@
             transition: transform 0.3s ease, opacity 0.3s ease;
         }
 
+        
         .library-search-capsule:hover .search-icon-glass img,
         .library-search-capsule.active .search-icon-glass img {
             opacity: 1;
-            transform: scale(1.1);
+            transform: scale(1.1); 
             filter: brightness(0) invert(1) drop-shadow(0 0 8px var(--nxe-brand-light));
         }
 
+        
         .library-search-capsule.active .search-icon-glass {
             border: 1px solid rgba(255, 255, 255, 0.2);
             box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.1);
@@ -571,11 +587,12 @@
             display: flex;
             align-items: center;
             gap: 15px;
-            direction: ltr;
+            direction: ltr; 
         }
 
+        
         html[dir="rtl"] .info-card-footer {
-            direction: rtl;
+            direction: rtl; 
         }
 
         .footer-button {
@@ -585,8 +602,9 @@
             gap: 8px;
         }
 
+        
         html[dir="rtl"] .button-icon {
-            margin-left: 5px;
+            margin-left: 5px;  
             margin-right: 0;
         }
 
@@ -595,9 +613,11 @@
         color: #333;
         min-width: 40px;
         height: 18px;
+        
         border-radius: 2px 2px 6px 6px;
+        
         border-bottom: 1px solid #999;
-        border-top: 2px solid #ccc;
+        border-top: 2px solid #ccc; 
         font-size: 10px;
         font-weight: 900;
         font-family: "Segoe UI", sans-serif;
@@ -661,15 +681,19 @@
             animation: blink 1s infinite;
         }
         @keyframes blink { 0% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: 0; } }
-
+    
+    
+    
     .button-icon.rt-icon {
         background: linear-gradient(to bottom, #ffffff 0%, #e0e0e0 100%);
         color: #333;
         min-width: 40px;
         height: 18px;
+        
         border-radius: 2px 2px 6px 6px;
+        
         border-bottom: 1px solid #999;
-        border-top: 2px solid #ccc;
+        border-top: 2px solid #ccc; 
         font-size: 10px;
         font-weight: 900;
         font-family: "Segoe UI", sans-serif;
@@ -682,13 +706,14 @@
         line-height: 1;
     }
 
-
+    
     .button-icon.back-icon {
         background: #333; color: white; border: 1px solid #666; font-size: 10px;
         border-radius: 50%; width: 20px; height: 20px; display: flex; 
         align-items: center; justify-content: center;
     }
 
+    
     .button-icon.lb-icon {
         background: linear-gradient(to bottom, #ffffff 0%, #e0e0e0 100%);
         color: #333;
@@ -708,7 +733,7 @@
         line-height: 1;
     }
 
-    .button-icon.start-icon {
+        .button-icon.start-icon {
         background: linear-gradient(to bottom, #9e9e9e 0%, #929292 100%);
         color: #333;
         min-width: 40px;
@@ -728,6 +753,7 @@
     }
 
 
+    
     .patch-selector-overlay {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px);
@@ -754,7 +780,7 @@
         border: 1px solid transparent; position: relative;
     }
     
-
+    
     .patch-file-item.focused {
         background: linear-gradient(to right, #585858, #4c4c4c);
         color: #fff;
@@ -784,7 +810,7 @@
     }
     .patch-selector-footer div { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #eee; font-weight: 600; }
 
-
+    
     .library-search-capsule.liquid-glass {
         display: flex; align-items: center;
         background: rgba(255, 255, 255, 0.1);
@@ -843,6 +869,7 @@
         letter-spacing: 1px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
 
+    
     .r3-indicator {
         display: flex; flex-direction: column; align-items: center; justify-content: center;
         width: 34px; height: 34px;
@@ -864,110 +891,7 @@
         position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
     }
 
-
-    .keyboard-overlay.xbox-theme {
-        position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75);
-        z-index: 9999; display: flex; align-items: center; justify-content: center;
-        opacity: 0; pointer-events: none; transition: opacity 0.2s;
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        backdrop-filter: blur(5px);
-    }
-    .keyboard-overlay.xbox-theme.open { opacity: 1; pointer-events: all; }
-
-    .xbox-kb-wrapper {
-        width: 800px; display: flex; flex-direction: column;
-        box-shadow: 0 0 0 2px rgba(255,255,255,0.1), 0 20px 50px rgba(0,0,0,0.8);
-        transform: scale(0.95); transition: transform 0.2s;
-    }
-    .keyboard-overlay.xbox-theme.open .xbox-kb-wrapper { transform: scale(1); }
-
-    .kb-top-label {
-        color: #fff; font-size: 16px; margin-bottom: 5px; font-weight: normal;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.8); padding-left: 2px;
-    }
-    .xbox-kb-input-row {
-        position: relative; background: #fff; height: 50px; 
-        display: flex; align-items: center; padding: 0 15px;
-        margin-bottom: 0; border: 1px solid #999; border-bottom: none; overflow: hidden;
-    }
-    .xbox-kb-input {
-        border: none; outline: none; width: 100%; 
-        font-size: 22px; font-weight: 600; letter-spacing: 1px;
-        color: #333; background: transparent; height: 100%;
-    }
-    .input-cursor {
-        position: absolute; top: 50%; transform: translateY(-50%);
-        left: 15px; width: 2px; height: 26px; background-color: #000;
-        z-index: 10; pointer-events: none;
-        animation: blink 1s infinite steps(2);
-    }
-    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-
-    .xbox-kb-main-body {
-        display: flex; background: linear-gradient(to bottom, #f0f0f0 0%, #dcdcdc 100%);
-        border: 1px solid #fff; outline: 1px solid #999; height: 280px;
-    }
-    .kb-col { border-right: 1px solid #bbb; display: flex; flex-direction: column; }
-    .kb-col:last-child { border-right: none; }
-
-    .side-col { width: 110px; }
-    .side-btn {
-        flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-        border-bottom: 1px solid #bbb; background: transparent; color: #333;
-    }
-    .side-btn.active-state { background: #d9eadd; box-shadow: inset 0 0 10px rgba(0,0,0,0.05); }
-    .btn-label { font-size: 11px; margin-top: 4px; color: #444; }
-    .btn-icon-visual { font-weight: bold; font-size: 12px; display: flex; align-items: center; gap: 3px; }
-    .lb-shape, .rb-shape { font-size: 13px; font-weight: 800; }
-    .lt-shape, .rt-shape { border-bottom: 3px solid #555; border-radius: 0 0 4px 4px; padding: 0 4px; line-height: 1; }
-    .stick-shape { width: 16px; height: 16px; border: 2px solid #555; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; background: #ccc; }
-    .arr-left, .arr-right { font-size: 10px; }
-
-    .center-col { flex: 1; padding: 6px; display: flex; flex-direction: column; }
-    .keys-grid-tight { display: flex; flex-direction: column; gap: 2px; margin-bottom: 6px; }
-    .keys-row-tight { display: flex; gap: 2px; height: 38px; }
-    .xbox-key-tight {
-        flex: 1; background: #fff; border: 1px solid #aaa;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 18px; color: #333; box-shadow: 0 1px 1px rgba(0,0,0,0.1); cursor: pointer;
-    }
-    .xbox-key-tight.focused {
-        border: 2px solid #00adef; box-shadow: 0 0 4px #00adef, inset 0 0 5px rgba(0, 173, 239, 0.2);
-        z-index: 10; transform: scale(1.05);
-    }
-
-    .bottom-actions-row { display: flex; gap: 6px; height: 35px; margin-top: auto; }
-    .wide-action-btn {
-        flex: 1; background: linear-gradient(to bottom, #fff 0%, #eee 100%);
-        border: 1px solid #aaa; display: flex; align-items: center; padding-left: 10px; gap: 8px;
-        font-size: 13px; color: #333; box-shadow: 0 1px 1px rgba(0,0,0,0.1);
-    }
-    .circle-icon {
-        width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-        font-weight: bold; font-size: 11px; color: #fff; box-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-    }
-    .blue { background: #0088dd; } .yellow { background: #ddaa00; }
-    .green-small { background: #55aa00; font-size: 10px; width: 16px; height: 16px; }
-    .red-small { background: #dd3300; font-size: 10px; width: 16px; height: 16px; }
-
-    .done-btn-container {
-        flex: 1.5; background: linear-gradient(to bottom,  #73ad07 0%, #385301 100%);
-        border-top: 1px solid #aaa; display: flex; flex-direction: column; align-items: center; justify-content: center;
-        cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,0.4); color: #fff; text-shadow: 0 1px 1px rgba(0,0,0,0.4);
-    }
-    .play-icon-circle {
-        background: #fff; color: #76a815; border-radius: 50%; width: 20px; height: 20px;
-        display: flex; align-items: center; justify-content: center; font-size: 12px; margin-bottom: 2px;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.3);
-    }
-
-    .kb-black-footer {
-        background: #111; height: 30px; display: flex; align-items: center;
-        gap: 20px; padding-left: 10px; border-radius: 0 0 4px 4px;
-    }
-    .footer-item { color: #fff; font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 6px; }
-
-
+    
     .art-manager-overlay {
         position: fixed; inset: 0;
         background: rgba(0, 0, 0, 0.85);
@@ -1014,7 +938,9 @@
         display: grid;
         gap: 30px;
         padding-bottom: 40px;
+        
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+        
         justify-content: start; 
         align-content: start;
     }
@@ -1028,6 +954,7 @@
     }
     .art-item img { width: 100%; height: 100%; display: block; transition: transform 0.3s ease; }
 
+    
     .art-grid.cover .art-item { aspect-ratio: 2/3; }
     .art-grid.cover .art-item img { object-fit: cover; }
 
@@ -1049,6 +976,7 @@
     }
     .art-grid.icon .art-item img { object-fit: contain; width: 50%; height: 50%; border-radius: 50%; }
 
+    
     .art-item.focused {
         border-color: #fff; box-shadow: 0 0 30px rgba(255,255,255,0.5);
         transform: scale(1.08); z-index: 10;
@@ -1087,11 +1015,13 @@
     .provider-logo { font-size: 13px; color: #888; }
     .provider-logo b { color: #fff; }
 
+    
     .custom-scrollbar::-webkit-scrollbar { width: 8px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
 
-
+   
+    
     
     .info-card.expanded-layout {
         width: 90%;
@@ -1101,6 +1031,7 @@
         flex-direction: column;
     }
 
+    
     .info-badges-row {
         display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;
     }
@@ -1121,6 +1052,7 @@
     }
     .star { font-size: 14px; margin-top: -2px; }
 
+    
     .info-card-body-grid {
         display: flex; gap: 30px; padding: 0 30px;
         flex: 1; 
@@ -1128,19 +1060,21 @@
         margin-bottom: 20px;
     }
 
+    
     .col-description {
         flex: 2;
         padding-right: 10px;
         overflow-y: auto;
     }
 
+    
     .details-grid-box {
         background: rgba(0,0,0,0.2);
         border-radius: 8px;
         padding: 15px;
         margin-bottom: 20px;
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr 1fr; 
         gap: 15px;
         border: 1px solid rgba(255,255,255,0.05);
     }
@@ -1150,7 +1084,7 @@
     }
     .detail-row .label {
         font-size: 11px;
-        color: #ffffff;
+        color: #ffffff; 
         text-transform: uppercase;
         font-weight: bold;
         margin-bottom: 3px;
@@ -1162,12 +1096,14 @@
         font-weight: 500;
     }
 
+    
     .col-description h4 { margin-top: 0; color: #ffffff; margin-bottom: 10px; }
     .col-description p {
         font-size: 15px; line-height: 1.6; color: #ccc;
         white-space: pre-line;
     }
 
+    
     .col-status {
         flex: 1;
         background: rgba(0,0,0,0.3);
@@ -1176,6 +1112,7 @@
         border: 1px solid rgba(255,255,255,0.05);
     }
 
+    
     .info-screenshots-section {
         padding: 0 30px 30px 30px;
         border-top: 1px solid rgba(255,255,255,0.1);
@@ -1195,7 +1132,7 @@
         border: 2px solid transparent;
         transition: all 0.2s;
         box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        object-fit: cover;
+        object-fit: cover; 
     }
     .screenshot-thumb:hover {
         transform: scale(1.05);
@@ -1204,18 +1141,22 @@
     }
 
 
+    
 
+    
     html.is-rtl .info-card-header {
         direction: ltr !important; 
         text-align: left;
     }
 
+
     html.is-rtl .info-badges-row {
-        direction: rtl !important;
-        justify-content: flex-start;
+        direction: rtl !important; 
+        justify-content: flex-start; 
     }
 
-
+    
+    
     html.is-rtl .info-badge {
         direction: ltr !important;
         text-align: left;
