@@ -92,6 +92,7 @@ document.addEventListener('alpine:init', () => {
         downloadStatuses: {
             win: { status: 'idle', percentage: 0, step: 'idle' },
             linux: { status: 'idle', percentage: 0, step: 'idle' },
+            winNetplay: { status: 'idle', percentage: 0, step: 'idle' }, 
             patches: { status: 'idle', percentage: 0, step: 'idle' },
             optimized: { status: 'idle', percentage: 0, step: 'idle' }
         },
@@ -283,20 +284,9 @@ document.addEventListener('alpine:init', () => {
 
         
         xeniaUpdateInfo: {
-            win: { 
-                status: 'idle', 
-                localVer: '---', remoteVer: '---', localDate: '', remoteDate: '', 
-                showButton: true, btnText: 'Check', 
-                message: 'Press (Y) to Check for Updates', 
-                color: '#ffffff' 
-            },
-            linux: { 
-                status: 'idle', 
-                localVer: '---', remoteVer: '---', localDate: '', remoteDate: '', 
-                showButton: true, btnText: 'Check', 
-                message: 'Press (Y) to Check for Updates', 
-                color: '#ffffff' 
-            }
+            win: { status: 'idle', localVer: '---', remoteVer: '---', localDate: '', remoteDate: '', showButton: true, btnText: 'Check', message: 'Press (Y) to Check for Updates', color: '#ffffff' },
+            winNetplay: { status: 'idle', localVer: '---', remoteVer: '---', localDate: '', remoteDate: '', showButton: true, btnText: 'Check', message: 'Press (Y) to Check for Updates', color: '#ffffff' }, 
+            linux: { status: 'idle', localVer: '---', remoteVer: '---', localDate: '', remoteDate: '', showButton: true, btnText: 'Check', message: 'Press (Y) to Check for Updates', color: '#ffffff' }
         },
 
         language: 'en',
@@ -370,9 +360,14 @@ document.addEventListener('alpine:init', () => {
         ach_lock: false,
         renameInput: '',       
         keyboardMode: 'search', 
+        friendsList: [],
+        isFriendsOverlayOpen: false,
+        friendInputXuid: '',
+        friendInputName: '',
+        focusedFriendIndex: 0,
         appUpdateInfo: {
             status: 'idle', 
-            currentVer: '1.2.1',
+            currentVer: '1.2.2',
             remoteVer: '---',
             message: 'Press (Y) to check for updates',
             percentage: 0
@@ -409,6 +404,113 @@ document.addEventListener('alpine:init', () => {
 
     
     Alpine.store('actions', {
+
+        async openFriendsList() {
+            const app = Alpine.store('app');
+            
+            
+            if (!app.settings.xeniaPath || !app.settings.xeniaPath.toLowerCase().includes('netplay')) {
+                alert(app.t('generic.netplay_only_alert'));
+                this.playSound('back');
+                return; 
+            }
+
+            this.playSound('panelUnfold');
+            const result = await window.electronAPI.getFriendsList();
+            if (result.success) {
+                app.friendsList = result.friends;
+            }
+            app.focusedFriendIndex = 0;
+            app.isFriendsOverlayOpen = true;
+            app.isGuideOpen = false; 
+        },
+        
+        promptAddFriend() {
+            const app = Alpine.store('app');
+            app.friendInputXuid = '';
+            app.friendInputName = '';
+            app.keyboardMode = 'add_friend_xuid'; 
+            app.searchCursorPos = 0;
+            app.keyboardRow = 0;
+            app.keyboardCol = 0;
+            app.isKeyboardOpen = true;
+            this.playSound('select');
+            setTimeout(() => this.updateCursorVisuals(), 50);
+        },
+        
+        async submitAddFriend() {
+            const app = Alpine.store('app');
+            if (!app.friendInputXuid.trim()) return;
+
+            const result = await window.electronAPI.addFriend({
+                xuid: app.friendInputXuid.trim().toUpperCase(),
+                name: app.friendInputName.trim() || 'Unknown'
+            });
+
+            if (result.success) {
+                const refresh = await window.electronAPI.getFriendsList();
+                if (refresh.success) {
+                    app.friendsList = refresh.friends;
+                    app.focusedFriendIndex = Math.max(0, app.friendsList.length - 1);
+                }
+                this.playSound('channelUp');
+            } else {
+                alert("Error adding friend: " + result.error);
+            }
+        },
+
+        
+        promptEditFriend() {
+            const app = Alpine.store('app');
+            const friend = app.friendsList[app.focusedFriendIndex];
+            if (!friend) return;
+
+            app.friendInputXuid = friend.xuid; 
+            app.friendInputName = friend.name; 
+            
+            app.keyboardMode = 'edit_friend_name'; 
+            app.searchCursorPos = app.friendInputName.length;
+            app.keyboardRow = 0;
+            app.keyboardCol = 0;
+            app.isKeyboardOpen = true;
+            this.playSound('select');
+            setTimeout(() => this.updateCursorVisuals(), 50);
+        },
+
+        
+        async submitEditFriend() {
+            const app = Alpine.store('app');
+            const newName = app.friendInputName.trim() || 'Unknown';
+            const targetXuid = app.friendInputXuid;
+
+            const result = await window.electronAPI.editFriend({ xuid: targetXuid, newName: newName });
+            if (result.success) {
+                const refresh = await window.electronAPI.getFriendsList();
+                if (refresh.success) app.friendsList = refresh.friends;
+                this.playSound('channelUp');
+            }
+        },
+
+        
+        async deleteFocusedFriend() {
+            const app = Alpine.store('app');
+            const friend = app.friendsList[app.focusedFriendIndex];
+            if (!friend) return;
+
+            if (confirm(`Remove ${friend.name} from Friend List?`)) {
+                this.playSound('back'); 
+                const result = await window.electronAPI.deleteFriend(friend.xuid);
+                
+                if (result.success) {
+                    app.friendsList.splice(app.focusedFriendIndex, 1);
+                    if (app.focusedFriendIndex >= app.friendsList.length) {
+                        app.focusedFriendIndex = Math.max(0, app.friendsList.length - 1);
+                    }
+                } else {
+                    alert("Error removing friend.");
+                }
+            }
+        },
 
         async downloadOptimizedSettings() {
             const app = Alpine.store('app');
@@ -1870,58 +1972,54 @@ document.addEventListener('alpine:init', () => {
         } catch(e) { return "New"; }
     },
 
-    
-    async checkXeniaUpdates(platform) {
+    async checkXeniaUpdates(platform, variant = 'standard') {
         const app = Alpine.store('app');
-        const infoKey = platform; 
         
+        const infoKey = variant === 'netplay' ? `${platform}Netplay` : platform; 
         
         app.xeniaUpdateInfo[infoKey].btnText = 'Checking...';
         
         try {
-            const result = await window.electronAPI.checkXeniaUpdate(platform);
-            
+            const result = await window.electronAPI.checkXeniaUpdate(platform, variant);
             
             if (result.success) {
                 const data = app.xeniaUpdateInfo[infoKey];
-                
                 
                 data.remoteVer = result.remote.tag; 
                 data.remoteDate = this.formatDate(result.remote.date);
                 
                 if (result.local) {
-                    data.localVer = result.local.tag; 
+                    data.localVer = result.local.tag;
                     data.localDate = this.formatDate(result.local.date);
                 } else {
                     data.localVer = '---';
                     data.localDate = 'Not Installed';
                 }
 
-                
                 if (result.status === 'not-installed') {
                     data.status = 'not-installed';
                     data.btnText = 'Install Now';
-                    data.message = 'Xenia is not installed.';
+                    data.message = 'Not installed.';
                     data.color = '#ff6b6b'; 
                 } else if (result.status === 'broken-install') {
                     data.status = 'broken';
-                    data.btnText = 'Repair (Re-install)';
-                    data.message = 'Files missing or corrupted!';
+                    data.btnText = 'Repair';
+                    data.message = 'Files corrupted!';
                     data.color = '#ff6b6b'; 
                 } else if (result.status === 'update-available') {
                     data.status = 'update-available';
                     data.btnText = 'Update Now';
-                    data.message = `New update available! (${this.getTimeDifference(result.remote.date)})`;
+                    data.message = `Update available! (${this.getTimeDifference(result.remote.date)})`;
                     data.color = '#59c853'; 
                 } else if (result.status === 'up-to-date') {
                     data.status = 'up-to-date';
                     data.btnText = 'Re-install';
-                    data.message = 'You have the latest version.';
+                    data.message = 'Up to date.';
                     data.color = '#3a82e5'; 
                 } else { 
                     data.status = 'unknown';
                     data.btnText = 'Update / Repair';
-                    data.message = 'Unknown version installed.';
+                    data.message = 'Unknown version.';
                     data.color = '#f2c40e'; 
                 }
             }
@@ -1930,49 +2028,36 @@ document.addEventListener('alpine:init', () => {
             app.xeniaUpdateInfo[infoKey].message = 'Connection Error.';
         }
     },
-        
-        async downloadXenia(platform) {
+        async downloadXenia(platform, variant = 'standard') {
             const app = Alpine.store('app');
-            
-            
-            const statusKey = platform; 
-            
+            const statusKey = variant === 'netplay' ? `${platform}Netplay` : platform; 
             
             if (app.downloadStatuses[statusKey].status.includes('Downloading') || app.downloadStatuses[statusKey].status.includes('Extracting')) {
                 return;
             }
 
             this.playSound('select');
-            
-            
             app.downloadStatuses[statusKey] = { status: 'Preparing...', percentage: 0, step: 'connect', type: statusKey };
             
             try {
-                const result = await window.electronAPI.downloadXenia(platform);
+                const result = await window.electronAPI.downloadXenia(platform, variant);
                 
                 if (result.success) {
-                    
                     if (result.newPath) {
                         app.settings.xeniaPath = result.newPath;
-                        
-                        
                         await this.initializeAppSettings();
                     }
 
                     app.downloadStatuses[statusKey] = { status: 'idle', percentage: 100, step: 'done', type: statusKey }; 
+                    await this.checkXeniaUpdates(platform, variant);
                     
-                    
-                    await this.checkXeniaUpdates(platform);
-                    
-                    
-                    app.xeniaUpdateInfo[statusKey].message = "Successfully Installed & Configured!";
+                    app.xeniaUpdateInfo[statusKey].message = "Successfully Installed!";
                     app.xeniaUpdateInfo[statusKey].color = "#59c853";
-                    
                     
                     this.playSound('channelUp');
 
                     setTimeout(() => {
-                        this.checkXeniaUpdates(platform);
+                        this.checkXeniaUpdates(platform, variant);
                     }, 3000);
                     
                 } else {
@@ -3749,11 +3834,14 @@ document.addEventListener('alpine:init', () => {
                     if (app.guideMenuIndex === 0) { 
                         app.isGuideOpen = false;
                         this.playSound('back');
+                    } else if (app.guideMenuIndex === 1) { 
+                        this.openFriendsList(); 
+                        return; 
                     } else if (app.guideMenuIndex === 2) { 
                         this.performShutdown();
                         return; 
                     }
-                } 
+                }
                 else if (currentTab === 'games') {
                     const game = app.gamesList[app.guideMenuIndex];
                     if(game) {
@@ -3778,20 +3866,13 @@ document.addEventListener('alpine:init', () => {
             
             updateCursorVisuals() {
                 const app = Alpine.store('app');
-                const input = document.querySelector('.xbox-kb-input');
-                const cursor = document.querySelector('.input-cursor');
-                const container = document.querySelector('.xbox-kb-input-row');
-                
-                if (!input || !cursor || !container) return;
-
                 
                 
                 let targetVar = 'librarySearch'; 
-                if (app.keyboardMode === 'rename') {
-                    targetVar = 'renameInput'; 
-                } else if (app.keyboardMode === 'create_profile' || app.keyboardMode === 'rename_profile') {
-                    targetVar = 'newProfileName'; 
-                }
+                if (app.keyboardMode === 'rename') targetVar = 'renameInput';
+                else if (app.keyboardMode === 'create_profile' || app.keyboardMode === 'rename_profile') targetVar = 'newProfileName';
+                else if (app.keyboardMode === 'add_friend_xuid') targetVar = 'friendInputXuid';
+                else if (app.keyboardMode === 'add_friend_name' || app.keyboardMode === 'edit_friend_name') targetVar = 'friendInputName'; 
                 
                 const currentText = app[targetVar] || "";
 
@@ -3799,35 +3880,53 @@ document.addEventListener('alpine:init', () => {
                 let textUpToCursor = currentText.substring(0, app.searchCursorPos);
                 
                 
-                const span = document.createElement('span');
-                const inputStyle = window.getComputedStyle(input);
-                const containerStyle = window.getComputedStyle(container);
                 
-                span.style.fontFamily = inputStyle.fontFamily;
-                span.style.fontSize = inputStyle.fontSize;
-                span.style.fontWeight = inputStyle.fontWeight;
-                span.style.letterSpacing = inputStyle.letterSpacing;
-                span.style.textTransform = inputStyle.textTransform; 
-                span.style.whiteSpace = 'pre'; 
+                const containers = document.querySelectorAll('.xbox-kb-input-row');
                 
-                span.textContent = textUpToCursor;
-                
-                span.style.visibility = 'hidden';
-                span.style.position = 'absolute';
-                document.body.appendChild(span);
-                
-                const textWidth = span.offsetWidth;
-                document.body.removeChild(span);
+                containers.forEach(container => {
+                    
+                    if (container.offsetWidth === 0 && container.offsetHeight === 0) return;
 
-                const paddingLeft = parseFloat(containerStyle.paddingLeft) || 15;
-                
-                
-                cursor.style.left = (paddingLeft + textWidth + 1) + 'px';
-                
-                
-                cursor.style.animation = 'none';
-                cursor.offsetHeight; 
-                cursor.style.animation = ''; 
+                    const input = container.querySelector('.xbox-kb-input');
+                    const cursor = container.querySelector('.input-cursor');
+                    
+                    if (!input || !cursor) return;
+
+                    
+                    input.style.direction = 'ltr';
+                    input.style.textAlign = 'left';
+
+                    
+                    const span = document.createElement('span');
+                    const inputStyle = window.getComputedStyle(input);
+                    const containerStyle = window.getComputedStyle(container);
+                    
+                    span.style.fontFamily = inputStyle.fontFamily;
+                    span.style.fontSize = inputStyle.fontSize;
+                    span.style.fontWeight = inputStyle.fontWeight;
+                    span.style.letterSpacing = inputStyle.letterSpacing;
+                    span.style.textTransform = inputStyle.textTransform; 
+                    span.style.whiteSpace = 'pre'; 
+                    
+                    span.textContent = textUpToCursor;
+                    
+                    span.style.visibility = 'hidden';
+                    span.style.position = 'absolute';
+                    document.body.appendChild(span);
+                    
+                    const textWidth = span.offsetWidth;
+                    document.body.removeChild(span);
+
+                    const paddingLeft = parseFloat(containerStyle.paddingLeft) || 15;
+                    
+                    
+                    cursor.style.left = (paddingLeft + textWidth + 1) + 'px';
+                    
+                    
+                    cursor.style.animation = 'none';
+                    cursor.offsetHeight; 
+                    cursor.style.animation = ''; 
+                });
             },
 
             
@@ -3837,11 +3936,11 @@ document.addEventListener('alpine:init', () => {
                 
                 
                 let targetVar = 'librarySearch'; 
-                if (app.keyboardMode === 'rename') {
-                    targetVar = 'renameInput'; 
-                } else if (app.keyboardMode === 'create_profile' || app.keyboardMode === 'rename_profile') {
-                    targetVar = 'newProfileName'; 
-                }
+                if (app.keyboardMode === 'rename') targetVar = 'renameInput';
+                else if (app.keyboardMode === 'create_profile' || app.keyboardMode === 'rename_profile') targetVar = 'newProfileName';
+                else if (app.keyboardMode === 'add_friend_xuid') targetVar = 'friendInputXuid';
+                else if (app.keyboardMode === 'add_friend_name' || app.keyboardMode === 'edit_friend_name') targetVar = 'friendInputName'; 
+
                 const currentText = app[targetVar] || "";
                 
                 
@@ -3875,12 +3974,11 @@ document.addEventListener('alpine:init', () => {
                     app.isSymbols = false;
                     app.isAccents = false;
                     
-                    let targetVar = 'librarySearch'; 
-                if (app.keyboardMode === 'rename') {
-                    targetVar = 'renameInput'; 
-                } else if (app.keyboardMode === 'create_profile' || app.keyboardMode === 'rename_profile') {
-                    targetVar = 'newProfileName'; 
-                }
+                let targetVar = 'librarySearch'; 
+                if (app.keyboardMode === 'rename') targetVar = 'renameInput';
+                else if (app.keyboardMode === 'create_profile' || app.keyboardMode === 'rename_profile') targetVar = 'newProfileName';
+                else if (app.keyboardMode === 'add_friend_xuid') targetVar = 'friendInputXuid';
+                else if (app.keyboardMode === 'add_friend_name' || app.keyboardMode === 'edit_friend_name') targetVar = 'friendInputName'; 
                     app.searchCursorPos = (app[targetVar] || "").length;
                     
                     setTimeout(() => this.updateCursorVisuals(), 50);
@@ -3916,9 +4014,11 @@ document.addEventListener('alpine:init', () => {
                 const key = app.currentKeys[app.keyboardRow][app.keyboardCol];
                 
                 
-                let targetVar = 'librarySearch';
+                let targetVar = 'librarySearch'; 
                 if (app.keyboardMode === 'rename') targetVar = 'renameInput';
-                if (app.keyboardMode === 'create_profile' || app.keyboardMode === 'rename_profile') targetVar = 'newProfileName';
+                else if (app.keyboardMode === 'create_profile' || app.keyboardMode === 'rename_profile') targetVar = 'newProfileName';
+                else if (app.keyboardMode === 'add_friend_xuid') targetVar = 'friendInputXuid';
+                else if (app.keyboardMode === 'add_friend_name' || app.keyboardMode === 'edit_friend_name') targetVar = 'friendInputName'; 
 
                 const currentText = app[targetVar] || "";
                 const pos = app.searchCursorPos;
@@ -3940,9 +4040,11 @@ document.addEventListener('alpine:init', () => {
             handleKeyboardSpecial(action) {
                 const app = Alpine.store('app');
                 
-                let targetVar = 'librarySearch';
+                let targetVar = 'librarySearch'; 
                 if (app.keyboardMode === 'rename') targetVar = 'renameInput';
-                if (app.keyboardMode === 'create_profile' || app.keyboardMode === 'rename_profile') targetVar = 'newProfileName';
+                else if (app.keyboardMode === 'create_profile' || app.keyboardMode === 'rename_profile') targetVar = 'newProfileName';
+                else if (app.keyboardMode === 'add_friend_xuid') targetVar = 'friendInputXuid';
+                else if (app.keyboardMode === 'add_friend_name' || app.keyboardMode === 'edit_friend_name') targetVar = 'friendInputName'; 
 
                 const currentText = app[targetVar] || "";
                 const pos = app.searchCursorPos;
@@ -3961,7 +4063,17 @@ document.addEventListener('alpine:init', () => {
                 }
                 else if (action === 'DONE') {
                     this.playSound('select');
-                    if (app.keyboardMode === 'create_profile') {
+                    if (app.keyboardMode === 'add_friend_xuid') {
+                        
+                        app.keyboardMode = 'add_friend_name';
+                        app.searchCursorPos = app.friendInputName.length;
+                        setTimeout(() => this.updateCursorVisuals(), 50);
+                        return; 
+                    } else if (app.keyboardMode === 'add_friend_name') {
+                        this.submitAddFriend();
+                    }else if (app.keyboardMode === 'edit_friend_name') { 
+                        this.submitEditFriend();
+                    } else if (app.keyboardMode === 'create_profile') {
                         this.submitNewProfile();
                     } else if (app.keyboardMode === 'rename_profile') {
                         this.submitProfileRename();
@@ -4233,12 +4345,14 @@ document.addEventListener('alpine:init', () => {
 
 
         if (app.currentView === 'achievements') {
+            
             if (app.isAchievementOverlayOpen) {
                 if (key === 'Escape' || key === 'Backspace') {
                     e.preventDefault(); 
                     actions.closeAchievementOverlay();
                     return;
                 }
+                
                 
                 if (key === 'ArrowUp') { e.preventDefault(); actions.moveAchievementGridFocus(-1, 0); return; }
                 if (key === 'ArrowDown') { e.preventDefault(); actions.moveAchievementGridFocus(1, 0); return; }
@@ -4248,6 +4362,7 @@ document.addEventListener('alpine:init', () => {
                 return; 
             }
 
+            
             if (key === 'ArrowRight') {
                 e.preventDefault();
                 actions.moveFocus(1);
@@ -4307,6 +4422,42 @@ document.addEventListener('alpine:init', () => {
                 actions.playSound('back');
             }
             return; 
+        }
+
+        
+        if (app.isFriendsOverlayOpen && !app.isKeyboardOpen) {
+            if (key === 'ArrowUp') {
+                if (app.focusedFriendIndex > 0) {
+                    app.focusedFriendIndex--;
+                    actions.playSound('focus');
+                }
+                e.preventDefault();
+            } else if (key === 'ArrowDown') {
+                if (app.focusedFriendIndex < app.friendsList.length - 1) {
+                    app.focusedFriendIndex++;
+                    actions.playSound('focus');
+                }
+                e.preventDefault();
+            } 
+            else if (key === 'b' || key === 'B' || key === 'Escape') {
+                app.isFriendsOverlayOpen = false;
+                actions.playSound('back');
+                e.preventDefault();
+            }
+            else if (key === 'y' || key === 'Y') {
+                actions.promptAddFriend();
+                e.preventDefault();
+            }
+            else if (key === 'x' || key === 'X') {
+                actions.promptEditFriend();
+                e.preventDefault();
+            }
+            
+            else if (key === 'Delete' || key === 'Backspace' || key === ' ') {
+                actions.deleteFocusedFriend();
+                e.preventDefault();
+            }
+            return;
         }
         
         
@@ -4381,11 +4532,10 @@ document.addEventListener('alpine:init', () => {
             
             if (key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
                 let targetVar = 'librarySearch'; 
-                if (app.keyboardMode === 'rename') {
-                    targetVar = 'renameInput'; 
-                } else if (app.keyboardMode === 'create_profile' || app.keyboardMode === 'rename_profile') {
-                    targetVar = 'newProfileName'; 
-                }
+                if (app.keyboardMode === 'rename') targetVar = 'renameInput';
+                else if (app.keyboardMode === 'create_profile' || app.keyboardMode === 'rename_profile') targetVar = 'newProfileName';
+                else if (app.keyboardMode === 'add_friend_xuid') targetVar = 'friendInputXuid';
+                else if (app.keyboardMode === 'add_friend_name' || app.keyboardMode === 'edit_friend_name') targetVar = 'friendInputName'; 
                 const currentText = app[targetVar] || "";
                 const pos = app.searchCursorPos;
 
@@ -4510,7 +4660,7 @@ document.addEventListener('alpine:init', () => {
             if (app.currentView === 'game-library') { actions.deleteFocusedGame(); e.preventDefault(); return; }
 
             if (app.currentView === 'settings-core') {
-                if (app.focusedIndex === 6) { actions.checkXeniaUpdates('win'); actions.playSound('select'); e.preventDefault(); return; }
+                if (app.focusedIndex === 6) { actions.checkXeniaUpdates('win', 'standard'); actions.checkXeniaUpdates('win', 'netplay'); actions.playSound('select'); e.preventDefault(); return; }
                 if (app.focusedIndex === 7) { actions.checkXeniaUpdates('linux'); actions.playSound('select'); e.preventDefault(); return; }
             }
         }
@@ -4532,6 +4682,12 @@ document.addEventListener('alpine:init', () => {
         }
 
         if (key === 'x' || key === 'X' || key === ' ') {
+
+            if (app.currentView === 'settings-core' && app.focusedIndex === 6) {
+                e.preventDefault();
+                actions.downloadXenia('win', 'netplay');
+                return;
+            }
             
             
             if (app.currentView === 'settings-colors' && app.colorPresets[app.focusedIndex].id === 'custom') {
@@ -4940,6 +5096,34 @@ document.addEventListener('alpine:init', () => {
                 return;
             }
             
+            
+            
+            if (app.isFriendsOverlayOpen && !app.isKeyboardOpen) {
+                if (message.event === 'dpad_y') {
+                    if (message.value === -1 && app.focusedFriendIndex > 0) {
+                        app.focusedFriendIndex--;
+                        actions.playSound('focus');
+                    } else if (message.value === 1 && app.focusedFriendIndex < app.friendsList.length - 1) {
+                        app.focusedFriendIndex++;
+                        actions.playSound('focus');
+                    }
+                } 
+                else if (message.event === 'button_b' && message.value === 1) {
+                    app.isFriendsOverlayOpen = false;
+                    actions.playSound('back');
+                }
+                else if (message.event === 'button_y' && message.value === 1) {
+                    actions.promptAddFriend();
+                }
+                else if (message.event === 'button_x' && message.value === 1) {
+                    actions.promptEditFriend();
+                }
+                else if (message.event === 'button_start' && message.value === 1) {
+                    actions.deleteFocusedFriend(); 
+                }
+                return; 
+            }
+            
             if (message.event === 'button_right_bumper' && message.value === 1) {
                 
                 
@@ -5277,7 +5461,6 @@ document.addEventListener('alpine:init', () => {
                 
                 return; 
             }
-
             
             
             
@@ -5404,14 +5587,12 @@ document.addEventListener('alpine:init', () => {
 
                 case 'button_a':
 
+                    case 'button_a':
                     if (app.focusedCollection === 'coreSettingsItems') {
                         const item = app.coreSettingsItems[app.focusedIndex];
+                        if (item.id === 'download-optimized') { actions.downloadOptimizedSettings(); return; }
                         
-                        if (item.id === 'download-optimized') { 
-                            actions.downloadOptimizedSettings(); 
-                            return; 
-                        }
-                        if (app.focusedIndex === 6) { actions.downloadXenia('win'); return; }
+                        if (app.focusedIndex === 6) { actions.downloadXenia('win', 'standard'); return; }
                         if (app.focusedIndex === 7) { actions.downloadXenia('linux'); return; }
                         if (app.focusedIndex === 8) { actions.downloadPatches(); return; }
                     }
@@ -5430,6 +5611,11 @@ document.addEventListener('alpine:init', () => {
                     break;
                 
                 case 'button_x': 
+
+                    if (app.currentView === 'settings-core' && app.focusedIndex === 6) {
+                        actions.downloadXenia('win', 'netplay');
+                        return;
+                    }
                     
                     if (app.currentView === 'settings-colors' && app.colorPresets[app.focusedIndex].id === 'custom') {
                         actions.saveNewCustomPreset();
@@ -5479,10 +5665,13 @@ document.addEventListener('alpine:init', () => {
                     }
                     else if (app.currentView === 'settings-core') {
                         if (app.focusedIndex === 6) { 
-                            actions.checkXeniaUpdates('win');
+                            
+                            actions.checkXeniaUpdates('win', 'standard');
+                            actions.checkXeniaUpdates('win', 'netplay');
                             actions.playSound('select');
                         }
                         else if (app.focusedIndex === 7) { 
+                            
                             actions.checkXeniaUpdates('linux');
                             actions.playSound('select');
                         }

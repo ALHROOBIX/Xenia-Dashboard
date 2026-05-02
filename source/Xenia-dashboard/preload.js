@@ -31,7 +31,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     launchGame: (xeniaPath, gamePath, titleID) => ipcRenderer.invoke('launchGame', xeniaPath, gamePath, titleID),
     
     
-    downloadXenia: (platform) => ipcRenderer.invoke('download-xenia', platform),
+   downloadXenia: (platform, variant) => ipcRenderer.invoke('download-xenia', platform, variant),
     downloadPatches: () => ipcRenderer.invoke('download-patches'),
     
     
@@ -52,7 +52,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     getGameCompatibility: (query) => ipcRenderer.invoke('get-game-compatibility', query),
     deleteGame: (path) => ipcRenderer.invoke('delete-game', path),
     
-    checkXeniaUpdate: (platform) => ipcRenderer.invoke('check-xenia-update', platform),
+    checkXeniaUpdate: (platform, variant) => ipcRenderer.invoke('check-xenia-update', platform, variant),
 
     
     loadLocales: () => ipcRenderer.invoke('loadLocales'),
@@ -103,6 +103,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
     getThemeCssUrl: (themeName) => ipcRenderer.invoke('getThemeCssUrl', themeName),
     saveThemeConfig: (themeName, data) => ipcRenderer.invoke('saveThemeConfig', themeName, data),
     reloadAppShell: () => ipcRenderer.invoke('reload-app-shell'),
+    
+    getFriendsList: () => ipcRenderer.invoke('get-friends-list'),
+    addFriend: (data) => ipcRenderer.invoke('add-friend', data),
+    editFriend: (data) => ipcRenderer.invoke('edit-friend', data),     
+    deleteFriend: (xuid) => ipcRenderer.invoke('delete-friend', xuid), 
     
     quitApp: () => ipcRenderer.invoke('quit-app')
 });

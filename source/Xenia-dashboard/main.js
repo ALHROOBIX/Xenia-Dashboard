@@ -267,23 +267,24 @@ async function getXeniaConfigPath() {
         const platform = require('os').platform();
         let configPath;
 
+        
+        let configFileName = 'xenia-canary.config.toml';
+        if (xeniaPath.toLowerCase().includes('netplay')) {
+            configFileName = 'xenia-canary-netplay.config.toml';
+        }
+
         if (platform === 'linux' && launchMethod === 'native') {
-            
             const os = require('os');
-            configPath = path.join(os.homedir(), '.local', 'share', 'Xenia', 'xenia-canary.config.toml');
-            
+            configPath = path.join(os.homedir(), '.local', 'share', 'Xenia', configFileName);
             
             const configDir = path.dirname(configPath);
             if (!fsSync.existsSync(configDir)) {
                 await fs.mkdir(configDir, { recursive: true });
             }
         } else {
-            
-            
-            configPath = path.join(path.dirname(xeniaPath), 'xenia-canary.config.toml');
+            configPath = path.join(path.dirname(xeniaPath), configFileName);
         }
 
-        
         if (!(await checkPathExistsAsync(configPath))) {
             console.log(`[Config] Creating new config file at: ${configPath}`);
             await fs.writeFile(configPath, '# Xenia Canary Config File\n');
@@ -776,6 +777,186 @@ function sendProgress(payload) {
 
 function registerIpcHandlers() {
 
+    
+    
+    
+
+    
+    
+    
+    ipcMain.handle('get-friends-list', async () => {
+        try {
+            const xeniaPath = store.get('xeniaPath');
+            
+            if (!xeniaPath || !xeniaPath.toLowerCase().includes('netplay')) {
+                return { success: false, error: 'Netplay version required' };
+            }
+
+            const configFileName = 'xenia-canary-netplay.config.toml'; 
+            
+            let configPath;
+            const platform = require('os').platform();
+            const launchMethod = store.get('linuxLaunchMethod') || 'native'; 
+            if (platform === 'linux' && launchMethod === 'native') {
+                configPath = path.join(require('os').homedir(), '.local', 'share', 'Xenia', configFileName);
+            } else {
+                configPath = path.join(path.dirname(xeniaPath), configFileName);
+            }
+
+            if (!fsSync.existsSync(configPath)) return { success: true, friends: [] };
+
+            
+            const tomlData = await fs.readFile(configPath, 'utf-8');
+            const match = tomlData.match(/^friends_xuids\s*=\s*"(.*?)"/m);
+            let xuids = [];
+            if (match && match[1]) {
+                xuids = match[1].split(',').map(s => s.trim()).filter(s => s.length > 0);
+            }
+
+            
+            const friendsJsonPath = path.join(CONFIG_DIR, 'data', 'friends.json');
+            let friendsNames = {};
+            if (fsSync.existsSync(friendsJsonPath)) {
+                friendsNames = JSON.parse(await fs.readFile(friendsJsonPath, 'utf-8'));
+            }
+
+            
+            const friends = xuids.map(xuid => ({
+                xuid: xuid,
+                name: friendsNames[xuid] || 'Unknown Friend'
+            }));
+
+            return { success: true, friends };
+        } catch (e) {
+            return { success: false, error: e.message };
+        }
+    });
+
+    ipcMain.handle('add-friend', async (event, { xuid, name }) => {
+        try {
+            const xeniaPath = store.get('xeniaPath');
+            if (!xeniaPath || !xeniaPath.toLowerCase().includes('netplay')) {
+                return { success: false, error: 'Netplay version required' };
+            }
+
+            const configFileName = 'xenia-canary-netplay.config.toml';
+            
+            let configPath;
+            const platform = require('os').platform();
+            const launchMethod = store.get('linuxLaunchMethod') || 'native'; 
+            if (platform === 'linux' && launchMethod === 'native') {
+                configPath = path.join(require('os').homedir(), '.local', 'share', 'Xenia', configFileName);
+            } else {
+                configPath = path.join(path.dirname(xeniaPath), configFileName);
+            }
+
+            if (!fsSync.existsSync(configPath)) return { success: false, error: 'Config file not found. Run Xenia Netplay first.' };
+
+            
+            let tomlData = await fs.readFile(configPath, 'utf-8');
+            const match = tomlData.match(/^friends_xuids\s*=\s*"(.*?)"/m);
+            
+            let xuids = [];
+            if (match && match[1]) {
+                xuids = match[1].split(',').map(s => s.trim()).filter(s => s.length > 0);
+            }
+
+            if (!xuids.includes(xuid)) {
+                xuids.push(xuid);
+                const newXuidsStr = xuids.join(',');
+                if (match) {
+                    tomlData = tomlData.replace(/^friends_xuids\s*=\s*".*?"/m, `friends_xuids = "${newXuidsStr}"`);
+                } else {
+                    if (tomlData.includes('[Live]')) {
+                        tomlData = tomlData.replace('[Live]', `[Live]\nfriends_xuids = "${newXuidsStr}"`);
+                    } else {
+                        tomlData += `\n[Live]\nfriends_xuids = "${newXuidsStr}"\n`;
+                    }
+                }
+                await fs.writeFile(configPath, tomlData);
+            }
+
+            
+            const friendsJsonPath = path.join(CONFIG_DIR, 'data', 'friends.json');
+            let friendsNames = {};
+            if (fsSync.existsSync(friendsJsonPath)) {
+                friendsNames = JSON.parse(await fs.readFile(friendsJsonPath, 'utf-8'));
+            }
+            friendsNames[xuid] = name;
+            
+            const dataDir = path.dirname(friendsJsonPath);
+            if (!fsSync.existsSync(dataDir)) await fs.mkdir(dataDir, { recursive: true });
+            await fs.writeFile(friendsJsonPath, JSON.stringify(friendsNames, null, 4));
+
+            return { success: true };
+        } catch (e) {
+            return { success: false, error: e.message };
+        }
+    });
+
+    ipcMain.handle('edit-friend', async (event, { xuid, newName }) => {
+        try {
+            const xeniaPath = store.get('xeniaPath');
+            if (!xeniaPath || !xeniaPath.toLowerCase().includes('netplay')) {
+                return { success: false, error: 'Netplay version required' };
+            }
+
+            const friendsJsonPath = path.join(CONFIG_DIR, 'data', 'friends.json');
+            let friendsNames = {};
+            if (fsSync.existsSync(friendsJsonPath)) {
+                friendsNames = JSON.parse(await fs.readFile(friendsJsonPath, 'utf-8'));
+            }
+            friendsNames[xuid] = newName; 
+            await fs.writeFile(friendsJsonPath, JSON.stringify(friendsNames, null, 4));
+            
+            return { success: true };
+        } catch (e) { return { success: false, error: e.message }; }
+    });
+
+    ipcMain.handle('delete-friend', async (event, xuidToRemove) => {
+        try {
+            const xeniaPath = store.get('xeniaPath');
+            if (!xeniaPath || !xeniaPath.toLowerCase().includes('netplay')) {
+                return { success: false, error: 'Netplay version required' };
+            }
+
+            const configFileName = 'xenia-canary-netplay.config.toml';
+            
+            let configPath;
+            const platform = require('os').platform();
+            const launchMethod = store.get('linuxLaunchMethod') || 'native'; 
+            if (platform === 'linux' && launchMethod === 'native') {
+                configPath = path.join(require('os').homedir(), '.local', 'share', 'Xenia', configFileName);
+            } else {
+                configPath = path.join(path.dirname(xeniaPath), configFileName);
+            }
+
+            
+            if (fsSync.existsSync(configPath)) {
+                let tomlData = await fs.readFile(configPath, 'utf-8');
+                const match = tomlData.match(/^friends_xuids\s*=\s*"(.*?)"/m);
+                if (match && match[1]) {
+                    let xuids = match[1].split(',').map(s => s.trim()).filter(s => s.length > 0);
+                    xuids = xuids.filter(id => id !== xuidToRemove); 
+                    
+                    const newXuidsStr = xuids.join(',');
+                    tomlData = tomlData.replace(/^friends_xuids\s*=\s*".*?"/m, `friends_xuids = "${newXuidsStr}"`);
+                    await fs.writeFile(configPath, tomlData);
+                }
+            }
+
+            
+            const friendsJsonPath = path.join(CONFIG_DIR, 'data', 'friends.json');
+            if (fsSync.existsSync(friendsJsonPath)) {
+                let friendsNames = JSON.parse(await fs.readFile(friendsJsonPath, 'utf-8'));
+                delete friendsNames[xuidToRemove];
+                await fs.writeFile(friendsJsonPath, JSON.stringify(friendsNames, null, 4));
+            }
+            
+            return { success: true };
+        } catch (e) { return { success: false, error: e.message }; }
+    });
+
 ipcMain.handle('reload-app-shell', () => {
     if (mainWindow) {
         console.log('[Shell] Reloading application shell with potential new index.html...');
@@ -1122,15 +1303,24 @@ ipcMain.handle('scan-zar-titleid', async (event, gamePath) => {
         try {
             
             if (platform === 'win32') {
-                xeniaProcess = spawn(xeniaPath, [gamePath], { detached: false });
+                xeniaProcess = spawn(xeniaPath, [gamePath], { 
+                    detached: false,
+                    cwd: xeniaDir 
+                });
             } 
             else if (platform === 'linux') {
                 if (launchMethod === 'native') {
                     try { await fsSync.promises.chmod(xeniaPath, 0o755); } catch (e) {}
-                    xeniaProcess = spawn(xeniaPath, [gamePath], { detached: false });
+                    xeniaProcess = spawn(xeniaPath, [gamePath], { 
+                        detached: false,
+                        cwd: xeniaDir 
+                    });
                 } 
                 else if (launchMethod === 'wine') {
-                    xeniaProcess = spawn('wine', [xeniaPath, gamePath], { detached: false });
+                    xeniaProcess = spawn('wine', [xeniaPath, gamePath], { 
+                        detached: false,
+                        cwd: xeniaDir 
+                    });
                 } 
                 else if (launchMethod === 'proton') {
                     const protonPath = store.get('protonPath');
@@ -1145,7 +1335,10 @@ ipcMain.handle('scan-zar-titleid', async (event, gamePath) => {
                     };
 
                     const command = `"${protonPath}" run "${xeniaPath}" "${gamePath}"`;
-                    xeniaProcess = exec(command, { env: protonEnv });
+                    xeniaProcess = exec(command, { 
+                        env: protonEnv,
+                        cwd: xeniaDir 
+                    });
                 }
             }
 
@@ -1159,7 +1352,6 @@ ipcMain.handle('scan-zar-titleid', async (event, gamePath) => {
                 
                 if (platform === 'linux') {
                     try {
-                        
                         exec('pkill -9 -f xenia_canary');
                     } catch (e) {}
                 }
@@ -1177,7 +1369,6 @@ ipcMain.handle('scan-zar-titleid', async (event, gamePath) => {
                             const fileName = path.basename(gamePath);
                             const gameNameOnly = path.basename(fileName, path.extname(fileName));
 
-                            
                             let zarData = {};
                             if (fsSync.existsSync(ZAR_MAPPING_FILE)) {
                                 zarData = JSON.parse(await fsSync.promises.readFile(ZAR_MAPPING_FILE, 'utf-8'));
@@ -1306,23 +1497,34 @@ ipcMain.handle('launch-xenia-dashboard', async (event, xeniaPath) => {
     }
 
     try {
+        
+        const xeniaDir = path.dirname(xeniaPath);
+
         if (platform === 'win32') {
             
             currentXeniaProcess = spawn(xeniaPath, [], { 
                 detached: true,
-                stdio: 'ignore'
+                stdio: 'ignore',
+                cwd: xeniaDir 
             });
         } 
         else if (platform === 'linux') {
-            
             const launchMethod = store.get('linuxLaunchMethod', 'native'); 
             
             if (launchMethod === 'native') {
                 try { await fsPromises.chmod(xeniaPath, 0o755); } catch (e) {}
-                currentXeniaProcess = spawn(xeniaPath, [], { detached: true, stdio: 'ignore' });
+                currentXeniaProcess = spawn(xeniaPath, [], { 
+                    detached: true, 
+                    stdio: 'ignore',
+                    cwd: xeniaDir 
+                });
             } 
             else if (launchMethod === 'wine') {
-                currentXeniaProcess = spawn('wine', [xeniaPath], { detached: true, stdio: 'ignore' });
+                currentXeniaProcess = spawn('wine', [xeniaPath], { 
+                    detached: true, 
+                    stdio: 'ignore',
+                    cwd: xeniaDir 
+                });
             } 
             else if (launchMethod === 'proton') {
                 const protonPath = store.get('protonPath');
@@ -1344,7 +1546,10 @@ ipcMain.handle('launch-xenia-dashboard', async (event, xeniaPath) => {
                 const command = `"${protonPath}" run "${xeniaPath}"`;
                 console.log(`[Game Launcher] Executing (Proton): ${command}`);
 
-                currentXeniaProcess = exec(command, { env: protonEnv });
+                currentXeniaProcess = exec(command, { 
+                    env: protonEnv,
+                    cwd: xeniaDir 
+                });
             }
         }
 
@@ -1352,7 +1557,6 @@ ipcMain.handle('launch-xenia-dashboard', async (event, xeniaPath) => {
         if (currentXeniaProcess) {
             currentXeniaProcess.on('spawn', () => {
                 isGameRunning = true;
-                
                 mainWindow.webContents.send('game-started'); 
                 console.log('[Game Launcher] Xenia process started...');
             });
@@ -1360,7 +1564,6 @@ ipcMain.handle('launch-xenia-dashboard', async (event, xeniaPath) => {
             currentXeniaProcess.on('close', (code) => {
                 isGameRunning = false;
                 currentXeniaProcess = null;
-                
                 mainWindow.webContents.send('game-stopped'); 
                 restartControllerService();
             });
@@ -1386,12 +1589,8 @@ ipcMain.handle('launchGame', async (event, xeniaPath, gamePath, titleID) => {
     if (isGameRunning && currentXeniaProcess) {
         console.log("[Game Launcher] Another game is running. Killing it to switch...");
         try {
-            
             currentXeniaProcess.kill('SIGKILL'); 
-            
-            
             await new Promise(resolve => setTimeout(resolve, 1000));
-            
             isGameRunning = false;
             currentXeniaProcess = null;
             console.log("[Game Launcher] Old process killed. Starting new game...");
@@ -1399,7 +1598,6 @@ ipcMain.handle('launchGame', async (event, xeniaPath, gamePath, titleID) => {
             console.error("[Game Launcher] Failed to kill existing process:", e);
         }
     }
-    
 
     try {
         
@@ -1408,14 +1606,11 @@ ipcMain.handle('launchGame', async (event, xeniaPath, gamePath, titleID) => {
         const args = [gamePath]; 
         
         if (titleID) {
-            
             const configResult = await getXeniaConfigPath(); 
             
             if (configResult.path) {
-                
                 const xeniaBaseDir = path.dirname(configResult.path);
                 const customConfigPath = path.join(xeniaBaseDir, 'config', `${titleID}.config.toml`);
-                
                 
                 if (fsSync.existsSync(customConfigPath)) {
                     console.log(`[Game Launcher] 🎯 Applying custom config: ${customConfigPath}`);
@@ -1424,13 +1619,16 @@ ipcMain.handle('launchGame', async (event, xeniaPath, gamePath, titleID) => {
                 }
             }
         }
+
         
+        const xeniaDir = path.dirname(xeniaPath);
 
         if (platform === 'win32') {
             console.log(`[Game Launcher] Spawning: ${xeniaPath} ${args.join(' ')}`);
             currentXeniaProcess = spawn(xeniaPath, args, { 
                 detached: true,
-                stdio: 'ignore'
+                stdio: 'ignore',
+                cwd: xeniaDir 
             });
         } 
         else if (platform === 'linux') {
@@ -1442,15 +1640,16 @@ ipcMain.handle('launchGame', async (event, xeniaPath, gamePath, titleID) => {
                 
                 currentXeniaProcess = spawn(xeniaPath, args, { 
                     detached: true,
-                    stdio: 'ignore'
+                    stdio: 'ignore',
+                    cwd: xeniaDir 
                 });
 
             } else if (launchMethod === 'wine') {
                 console.log(`[Game Launcher] Spawning: wine ${xeniaPath} ${args.join(' ')}`);
-                
                 currentXeniaProcess = spawn('wine', [xeniaPath, ...args], { 
                     detached: true,
-                    stdio: 'ignore'
+                    stdio: 'ignore',
+                    cwd: xeniaDir 
                 });
 
             } else if (launchMethod === 'proton') {
@@ -1470,21 +1669,18 @@ ipcMain.handle('launchGame', async (event, xeniaPath, gamePath, titleID) => {
                     'STEAM_COMPAT_CLIENT_INSTALL_PATH': steamInstallPath
                 };
                 
-                
-                
-                
-                
                 let argString = `"${gamePath}"`; 
-                
                 if (args.length > 1) { 
-                     
                      argString += ` --config "${args[2]}"`;
                 }
 
                 const command = `"${protonPath}" run "${xeniaPath}" ${argString}`;
                 console.log(`[Game Launcher] Executing (Proton): ${command}`);
 
-                currentXeniaProcess = exec(command, { env: protonEnv });
+                currentXeniaProcess = exec(command, { 
+                    env: protonEnv,
+                    cwd: xeniaDir 
+                });
                 
                 isGameRunning = true; 
                 currentXeniaProcess.on('close', (code) => {
@@ -1791,7 +1987,8 @@ ipcMain.handle('scanForGames', async () => {
     
     const CONTENT_TYPES = {
         '00007000': 'Games on Demand',
-        '000D0000': 'Xbox Live Arcade'
+        '000D0000': 'Xbox Live Arcade',
+        '00004000': 'Game Install' 
     };
 
     try {
@@ -1802,6 +1999,7 @@ ipcMain.handle('scanForGames', async () => {
             const gameFileName = entry.name;
             let isXBLA = false;
             let isGOD = false;
+            let isGameInstall = false; 
             let detectedTitleID = null;
 
             
@@ -1823,14 +2021,17 @@ ipcMain.handle('scanForGames', async () => {
                         isGOD = true;
                     } else if (contentTypeDir === '000D0000') {
                         isXBLA = true;
+                    } else if (contentTypeDir === '00004000') {
+                        isGameInstall = true; 
                     }
                     detectedTitleID = titleIdDir.toUpperCase();
                 }
             }
 
-            if (isNormalGame || isXBLA || isGOD) {
+            
+            if (isNormalGame || isXBLA || isGOD || isGameInstall) {
                 const cacheKey = gameFileName;
-                const gameNameOnly = (isXBLA || isGOD) ? "" : path.basename(gameFileName, path.extname(gameFileName));
+                const gameNameOnly = (isXBLA || isGOD || isGameInstall) ? "" : path.basename(gameFileName, path.extname(gameFileName));
 
                 let game = {
                     name: gameNameOnly,
@@ -1838,7 +2039,8 @@ ipcMain.handle('scanForGames', async () => {
                     path: gamePath,
                     titleID: detectedTitleID || (cache[cacheKey]?.titleID) || null,
                     isArcade: isXBLA,
-                    isGOD: isGOD
+                    isGOD: isGOD,
+                    isGameInstall: isGameInstall 
                 };
 
                 
@@ -1858,13 +2060,15 @@ ipcMain.handle('scanForGames', async () => {
                         game.name = `Arcade Game [${game.titleID}]`;
                     } else if (isGOD) {
                         game.name = `GOD Game [${game.titleID}]`; 
+                    } else if (isGameInstall) { 
+                        game.name = `Installed Game [${game.titleID}]`; 
                     } else {
                         game.name = gameNameOnly;
                     }
                 }
 
                 
-                const result = (isXBLA || isGOD) ? { titleID: game.titleID, source: 'folder' } : await _resolveTitleIDInternal(game.path, game, { nameIndex });
+                const result = (isXBLA || isGOD || isGameInstall) ? { titleID: game.titleID, source: 'folder' } : await _resolveTitleIDInternal(game.path, game, { nameIndex });
                 game.titleID = result.titleID;
                 game.patchSource = result.source;
                 game.patchFiles = result.titleID ? (patchMap[result.titleID] || []) : [];
@@ -1913,11 +2117,11 @@ ipcMain.handle('scanForGames', async () => {
     }
 });
 
+
 ipcMain.handle('scanForThemes', async () => {
     try {
         let allThemes = [];
 
-        
         const readThemeIcons = async (themePath) => {
             const iconsPath = path.join(themePath, 'assets', 'icons');
             if (fsSync.existsSync(iconsPath)) {
@@ -1926,18 +2130,15 @@ ipcMain.handle('scanForThemes', async () => {
             return [];
         };
 
-        
         try {
             const intDirs = await fs.readdir(path.join(__dirname, 'themes'), { withFileTypes: true });
             for (const d of intDirs) {
                 if (d.isDirectory()) {
-                    
                     allThemes.push({ name: d.name, type: 'internal', customIcons: [] });
                 }
             }
         } catch (e) {}
 
-        
         try {
             if (fsSync.existsSync(SYSTEMS_DIR)) {
                 const extDirs = await fs.readdir(SYSTEMS_DIR, { withFileTypes: true });
@@ -2027,121 +2228,128 @@ ipcMain.handle('scanForThemes', async () => {
         await fs.writeFile(versionFile, JSON.stringify(data, null, 2));
     }
     
-    ipcMain.handle('check-xenia-update', async (event, platform) => {
-        try {
-            const folderName = platform === 'win' ? 'xenia-win' : 'xenia-linux';
-            const targetDir = path.join(CONFIG_DIR, 'assets', folderName);
-            const versionFile = path.join(targetDir, 'version.json');
-            const exeName = platform === 'win' ? 'xenia_canary.exe' : 'xenia_canary';
-            const exePath = path.join(targetDir, exeName);
+ipcMain.handle('check-xenia-update', async (event, platform, variant = 'standard') => {
+    try {
+        let repoUrl = 'https://api.github.com/repos/xenia-canary/xenia-canary-releases/releases/latest';
+        let folderName = platform === 'win' ? 'xenia-win' : 'xenia-linux';
+        let exeName = platform === 'win' ? 'xenia_canary.exe' : 'xenia_canary';
 
-            
-            const repoUrl = 'https://api.github.com/repos/xenia-canary/xenia-canary-releases/releases/latest';
-            const { data: remoteRelease } = await axios.get(repoUrl, {
-                headers: { 'User-Agent': 'Xenia-NXE-Launcher' },
-                timeout: 5000
-            });
+        
+        if (variant === 'netplay') {
+            repoUrl = 'https://api.github.com/repos/AdrianCassar/xenia-canary/releases/latest';
+            folderName = platform === 'win' ? 'xenia-netplay-win' : 'xenia-netplay-linux';
+            exeName = platform === 'win' ? 'xenia_canary_netplay.exe' : 'xenia_canary_netplay';
+        }
 
-            let localData = null;
-            let isInstalled = false;
-            let isVersionFileExists = false;
+        const targetDir = path.join(CONFIG_DIR, 'assets', folderName);
+        const versionFile = path.join(targetDir, 'version.json');
+        const exePath = path.join(targetDir, exeName);
 
-            
-            if (fsSync.existsSync(exePath)) {
-                isInstalled = true;
-            } else if (platform !== 'win') {
-                try {
-                    if (fsSync.existsSync(targetDir)) {
-                        const files = await fs.readdir(targetDir);
-                        if (files.some(f => f.includes('xenia') && !f.endsWith('.json'))) isInstalled = true;
-                    }
-                } catch(e) {}
-            }
+        
+        const { data: remoteRelease } = await axios.get(repoUrl, {
+            headers: { 'User-Agent': 'Xenia-NXE-Launcher' },
+            timeout: 5000
+        });
 
-            
-            if (fsSync.existsSync(versionFile)) {
-                try {
-                    const localJson = await fs.readFile(versionFile, 'utf-8');
-                    localData = JSON.parse(localJson);
-                    isVersionFileExists = true;
-                } catch (e) { console.warn("Version file corrupted"); }
-            }
+        let localData = null;
+        let isInstalled = false;
+        let isVersionFileExists = false;
 
-            
-            
-            
-            
-            let status = 'not-installed';
-            
-            if (!isInstalled && !isVersionFileExists) {
-                status = 'not-installed';
-            } else if (!isInstalled && isVersionFileExists) {
-                status = 'broken-install';
-            } else if (isInstalled && !localData) {
-                status = 'unknown-version';
+        
+        if (fsSync.existsSync(exePath)) {
+            isInstalled = true;
+        } else if (platform !== 'win') {
+            try {
+                if (fsSync.existsSync(targetDir)) {
+                    const files = await fs.readdir(targetDir);
+                    if (files.some(f => f.includes('xenia') && !f.endsWith('.json'))) isInstalled = true;
+                }
+            } catch(e) {}
+        }
+
+        
+        if (fsSync.existsSync(versionFile)) {
+            try {
+                const localJson = await fs.readFile(versionFile, 'utf-8');
+                localData = JSON.parse(localJson);
+                isVersionFileExists = true;
+            } catch (e) { console.warn("Version file corrupted"); }
+        }
+
+        let status = 'not-installed';
+        
+        if (!isInstalled && !isVersionFileExists) {
+            status = 'not-installed';
+        } else if (!isInstalled && isVersionFileExists) {
+            status = 'broken-install';
+        } else if (isInstalled && !localData) {
+            status = 'unknown-version';
+        } else {
+            const remoteTag = remoteRelease.tag_name ? remoteRelease.tag_name.trim() : null;
+            const localTag = localData.tag_name ? localData.tag_name.trim() : null;
+
+            if (localTag && remoteTag && localTag !== remoteTag) {
+                status = 'update-available';
             } else {
-                
-                const remoteTag = remoteRelease.tag_name ? remoteRelease.tag_name.trim() : null;
-                const localTag = localData.tag_name ? localData.tag_name.trim() : null;
-
-                console.log(`[Update Check] Local Tag: "${localTag}" | Remote Tag: "${remoteTag}"`);
-
-                
-                if (localTag && remoteTag && localTag !== remoteTag) {
+                const remoteDate = new Date(remoteRelease.published_at).getTime();
+                const localDate = new Date(localData.published_at).getTime();
+                if (remoteDate > localDate + (60 * 1000)) { 
                     status = 'update-available';
-                } 
-                
-                else {
-                    const remoteDate = new Date(remoteRelease.published_at).getTime();
-                    const localDate = new Date(localData.published_at).getTime();
-                    if (remoteDate > localDate + (60 * 1000)) { 
-                        status = 'update-available';
-                    } else {
-                        status = 'up-to-date';
-                    }
+                } else {
+                    status = 'up-to-date';
                 }
             }
-
-            return {
-                success: true,
-                status: status,
-                remote: {
-                    tag: remoteRelease.tag_name, 
-                    date: remoteRelease.published_at,
-                    hash: remoteRelease.target_commitish.substring(0, 7)
-                },
-                local: localData ? {
-                    tag: localData.tag_name, 
-                    date: localData.published_at,
-                    hash: localData.commit_hash ? localData.commit_hash.substring(0, 7) : '???'
-                } : null
-            };
-
-        } catch (error) {
-            console.error('[Update Check Error]', error.message);
-            
-            
-            if (error.response && error.response.status === 403) {
-                return { success: false, error: "GitHub Rate Limit Exceeded. Wait 1 hour." };
-            }
-            
-            return { success: false, error: error.message };
         }
-    });
+
+        return {
+            success: true,
+            status: status,
+            remote: {
+                tag: remoteRelease.tag_name,
+                date: remoteRelease.published_at,
+                hash: remoteRelease.target_commitish.substring(0, 7)
+            },
+            local: localData ? {
+                tag: localData.tag_name,
+                date: localData.published_at,
+                hash: localData.commit_hash ? localData.commit_hash.substring(0, 7) : '???'
+            } : null
+        };
+
+    } catch (error) {
+        console.error('[Update Check Error]', error.message);
+        if (error.response && error.response.status === 403) {
+            return { success: false, error: "GitHub Rate Limit Exceeded. Wait 1 hour." };
+        }
+        return { success: false, error: error.message };
+    }
+});
 
 
-ipcMain.handle('download-xenia', async (event, platform) => {
-    const repoUrl = 'https://api.github.com/repos/xenia-canary/xenia-canary-releases/releases/latest';
-    const winAssetName = 'xenia_canary_windows.zip';
+ipcMain.handle('download-xenia', async (event, platform, variant = 'standard') => {
+    let repoUrl = 'https://api.github.com/repos/xenia-canary/xenia-canary-releases/releases/latest';
+    let winAssetName = 'xenia_canary_windows.zip';
     const linuxAssetPrefix = 'xenia_canary_linux'; 
+    let binaryName = platform === 'win' ? 'xenia_canary.exe' : 'xenia_canary';
     
+    
+    let folderName = platform === 'win' ? 'xenia-win' : 'xenia-linux';
+
+    
+    if (variant === 'netplay') {
+        repoUrl = 'https://api.github.com/repos/AdrianCassar/xenia-canary/releases/latest';
+        winAssetName = 'xenia_canary_netplay_windows.zip';
+        binaryName = 'xenia_canary_netplay.exe';
+        
+        
+        folderName = platform === 'win' ? 'xenia-netplay-win' : 'xenia-netplay-linux';
+    }
+
     const downloadDir = path.join(CONFIG_DIR, 'temp_downloads');
-    const folderName = platform === 'win' ? 'xenia-win' : 'xenia-linux';
     const finalTargetDir = path.join(CONFIG_DIR, 'assets', folderName);
     const tempExtractDir = path.join(CONFIG_DIR, 'assets', `${folderName}_temp_update`);
-    const binaryName = platform === 'win' ? 'xenia_canary.exe' : 'xenia_canary';
 
-    const downloadType = platform === 'win' ? 'win' : 'linux';
+    const downloadType = variant === 'netplay' ? `${platform}Netplay` : platform;
 
     const sendLocalProgress = (payload) => {
         sendProgress({ ...payload, type: downloadType });
@@ -2212,7 +2420,6 @@ ipcMain.handle('download-xenia', async (event, platform) => {
 
         if (platform === 'win') await decompress(downloadPath, tempExtractDir);
         else await execPromise(`tar -xf "${downloadPath}" -C "${tempExtractDir}"`);
-
         
         sendLocalProgress({ status: 'Installing binaries...', percentage: 100, step: 'install' });
 
@@ -2225,9 +2432,13 @@ ipcMain.handle('download-xenia', async (event, platform) => {
             await fs.copyFile(foundBinaryPath, targetBinaryPath);
             
             
+            const portableFile = path.join(finalTargetDir, 'portable.txt');
+            if (!fsSync.existsSync(portableFile)) {
+                await fs.writeFile(portableFile, ''); 
+            }
+            
             store.set('xeniaPath', targetBinaryPath);
             savedBinaryPath = targetBinaryPath;
-            console.log(`[Auto-Config] Xenia path automatically set to: ${targetBinaryPath}`);
         } else {
             throw new Error(`Could not find ${binaryName} inside archive!`);
         }
