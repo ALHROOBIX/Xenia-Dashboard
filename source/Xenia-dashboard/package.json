@@ -1,6 +1,6 @@
 {
   "name": "xenia-dashboard",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Xbox 360 Dashboard for Xenia Emulator",
   "main": "main.js",
   "author": "ALHROOBIX",
