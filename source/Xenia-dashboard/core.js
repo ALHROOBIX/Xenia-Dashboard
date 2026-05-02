@@ -770,7 +770,7 @@ document.addEventListener('alpine:init', () => {
                 
                 for (const game of app.achievementsGamesList) {
                     try {
-                        const achRes = await window.electronAPI.getGameAchievements(game.titleID, xuid);
+                        const achRes = await window.electronAPI.getGameAchievements(game.titleID, xuid, true);
                         
                         if (achRes.success && achRes.achievements) {
                             game.realAchievements = achRes.achievements;
@@ -1793,15 +1793,14 @@ document.addEventListener('alpine:init', () => {
                 app.activeProfileSlot = res.activeSlot;
 
                 
-                const active = res.profiles.find(p => p.slot === res.activeSlot) || res.profiles[0];
-                if (active) {
-                    app.playerTag = active.gamertag;
-                    app.gamerscore = active.total_gamerscore;
-                    
-                    
-                    const pic = await window.electronAPI.getUserGamerpic(active.xuid, active.slot);
-                    app.userAvatar = pic.success ? pic.url : null;
-                }
+            const active = res.profiles.find(p => p.slot === res.activeSlot) || res.profiles[0];
+            if (active) {
+                app.playerTag = active.gamertag;
+                app.gamerscore = active.total_gamerscore;
+                await window.electronAPI.set('xuid', active.xuid);
+                const pic = await window.electronAPI.getUserGamerpic(active.xuid, active.slot);
+                app.userAvatar = pic.success ? pic.url : null;
+            }
 
                 
                 for (let profile of app.profilesList) {
@@ -4901,6 +4900,11 @@ document.addEventListener('alpine:init', () => {
         window.electronAPI.onGameStopped(() => {
             app.isGameRunning = false;
             Alpine.store('actions').manageBGM('play'); 
+            Alpine.store('actions').refreshProfileData();
+            const appStore = Alpine.store('app');
+            if (appStore.currentView === 'achievements') {
+                Alpine.store('actions').loadAchievementsData();
+            }
         });
 
         setInterval(() => {
