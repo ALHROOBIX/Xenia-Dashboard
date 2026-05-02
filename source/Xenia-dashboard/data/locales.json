@@ -34,7 +34,9 @@
       "space": "Space",
       "symbols": "Symbols",
       "caps": "Caps Lock",
-      "download-optimized": "Download Optimized Settings Database"
+      "download-optimized": "Download Optimized Settings Database",
+      "netplay_only_alert": "The Friends List is only available when using the Xenia Netplay version. Please select your Netplay executable in the Core Configuration settings to access this feature.",
+      "add": "Add Friend"
     },
     "dashboard_menu": {
       "myxbox": "MY XENIA",
@@ -76,11 +78,14 @@
       "games": "Games",
       "settings": "Settings",
       "dashboard": "XENIA Dashboard",
-      "quick_launch": "Quick Launch",
+      "friend_list": "Friend List",
       "shutdown": "Shutdown System",
       "coming_soon": "(coming soon)",
       "exit_app": "(Exit App)",
-      "no_games": "No games found"
+      "no_games": "No games found",
+      "friends_empty": "No friends added yet.<br>Press <b>Y</b> to add a friend's XUID.",
+      "enter_xuid": "Enter Friend XUID (16 Characters)",
+      "enter_name": "Enter Friend Name"
     },
     "settings": {
       "title": "Settings",
@@ -162,7 +167,8 @@
       "linuxLaunchMethod": "Path to your 'proton' executable",
       "nonlinuxLaunchMethod": "(This setting is only required if 'Linux Launch Method' is set to 'Proton').",
       "Linux": "(For Linux users only).",
-      "cycle_method": "to cycle the method:"
+      "cycle_method": "to cycle the method:",
+      "to_update": "to Update"
 
     },
     "colors": {
@@ -317,7 +323,9 @@
       "space": "مسافة",
       "symbols": "الرموز",
       "caps": "حروف كبيرة",
-      "download-optimized": "تحميل قاعدة إعدادات محسنة"
+      "download-optimized": "تحميل قاعدة إعدادات محسنة",
+      "netplay_only_alert": "قائمة الأصدقاء متاحة فقط عند استخدام إصدار Xenia Netplay. يرجى اختيار ملف Netplay التنفيذي الخاص بك في إعدادات التكوين الأساسية للوصول إلى هذه الميزة.",
+      "add": "إضافة صديق"
     },
     "dashboard_menu": {
       "myxbox": "جهازي زينيا",
@@ -380,11 +388,14 @@
       "settings": "الإعدادات",
       "active_dl": "تنزيلات جارية",
       "dashboard": "واجهة XENIA",
-      "quick_launch": "تشغيل سريع",
+      "friend_list": "قائمة الأصدقاء",
       "shutdown": "إيقاف النظام",
       "coming_soon": "(قريباً)",
       "exit_app": "(خروج من التطبيق)",
-      "no_games": "لم يتم العثور على ألعاب"
+      "no_games": "لم يتم العثور على ألعاب",
+      "friends_empty": "لم يتم إضافة أصدقاء بعد.<br>اضغط <b>Y</b> لإضافة XUID صديق.",
+      "enter_xuid": "أدخل XUID الصديق (16 حرفًا)",
+      "enter_name": "أدخل اسم الصديق"
     },
     "settings": {
       "title": "الإعدادات",
@@ -467,7 +478,8 @@
       "linuxLaunchMethod": "مسار ملف 'proton' التنفيذي",
       "nonlinuxLaunchMethod": "(هذا الإعداد مطلوب فقط إذا تم تعيين 'طريقة تشغيل Linux' إلى 'Proton').",
       "Linux": "(للمستخدمين الذين يستخدمون Linux فقط).",
-      "cycle_method": "للتبديل بين الطرق:"
+      "cycle_method": "للتبديل بين الطرق:",
+      "to_update": "لتحديث."
     },
     "colors": {
       "title": "ألوان الواجهة",
@@ -620,7 +632,9 @@
       "space": "空格键",
       "symbols": "符号",
       "caps": "大写锁定",
-      "download-optimized": "下载优化设置数据库"
+      "download-optimized": "下载优化设置数据库",
+      "netplay_only_alert": "好友列表仅在使用 Xenia Netplay 版本时可用。请在核心配置设置中选择您的 Netplay 可执行文件以访问此功能。",
+      "add": "添加好友"
     },
     "dashboard_menu": {
       "myxbox": "我的 XENIA",
@@ -683,11 +697,14 @@
       "settings": "设置",
       "active_dl": "进行中的下载",
       "dashboard": "XENIA 界面",
-      "quick_launch": "快速启动",
+      "friend_list": "好友列表",
       "shutdown": "关闭系统",
       "coming_soon": "（即将推出）",
       "exit_app": "（退出应用）",
-      "no_games": "未找到游戏"
+      "no_games": "未找到游戏",
+      "friends_empty": "尚未添加好友。<br>按 <b>Y</b> 添加好友的 XUID。",
+      "enter_xuid": "输入好友的 XUID（16 个字符）",
+      "enter_name": "输入好友名称"
     },
     "settings": {
       "title": "设置",
@@ -769,7 +786,8 @@
       "linuxLaunchMethod": "您的 'proton' 可执行文件路径",
       "nonlinuxLaunchMethod": "（仅当 'Linux 启动方式' 设置为 'Proton' 时才需要此设置）。",
       "Linux": "（仅适用于 Linux 用户）。",
-      "cycle_method": "切换方法："
+      "cycle_method": "切换方法：",
+      "to_update": "更新"
     },
     "colors": {
       "title": "界面颜色",
@@ -922,7 +940,9 @@
       "space": "スペースキー",
       "symbols": "シンボル",
       "caps": "キャップスロック",
-      "download-optimized": "最適化された設定データベースをダウンロード"
+      "download-optimized": "最適化された設定データベースをダウンロード",
+      "netplay_only_alert": "フレンドリストはXenia Netplayバージョンを使用している場合にのみ利用可能です。コア構成設定でNetplay実行可能ファイルを選択して、この機能にアクセスしてください。",
+      "add": "フレンドを追加する"
     },
     "dashboard_menu": {
       "myxbox": "私のXENIA",
@@ -985,11 +1005,14 @@
       "settings": "設定",
       "active_dl": "進行中のダウンロード",
       "dashboard": "XENIAインターフェース",
-      "quick_launch": "クイック起動",
+      "friend_list": "フレンドリスト",
       "shutdown": "システムをシャットダウン",
       "coming_soon": "（近日公開）",
       "exit_app": "（アプリを終了）",
-      "no_games": "ゲームが見つかりません"
+      "no_games": "ゲームが見つかりません",
+      "friends_empty": "まだフレンドが追加されていません。<br><b>Y</b>を押してフレンドのXUIDを追加してください。",
+      "enter_xuid": "フレンドのXUIDを入力してください（16文字）",
+      "enter_name": "フレンドの名前を入力してください"
     },
     "settings": {
       "title": "設定",
@@ -1071,7 +1094,8 @@
       "linuxLaunchMethod": "あなたの 'proton' 実行ファイルのパス",
       "nonlinuxLaunchMethod": "（'Linux起動方法'が'Proton'に設定されている場合にのみ必要）。",
       "Linux": "（Linuxユーザー専用）。",
-      "cycle_method": "方法を切り替える："
+      "cycle_method": "方法を切り替える：",
+      "to_update": "更新する。"
 
     },
     "colors": {
@@ -1225,7 +1249,9 @@
       "space": "스페이스바",
       "symbols": "심볼",
       "caps": "캡스록",
-      "download-optimized": "최적화된 설정 데이터베이스 다운로드"
+      "download-optimized": "최적화된 설정 데이터베이스 다운로드",
+      "netplay_only_alert": "친구 목록은 Xenia Netplay 버전을 사용하는 경우에만 사용할 수 있습니다. 코어 구성 설정에서 Netplay 실행 파일을 선택하여 이 기능에 액세스하세요.",
+      "add": "친구 추가"
     },
     "dashboard_menu": {
       "myxbox": "나의 XENIA",
@@ -1288,11 +1314,14 @@
       "settings": "설정",
       "active_dl": "진행 중인 다운로드",
       "dashboard": "XENIA 대시보드",
-      "quick_launch": "빠른 실행",
+      "friend_list": "친구 목록",
       "shutdown": "시스템 종료",
       "coming_soon": "(곧 출시)",
       "exit_app": "(앱 종료)",
-      "no_games": "게임을 찾을 수 없음"
+      "no_games": "게임을 찾을 수 없음",
+      "friends_empty": "아직 친구가 추가되지 않았습니다.<br><b>Y</b>를 눌러 친구의 XUID를 추가하세요.",
+      "enter_xuid": "친구의 XUID를 입력하세요（16자리）",
+      "enter_name": "친구의 이름을 입력하세요"
     },
     "settings": {
       "title": "설정",
@@ -1374,7 +1403,8 @@
       "linuxLaunchMethod": "당신의 'proton' 실행 파일 경로",
       "nonlinuxLaunchMethod": "('Linux 실행 방법'이 'Proton'으로 설정된 경우에만 필요합니다).",
       "Linux": "(Linux 사용자 전용).",
-      "cycle_method": "방법을 전환하려면:"
+      "cycle_method": "방법을 전환하려면:",
+      "to_update": "업데이트하세요."
     },
     "colors": {
       "title": "인터페이스 색상",
@@ -1527,7 +1557,9 @@
       "space": "Пробел",
       "symbols": "Символы",
       "caps": "Caps Lock",
-      "download-optimized": "Загрузить оптимизированную базу данных настроек"
+      "download-optimized": "Загрузить оптимизированную базу данных настроек",
+      "netplay_only_alert": "Список друзей доступен только при использовании версии Xenia Netplay. Выберите исполняемый файл Netplay в настройках конфигурации ядра, чтобы получить доступ к этой функции.",
+      "add": "Добавить друга"
     },
     "dashboard_menu": {
       "myxbox": "МОЙ XENIA",
@@ -1590,11 +1622,14 @@
       "settings": "Настройки",
       "active_dl": "Текущие загрузки",
       "dashboard": "ИНТЕРФЕЙС XENIA",
-      "quick_launch": "Быстрый запуск",
+      "friend_list": "Список друзей",
       "shutdown": "Выключить систему",
       "coming_soon": "(скоро)",
       "exit_app": "(Выйти из приложения)",
-      "no_games": "Игры не найдены"
+      "no_games": "Игры не найдены",
+      "friends_empty": "Друзья еще не добавлены.<br>Нажмите <b>Y</b>, чтобы добавить XUID вашего друга.",
+      "enter_xuid": "Введите XUID вашего друга (16 символов)",
+      "enter_name": "Введите имя вашего друга"
     },
     "settings": {
       "title": "Настройки",
@@ -1676,7 +1711,8 @@
       "linuxLaunchMethod": "Ваш путь к файлу 'proton'",
       "nonlinuxLaunchMethod": "(Только если 'Метод запуска Linux' установлен на 'Proton').",
       "Linux": "(Только для пользователей Linux).",
-      "cycle_method": "Нажмите для переключения метода:"
+      "cycle_method": "Нажмите для переключения метода:",
+      "to_update": "Обновить."
     },
     "colors": {
       "title": "Цвета интерфейса",
@@ -1829,7 +1865,9 @@
       "space": "Leertaste",
       "symbols": "Symbole",
       "caps": "Feststelltaste",
-      "download-optimized": "Optimierte Einstellungsdatenbank herunterladen"
+      "download-optimized": "Optimierte Einstellungsdatenbank herunterladen",
+      "netplay_only_alert": "Die Freundesliste ist nur verfügbar, wenn Sie die Xenia Netplay-Version verwenden. Wählen Sie die Netplay-Executable in den Core-Konfigurationseinstellungen aus, um auf diese Funktion zuzugreifen.",
+      "add": "Freund hinzufügen"
     },
     "dashboard_menu": {
       "myxbox": "MEIN XENIA",
@@ -1892,11 +1930,14 @@
       "settings": "Einstellungen",
       "active_dl": "Laufende Downloads",
       "dashboard": "XENIA-DASHBOARD",
-      "quick_launch": "Schnellstart",
+      "friend_list": "Freundeliste",
       "shutdown": "System herunterfahren",
       "coming_soon": "(Demnächst)",
       "exit_app": "(App verlassen)",
-      "no_games": "Keine Spiele gefunden"
+      "no_games": "Keine Spiele gefunden",
+      "friends_empty": "Noch keine Freunde hinzugefügt.<br>Drücke <b>Y</b>, um die XUID deines Freundes hinzuzufügen.",
+      "enter_xuid": "Gib die XUID deines Freundes ein (16 Zeichen)",
+      "enter_name": "Gib den Namen deines Freundes ein"
     },
     "settings": {
       "title": "Einstellungen",
@@ -1978,7 +2019,8 @@
       "linuxLaunchMethod": "Ihr Pfad zur 'proton'-Datei",
       "nonlinuxLaunchMethod": "(Nur wenn 'Linux-Startmethode' auf 'Proton' eingestellt ist).",
       "Linux": "(Nur für Linux-Benutzer).",
-      "cycle_method": "Drücke zum Wechseln der Methode:"
+      "cycle_method": "Drücke zum Wechseln der Methode:",
+      "to_update": "Aktualisieren."
     },
     "colors": {
       "title": "Oberflächenfarben",
@@ -2131,7 +2173,9 @@
       "space": "Espaço",
       "symbols": "Símbolos",
       "caps": "Fixa",
-      "download-optimized": "Baixar banco de dados de configurações otimizadas"
+      "download-optimized": "Baixar banco de dados de configurações otimizadas",
+      "netplay_only_alert": "A lista de amigos só está disponível se você estiver usando a versão Xenia Netplay. Selecione o executável Netplay nas configurações de configuração principal para acessar este recurso.",
+      "add": "Adicionar amigo"
     },
     "dashboard_menu": {
       "myxbox": "MEU XENIA",
@@ -2194,11 +2238,14 @@
       "settings": "Configurações",
       "active_dl": "Downloads em Andamento",
       "dashboard": "PAINEL XENIA",
-      "quick_launch": "Início Rápido",
+      "friend_list": "Lista de Amigos",
       "shutdown": "Desligar Sistema",
       "coming_soon": "(Em Breve)",
       "exit_app": "(Sair do App)",
-      "no_games": "Nenhum jogo encontrado"
+      "no_games": "Nenhum jogo encontrado",
+      "friends_empty": "Nenhum amigo adicionado ainda.<br>Pressione <b>Y</b> para adicionar o XUID do seu amigo.",
+      "enter_xuid": "Digite o XUID do seu amigo (16 caracteres)",
+      "enter_name": "Digite o nome do seu amigo"
     },
     "settings": {
       "title": "Configurações",
@@ -2280,7 +2327,8 @@
       "linuxLaunchMethod": "Seu caminho para o arquivo 'proton'",
       "nonlinuxLaunchMethod": "(Somente se 'Método de Inicialização Linux' estiver definido como 'Proton').",
       "Linux": "(Somente para usuários Linux).",
-      "cycle_method": "Pressione para alternar método:"
+      "cycle_method": "Pressione para alternar método:",
+      "to_update": "Atualizar."
     },
     "colors": {
       "title": "Cores da Interface",
@@ -2433,7 +2481,9 @@
       "space": "Espacio",
       "symbols": "Símbolos",
       "caps": "Bloq Mayús",
-      "download-optimized": "Descargar base de datos de configuraciones optimizadas"
+      "download-optimized": "Descargar base de datos de configuraciones optimizadas",
+      "netplay_only_alert": "La lista de amigos solo está disponible si estás usando la versión Xenia Netplay. Selecciona el ejecutable Netplay en la configuración principal para acceder a esta función.",
+      "add": "Agregar amigo"
     },
     "dashboard_menu": {
       "myxbox": "MI XENIA",
@@ -2496,11 +2546,14 @@
       "settings": "Ajustes",
       "active_dl": "Descargas en Curso",
       "dashboard": "PANEL XENIA",
-      "quick_launch": "Inicio Rápido",
+      "friend_list": "Lista de Amigos",
       "shutdown": "Apagar Sistema",
       "coming_soon": "(Próximamente)",
       "exit_app": "(Salir de la App)",
-      "no_games": "No se encontraron juegos"
+      "no_games": "No se encontraron juegos",
+      "friends_empty": "No se han agregado amigos todavía.<br>Presiona <b>Y</b> para agregar el XUID de tu amigo.",
+      "enter_xuid": "Introduce el XUID de tu amigo (16 caracteres)",
+      "enter_name": "Introduce el nombre de tu amigo"
     },
     "settings": {
       "title": "Ajustes",
@@ -2582,7 +2635,8 @@
       "linuxLaunchMethod": "Su ruta al archivo 'proton'",
       "nonlinuxLaunchMethod": "(Solo si 'Método de Inicio Linux' está configurado como 'Proton').",
       "Linux": "(Solo para usuarios de Linux).",
-      "cycle_method": "Presiona para alternar método:"
+      "cycle_method": "Presiona para alternar método:",
+      "to_update": "Actualizar."
     },
     "colors": {
       "title": "Colores de Interfaz",
@@ -2735,7 +2789,9 @@
       "space": "Boşluk",
       "symbols": "Semboller",
       "caps": "Büyük harf kilidi",
-      "download-optimized": "Optimize Edilmiş Ayarlar veritabanını indir"
+      "download-optimized": "Optimize Edilmiş Ayarlar veritabanını indir",
+      "netplay_only_alert": "Arkadaş listesi yalnızca Xenia Netplay sürümünü kullanıyorsanız kullanılabilir. Bu özelliğe erişmek için ana yapılandırmada Netplay yürütülebilir dosyasını seçin.",
+      "add": "Arkadaş ekle"
     },
     "dashboard_menu": {
       "myxbox": "XENIA'M",
@@ -2798,11 +2854,14 @@
       "settings": "Ayarlar",
       "active_dl": "Devam Eden İndirmeler",
       "dashboard": "XENIA PANOSU",
-      "quick_launch": "Hızlı Başlat",
+      "friend_list": "Arkadaş Listesi",
       "shutdown": "Sistemi Kapat",
       "coming_soon": "(Yakında)",
       "exit_app": "(Uygulamadan Çık)",
-      "no_games": "Oyun bulunamadı"
+      "no_games": "Oyun bulunamadı",
+      "friends_empty": "Henüz arkadaş eklenmedi.<br>Arkadaşınızın XUID'sini eklemek için <b>Y</b> tuşuna basın.",
+      "enter_xuid": "Arkadaşınızın XUID'sini girin (16 karakter)",
+      "enter_name": "Arkadaşınızın adını girin"
     },
     "settings": {
       "title": "Ayarlar",
@@ -2884,7 +2943,8 @@
       "linuxLaunchMethod": "'proton' dosyanızın yolu",
       "nonlinuxLaunchMethod": "(Yalnızca 'Linux Başlatma Yöntemi' 'Proton' olarak ayarlanmışsa).",
       "Linux": "(Yalnızca Linux kullanıcıları için).",
-      "cycle_method": "Yöntemi değiştirmek için basın:"
+      "cycle_method": "Yöntemi değiştirmek için basın:",
+      "to_update": "Güncellemek için basın."
     },
     "colors": {
       "title": "Arayüz Renkleri",
@@ -3037,7 +3097,9 @@
       "space": "Spazio",
       "symbols": "Simboli",
       "caps": "Bloc Maiusc",
-      "download-optimized": "Scarica database di impostazioni ottimizzate"
+      "download-optimized": "Scarica database di impostazioni ottimizzate",
+      "netplay_only_alert": "La lista amici è disponibile solo se stai usando la versione Xenia Netplay. Per accedere a questa funzionalità, seleziona l'eseguibile Netplay nella configurazione principale.",
+      "add": "Aggiungi amico"
     },
     "dashboard_menu": {
       "myxbox": "IL MIO XENIA",
@@ -3100,11 +3162,14 @@
       "settings": "Impostazioni",
       "active_dl": "Download in Corso",
       "dashboard": "PANNELLO XENIA",
-      "quick_launch": "Avvio Rapido",
+      "friend_list": "Lista Amici",
       "shutdown": "Spegni Sistema",
       "coming_soon": "(Prossimamente)",
       "exit_app": "(Esci dall'App)",
-      "no_games": "Nessun gioco trovato"
+      "no_games": "Nessun gioco trovato",
+      "friends_empty": "Nessun amico aggiunto ancora.<br>Premi <b>Y</b> per aggiungere l'XUID del tuo amico.",
+      "enter_xuid": "Inserisci l'XUID del tuo amico (16 caratteri)",
+      "enter_name": "Inserisci il nome del tuo amico"
     },
     "settings": {
       "title": "Impostazioni",
@@ -3186,7 +3251,8 @@
       "linuxLaunchMethod": "'proton' file path",
       "nonlinuxLaunchMethod": "(Only if 'Linux Launch Method' is set to 'Proton').",
       "Linux": "(Only for Linux users).",
-      "cycle_method": "Premi per cambiare metodo:"
+      "cycle_method": "Premi per cambiare metodo:",
+      "to_update": "Premi per aggiornare."
     },
     "colors": {
       "title": "Colori Interfaccia",
@@ -3339,7 +3405,9 @@
       "space": "Espace",
       "symbols": "Symboles",
       "caps": "Verrouillage Maj",
-      "download-optimized": "Télécharger la base de données d'options optimisées"
+      "download-optimized": "Télécharger la base de données d'options optimisées",
+      "netplay_only_alert": "La liste d'amis n'est disponible que si vous utilisez la version Xenia Netplay. Pour accéder à cette fonctionnalité, sélectionnez l'exécutable Netplay dans la configuration principale.",
+      "add": "Ajouter un ami"
     },
     "dashboard_menu": {
       "myxbox": "MON XENIA",
@@ -3402,11 +3470,14 @@
       "settings": "Paramètres",
       "active_dl": "Téléchargements en Cours",
       "dashboard": "TABLEAU DE BORD XENIA",
-      "quick_launch": "Lancement Rapide",
+      "friend_list": "Lista Amici",
       "shutdown": "Éteindre le Système",
       "coming_soon": "(Bientôt)",
       "exit_app": "(Quitter l'Application)",
-      "no_games": "Aucun jeu trouvé"
+      "no_games": "Aucun jeu trouvé",
+      "friends_empty": "Aucun ami ajouté pour le moment.<br>Appuyez sur <b>Y</b> pour ajouter le XUID de votre ami.",
+      "enter_xuid": "Entrez le XUID de votre ami (16 caractères)",
+      "enter_name": "Entrez le nom de votre ami"
     },
     "settings": {
       "title": "Paramètres",
@@ -3488,7 +3559,8 @@
       "linuxLaunchMethod": "Chemin du fichier 'proton'",
       "nonlinuxLaunchMethod": "(Uniquement si 'Méthode de Démarrage Linux' est réglée sur 'Proton').",
       "Linux": "(Uniquement pour les utilisateurs Linux).",
-      "cycle_method": "Appuyez pour changer de méthode :"
+      "cycle_method": "Appuyez pour changer de méthode :",
+      "to_update": "Appuyez pour mettre à jour."
     },
     "colors": {
       "title": "Couleurs de l'Interface",
