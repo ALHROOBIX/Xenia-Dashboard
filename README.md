@@ -86,7 +86,7 @@ This project stands on the shoulders of giants. Special thanks to these incredib
 
 | Download Link |
 |---------------|
-| 🔗 [Download Theme](https://github.com/0xErrorVoid/Xenia-Dashboard-Metro-ui-Theme/releases/tag/v.1) |
+| 🔗 [Download Theme](https://github.com/0xErrorVoid/Xenia-Dashboard-Metro-ui-Theme) |
 
 </div>
 <blockquote>
