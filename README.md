@@ -60,12 +60,10 @@ This project stands on the shoulders of giants. Special thanks to these incredib
 | Library/Tool | Purpose | Link |
 |--------------|---------|------|
 | **SDL** | Controller input and hardware abstraction | [🔗](https://www.libsdl.org/) |
-| **abgx360** | Binary scanning & Title ID verification | [🔗](https://github.com/BakasuraRCE/abgx360) |
+| **x360tid** | Binary scanning & Title ID verification | [🔗](https://github.com/ALHROOBIX/x360tid) |
 | **TOMKit** | TOML configuration management | [🔗](https://github.com/python-poetry/tomlkit) |
 
 </div>
-
-> **📝 Note:** The **abgx360** tool is an external, independent utility and is not affiliated with this project. It is used solely as a third-party scanning engine to improve the accuracy of game identification.
 
 ---
 
@@ -106,7 +104,7 @@ This project stands on the shoulders of giants. Special thanks to these incredib
 
 ### 🗂️ **Intelligent Library Management**
 - **Automated Game Scanning:** Detects `.iso`, `.xex`, `.zar`, `GOD`, and `XBLA` files
-- **abgx360 Integration:** Low-level analysis for accurate Title ID identification
+- **x360tid Integration:** Low-level analysis for accurate Title ID identification
 - **Dual-Source Metadata:** Fetches artwork from SteamGridDB API or local database
 - **Compatibility Reports:** Real-time status from official Xenia compatibility tracker
 
@@ -153,36 +151,6 @@ These are digital versions or converted disc games. They are always located insi
 | **000D0000** | The dedicated folder for Arcade games and DLCs. |
 | **00007000** | The dedicated folder for Full Games converted to GOD format. |
 | **Game File** | The core file that appears with random characters; renaming it will break the game. |
-
----
-
-
-## 📥 Download abgx360
-
-<p align="center">
-  <strong>Essential for accurate game identification</strong>
-</p>
-
-<div align="center">
-
-| Platform | Download Link | Release Name |
-|----------|---------------|--------------|
-| **Windows** | [Download](https://www.hadzz.com/abgx/download.php) | `CLI - abgx360_v1.0.7_cli.zip` |
-| **Linux** | [Download](https://www.hadzz.com/abgx/download.php) | `CLI - abgx360-1.0.7.tar.gz` |
-
-</div>
-
-### 🐧 Linux Installation Instructions
-
-```bash
-# Step 1: Install dependencies
-sudo apt-get install libcurl4-openssl-dev zlib1g-dev
-
-# Step 2: Compile and install
-./configure
-make
-sudo make install
-```
 
 ---
 
