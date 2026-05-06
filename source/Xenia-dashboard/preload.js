@@ -73,7 +73,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     
     translateText: (text, targetLang) => ipcRenderer.invoke('translate-text', text, targetLang),
     
-    checkAbgxStatus: () => ipcRenderer.invoke('check-abgx-status'),
+    checkX360tidStatus: () => ipcRenderer.invoke('check-x360tid-status'),
+    downloadX360tid: () => ipcRenderer.invoke('download-x360tid'),
 
     
     scanZarTitleID: (gamePath) => ipcRenderer.invoke('scan-zar-titleid', gamePath),

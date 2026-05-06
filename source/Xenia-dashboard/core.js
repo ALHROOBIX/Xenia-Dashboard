@@ -116,8 +116,9 @@ document.addEventListener('alpine:init', () => {
             screenshots: [],
             loading: false
         },
-        abgxStatus: { exists: true, winUrl: '', linuxUrl: '' },
-        showAbgxNotify: false,
+        x360tidStatus: { exists: true, winUrl: '', linuxUrl: '' },
+        showX360tidNotify: false,
+        x360tidDownloadState: 'idle',
         
         settingsMenu: [
             { id: 'core', name: 'Core Configuration', view: 'settings-core', icon: 'assets/icons/Console-Xbox.png' },
@@ -367,11 +368,12 @@ document.addEventListener('alpine:init', () => {
         focusedFriendIndex: 0,
         appUpdateInfo: {
             status: 'idle', 
-            currentVer: '1.2.2',
+            currentVer: '1.2.4',
             remoteVer: '---',
             message: 'Press (Y) to check for updates',
             percentage: 0
         }
+        
     });
 
     
@@ -404,6 +406,33 @@ document.addEventListener('alpine:init', () => {
 
     
     Alpine.store('actions', {
+
+        async downloadX360tid() {
+            const app = Alpine.store('app');
+            if (app.x360tidDownloadState === 'downloading') return;
+
+            this.playSound('select');
+            app.x360tidDownloadState = 'downloading';
+
+            try {
+                const result = await window.electronAPI.downloadX360tid();
+                if (result.success) {
+                    this.playSound('channelUp');
+                    app.x360tidDownloadState = 'success';
+                    app.x360tidStatus.exists = true; 
+                    
+                    
+                    setTimeout(() => {
+                        app.showX360tidNotify = false;
+                        app.x360tidDownloadState = 'idle';
+                    }, 2000);
+                } else {
+                    app.x360tidDownloadState = 'error';
+                }
+            } catch (e) {
+                app.x360tidDownloadState = 'error';
+            }
+        },
 
         async openFriendsList() {
             const app = Alpine.store('app');
@@ -1163,20 +1192,19 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
-        async checkAbgxTool() {
+        async checkX360tidTool() {
             const app = Alpine.store('app');
-            const status = await window.electronAPI.checkAbgxStatus();
-            app.abgxStatus = status;
-            
+            const status = await window.electronAPI.checkX360tidStatus();
+            app.x360tidStatus = status;
             
             if (!status.exists) {
-                app.showAbgxNotify = true;
+                app.showX360tidNotify = true;
             }
         },
-        async verifyAbgxTool() {
+        async verifyX360tidTool() {
             const app = Alpine.store('app');
-            const result = await window.electronAPI.checkAbgxStatus();
-            app.abgxStatus = result;
+            const result = await window.electronAPI.checkX360tidStatus();
+            app.x360tidStatus = result;
         },
 
         
@@ -1791,8 +1819,6 @@ document.addEventListener('alpine:init', () => {
             if (res.success) {
                 app.profilesList = res.profiles;
                 app.activeProfileSlot = res.activeSlot;
-
-                
             const active = res.profiles.find(p => p.slot === res.activeSlot) || res.profiles[0];
             if (active) {
                 app.playerTag = active.gamertag;
@@ -4276,8 +4302,18 @@ document.addEventListener('alpine:init', () => {
         const key = e.key;
         const actions = Alpine.store('actions');
         const app = Alpine.store('app');
-        
 
+        if (app.showX360tidNotify) {
+            e.preventDefault();
+            if (key === 'y' || key === 'Y') {
+                actions.downloadX360tid();
+            } else if (key === 'Escape' || key === 'b' || key === 'B') {
+                app.showX360tidNotify = false;
+                actions.playSound('back');
+            }
+            return;
+        }
+        
         
         if (key === 'Tab') { 
             e.preventDefault();
@@ -4840,8 +4876,8 @@ document.addEventListener('alpine:init', () => {
         
         await Alpine.store('actions').refreshProfileData();
         await Alpine.store('actions').loadUserSounds();
-        await Alpine.store('actions').checkAbgxTool();
-        await Alpine.store('actions').verifyAbgxTool();
+        await Alpine.store('actions').checkX360tidTool();
+        await Alpine.store('actions').verifyX360tidTool();
 
         let mouseTimer;
         const hideCursor = () => {
@@ -5019,6 +5055,16 @@ document.addEventListener('alpine:init', () => {
             Alpine.store('hooks').emit('onGamepadInput', message);
             const actions = Alpine.store('actions');
             const app = Alpine.store('app');
+
+            if (app.showX360tidNotify) {
+                if (message.event === 'button_y' && message.value === 1) {
+                    actions.downloadX360tid();
+                } else if (message.event === 'button_b' && message.value === 1) {
+                    app.showX360tidNotify = false;
+                    actions.playSound('back');
+                }
+                return; 
+            }
 
             if (message.event === 'button_left_thumb' && message.value === 1) {
                 

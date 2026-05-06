@@ -541,7 +541,7 @@ async function _resolveTitleIDInternal(gameFilePath, game, options) {
     }
     const idFromFileScan = await readTitleIDFromFile(gameFilePath);
     if (idFromFileScan) {
-        return { titleID: idFromFileScan, source: 'file-scan (abgx360)' };
+        return { titleID: idFromFileScan, source: 'file-scan (x360tid)' };
     }
     const gameNameClean = normalizeName(game.name);
     if (gameNameClean.length > 2 && nameIndex.length > 0) {
@@ -776,13 +776,6 @@ function sendProgress(payload) {
 
 
 function registerIpcHandlers() {
-
-    
-    
-    
-
-    
-    
     
     ipcMain.handle('get-friends-list', async () => {
         try {
@@ -957,12 +950,13 @@ function registerIpcHandlers() {
         } catch (e) { return { success: false, error: e.message }; }
     });
 
-ipcMain.handle('reload-app-shell', () => {
-    if (mainWindow) {
-        console.log('[Shell] Reloading application shell with potential new index.html...');
-        mainWindow.loadFile(getEntryPoint());
-    }
-});
+    ipcMain.handle('reload-app-shell', () => {
+        if (mainWindow) {
+            console.log('[Shell] Reloading application shell with potential new index.html...');
+            mainWindow.loadFile(getEntryPoint());
+        }
+        
+    });
 
 ipcMain.handle('download-optimized-settings', async () => {
     const downloadUrl = 'https://github.com/xenia-manager/optimized-settings/archive/refs/heads/main.zip';
@@ -1114,6 +1108,83 @@ ipcMain.handle('apply-optimized-settings', async (event, { titleID, gameConfigPa
                 publishedAt: remoteRelease.published_at
             };
         } catch (error) {
+            return { success: false, error: error.message };
+        }
+    });
+
+    
+    ipcMain.handle('download-x360tid', async () => {
+        try {
+            const platform = require('os').platform();
+            const isWin = platform === 'win32';
+            
+            
+            const assetName = isWin ? 'x360tid-static_win.zip' : 'x360tid-static_linux.zip';
+            const osFolder = isWin ? 'win' : 'linux';
+            const binaryName = isWin ? 'x360tid.exe' : 'x360tid';
+
+            const repoUrl = 'https://api.github.com/repos/ALHROOBIX/x360tid/releases/latest';
+            
+            
+            const { data: release } = await axios.get(repoUrl, { headers: { 'User-Agent': 'Xenia-Dashboard' }});
+            const asset = release.assets.find(a => a.name === assetName);
+            if (!asset) throw new Error(`Asset ${assetName} not found in the latest release.`);
+
+            
+            const tempDir = path.join(CONFIG_DIR, 'temp_downloads');
+            const zipPath = path.join(tempDir, assetName);
+            const extractDir = path.join(tempDir, 'x360tid_extracted');
+            const finalTargetDir = path.join(CONFIG_DIR, 'assets', 'bin', osFolder);
+            
+            if (!fsSync.existsSync(tempDir)) await fs.mkdir(tempDir, { recursive: true });
+            if (fsSync.existsSync(extractDir)) await fs.rm(extractDir, { recursive: true, force: true });
+            await fs.mkdir(extractDir, { recursive: true });
+            if (!fsSync.existsSync(finalTargetDir)) await fs.mkdir(finalTargetDir, { recursive: true });
+
+            
+            const response = await axios({ url: asset.browser_download_url, method: 'GET', responseType: 'stream' });
+            const writer = fsSync.createWriteStream(zipPath);
+            response.data.pipe(writer);
+            await new Promise((r, j) => { writer.on('finish', r); writer.on('error', j); });
+
+            
+            await decompress(zipPath, extractDir);
+
+            
+            async function findBinary(dir, targetName) {
+                const entries = await fs.readdir(dir, { withFileTypes: true });
+                for (const entry of entries) {
+                    const fullPath = path.join(dir, entry.name);
+                    if (entry.isDirectory()) {
+                        const found = await findBinary(fullPath, targetName);
+                        if (found) return found;
+                    } else if (entry.name === targetName) {
+                        return fullPath;
+                    }
+                }
+                return null;
+            }
+
+            const foundBinaryPath = await findBinary(extractDir, binaryName);
+            if (!foundBinaryPath) throw new Error(`${binaryName} not found in the extracted files.`);
+
+            const targetBinaryPath = path.join(finalTargetDir, binaryName);
+            if (fsSync.existsSync(targetBinaryPath)) await fs.unlink(targetBinaryPath);
+            await fs.copyFile(foundBinaryPath, targetBinaryPath);
+
+            
+            if (!isWin) {
+                await fs.chmod(targetBinaryPath, 0o755);
+            }
+
+            
+            await fs.rm(extractDir, { recursive: true, force: true });
+            await fs.unlink(zipPath);
+
+            return { success: true };
+
+        } catch (error) {
+            console.error('[x360tid Download Error]', error);
             return { success: false, error: error.message };
         }
     });
@@ -1295,7 +1366,64 @@ ipcMain.handle('scan-zar-titleid', async (event, gamePath) => {
     const xeniaDir = path.dirname(xeniaPath);
     const logPath = path.join(xeniaDir, 'xenia.log');
 
-    try { if (fsSync.existsSync(logPath)) await fs.unlink(logPath); } catch (e) {}
+    
+    const processAndSaveArt = async (titleID) => {
+        const fileName = path.basename(gamePath);
+        const gameNameOnly = path.basename(fileName, path.extname(fileName));
+
+        
+        let zarData = {};
+        if (fsSync.existsSync(ZAR_MAPPING_FILE)) {
+            zarData = JSON.parse(await fsSync.promises.readFile(ZAR_MAPPING_FILE, 'utf-8'));
+        }
+        zarData[fileName] = { "Title ID": titleID };
+        await fsSync.promises.writeFile(ZAR_MAPPING_FILE, JSON.stringify(zarData, null, 4));
+
+        const cache = await loadCache();
+        let gameArt = { coverUrl: '', heroUrl: '', logoUrl: '', iconUrl: '' };
+
+        
+        if (artSource === 'LocalDB' && localGameDB[titleID]) {
+            const dbData = localGameDB[titleID];
+            gameArt.coverUrl = await ensureLocalImage(dbData.artwork.boxart, 'cover', gameNameOnly);
+            gameArt.heroUrl = await ensureLocalImage(dbData.artwork.background, 'hero', gameNameOnly);
+            gameArt.logoUrl = await ensureLocalImage(dbData.artwork.banner, 'logo', gameNameOnly);
+            gameArt.iconUrl = await ensureLocalImage(dbData.artwork.icon, 'icon', gameNameOnly);
+        } 
+        
+        
+        cache[fileName] = { ...gameArt, titleID: titleID };
+        await saveCache(cache);
+
+        
+        if (artSource === 'SteamGridDB') {
+            const apiKey = store.get('steamGridDBKey');
+            if (apiKey) fetchGamesInBackground([{ originalName: fileName, cleanName: cleanGameName(gameNameOnly) }], apiKey, cache);
+        }
+
+        return { success: true, titleID: titleID, art: gameArt };
+    };
+
+    
+    
+    
+    try {
+        console.log(`[ZAR Scan] Attempting fast scan with x360tid for: ${gamePath}`);
+        const fastTitleID = await readTitleIDFromFile(gamePath);
+        
+        if (fastTitleID) {
+            console.log(`[ZAR Scan] Fast scan successful! Title ID: ${fastTitleID}`);
+            return await processAndSaveArt(fastTitleID); 
+        }
+    } catch (e) {
+        console.warn(`[ZAR Scan] Fast scan encountered an error: ${e.message}`);
+    }
+
+    
+    
+    
+    console.log(`[ZAR Scan] Fast scan failed or returned null. Falling back to Xenia slow scan...`);
+    try { if (fsSync.existsSync(logPath)) await fsSync.promises.unlink(logPath); } catch (e) {}
 
     return new Promise(async (resolve) => {
         let xeniaProcess = null;
@@ -1348,12 +1476,9 @@ ipcMain.handle('scan-zar-titleid', async (event, gamePath) => {
                 if (xeniaProcess) {
                     try { xeniaProcess.kill('SIGKILL'); } catch (e) {}
                 }
-
                 
                 if (platform === 'linux') {
-                    try {
-                        exec('pkill -9 -f xenia_canary');
-                    } catch (e) {}
+                    try { exec('pkill -9 -f xenia_canary'); } catch (e) {}
                 }
 
                 
@@ -1366,38 +1491,12 @@ ipcMain.handle('scan-zar-titleid', async (event, gamePath) => {
 
                         if (match && match[1]) {
                             const titleID = match[1].toUpperCase();
-                            const fileName = path.basename(gamePath);
-                            const gameNameOnly = path.basename(fileName, path.extname(fileName));
-
-                            let zarData = {};
-                            if (fsSync.existsSync(ZAR_MAPPING_FILE)) {
-                                zarData = JSON.parse(await fsSync.promises.readFile(ZAR_MAPPING_FILE, 'utf-8'));
-                            }
-                            zarData[fileName] = { "Title ID": titleID };
-                            await fsSync.promises.writeFile(ZAR_MAPPING_FILE, JSON.stringify(zarData, null, 4));
-
-                            const cache = await loadCache();
-                            let gameArt = { coverUrl: '', heroUrl: '', logoUrl: '', iconUrl: '' };
-
-                            if (artSource === 'LocalDB' && localGameDB[titleID]) {
-                                const dbData = localGameDB[titleID];
-                                gameArt.coverUrl = await ensureLocalImage(dbData.artwork.boxart, 'cover', gameNameOnly);
-                                gameArt.heroUrl = await ensureLocalImage(dbData.artwork.background, 'hero', gameNameOnly);
-                                gameArt.logoUrl = await ensureLocalImage(dbData.artwork.banner, 'logo', gameNameOnly);
-                                gameArt.iconUrl = await ensureLocalImage(dbData.artwork.icon, 'icon', gameNameOnly);
-                            } 
+                            console.log(`[ZAR Scan] Xenia slow scan successful! Title ID: ${titleID}`);
                             
-                            cache[fileName] = { ...gameArt, titleID: titleID };
-                            await saveCache(cache);
-
-                            if (artSource === 'SteamGridDB') {
-                                const apiKey = store.get('steamGridDBKey');
-                                if (apiKey) fetchGamesInBackground([{ originalName: fileName, cleanName: cleanGameName(gameNameOnly) }], apiKey, cache);
-                            }
-
-                            resolve({ success: true, titleID: titleID, art: gameArt });
+                            
+                            resolve(await processAndSaveArt(titleID));
                         } else {
-                            resolve({ success: false, error: "Title ID not found" });
+                            resolve({ success: false, error: "Title ID not found in Xenia log" });
                         }
                     } catch (err) {
                         resolve({ success: false, error: err.message });
@@ -1428,16 +1527,16 @@ async function ensureCacheDirs() {
 }
 
 
-ipcMain.handle('check-abgx-status', async () => {
+ipcMain.handle('check-x360tid-status', async () => {
     const platform = require('os').platform();
-    const abgxPath = getBinaryPath('abgx360'); 
-    const exists = fsSync.existsSync(abgxPath);
+    const toolPath = getBinaryPath('x360tid'); 
+    const exists = fsSync.existsSync(toolPath);
     
     return {
         exists: exists,
         
-        winUrl: 'https://abgx360.hadzz.com/download.php',
-        linuxUrl: 'https://abgx360.hadzz.com/download.php'
+        winUrl: '#',
+        linuxUrl: '#'
     };
 });
 
@@ -1844,10 +1943,18 @@ ipcMain.handle('launchGame', async (event, xeniaPath, gamePath, titleID) => {
         }
     });
 
-
-
-function forceExitApp() {
+async function forceExitApp() { 
     console.log('[System] Initiating forceful shutdown and cleaning Task Manager...');
+
+    
+    try {
+        if (session && session.defaultSession) {
+            console.log("[Shutdown] Clearing Chromium Cache...");
+            await session.defaultSession.clearCache();
+        }
+    } catch (e) {
+        console.error('[Cleanup] Failed to clear Chromium cache:', e.message);
+    }
 
     
     if (controllerProcess && controllerProcess.pid) {
@@ -1882,10 +1989,11 @@ function forceExitApp() {
             
             exec('taskkill /f /im controller_service.exe /t');
             exec('taskkill /f /im xenia_canary.exe /t');
-            exec('taskkill /f /im abgx360.exe /t');
+            exec('taskkill /f /im x360tid.exe /t');
         } else {
             exec('pkill -9 -f xenia_canary || true');
             exec('pkill -9 -f controller_service || true');
+            exec('pkill -9 -f x360tid || true'); 
         }
     } catch (e) {}
 
@@ -2920,88 +3028,89 @@ async function autoCleanupArt() {
 })();
 
 async function readTitleIDFromFile(gamePath) {
-    
-    
-    
-    const abgxPath = getBinaryPath('abgx360');
+    const toolPath = getBinaryPath('x360tid');
 
-    console.log(`[abgx360] Target Binary Path: ${abgxPath}`);
+    console.log(`[x360tid] Target Binary Path: ${toolPath}`);
 
     
-    if (!fsSync.existsSync(abgxPath)) {
-        console.error(`[abgx360] Binary not found at ${abgxPath}. Skipping file scan.`);
+    if (!fsSync.existsSync(toolPath)) {
+        console.error(`[x360tid] Binary not found at ${toolPath}. Skipping file scan.`);
         return null;
     }
 
     
     if (require('os').platform() !== 'win32') {
-        try {
-            fsSync.chmodSync(abgxPath, 0o755);
-        } catch (chmodError) {
-            
-            if (chmodError.code !== 'EROFS') {
-                console.warn(`[abgx360] chmod warning: ${chmodError.message}`);
-            }
-        }
+        try { fsSync.chmodSync(toolPath, 0o755); } 
+        catch (chmodError) { if (chmodError.code !== 'EROFS') console.warn(`[x360tid] chmod warning: ${chmodError.message}`); }
     }
 
     return new Promise((resolve) => {
         
-        const command = `"${abgxPath}" -vwo "${gamePath}"`;
+        const command = `"${toolPath}" -j "${gamePath}"`;
         
         exec(command, (error, stdout, stderr) => {
-            if (error) {
-                console.warn(`[abgx360] Failed to run on ${gamePath}: ${error.message}`);
+            if (error && !stdout) {
+                console.warn(`[x360tid] Failed to run on ${gamePath}: ${error.message}`);
                 resolve(null);
                 return;
             }
             
-            
-            const lines = stdout.split('\n');
-            for (const line of lines) {
-                if (line.includes('Title ID:')) {
-                    const match = line.match(/Title ID: *\s*([0-9a-fA-F]{8})/);
-                    if (match && match[1]) {
-                        console.log(`[abgx360] Found Title ID: ${match[1]} for ${gamePath}`);
-                        resolve(match[1].toUpperCase());
-                        return;
-                    }
+            try {
+                
+                const data = JSON.parse(stdout);
+                
+                
+                if (Array.isArray(data) && data.length > 0 && data[0].title_id) {
+                    const titleId = data[0].title_id.toUpperCase();
+                    console.log(`[x360tid] Found Title ID via JSON: ${titleId} for ${gamePath}`);
+                    resolve(titleId);
+                    return;
                 }
+            } catch (parseError) {
+                console.warn(`[x360tid] Failed to parse JSON output: ${parseError.message}`);
             }
             
-            console.warn(`[abgx360] Ran successfully but no Title ID found.`);
+            console.warn(`[x360tid] Ran successfully but no Title ID found in JSON.`);
             resolve(null);
         });
     });
 }
 
 
+
 ipcMain.handle('deep-scan-game', async (event, gamePath) => {
-    const abgxPath = getBinaryPath('abgx360');
-    console.log(`[Deep Scan] Starting heavy scan for: ${gamePath}`);
+    const toolPath = getBinaryPath('x360tid');
+    console.log(`[Deep Scan] Starting x360tid JSON scan for: ${gamePath}`);
 
     return new Promise((resolve) => {
         
-        const command = `"${abgxPath}" -p --noverify -v "${gamePath}"`;
+        const command = `"${toolPath}" -j "${gamePath}"`;
 
-        
         exec(command, { 
             maxBuffer: 1024 * 1024 * 10, 
             timeout: 30000 
         }, (error, stdout, stderr) => {
-            const output = (stdout || '') + (stderr || '');
-            const match = output.match(/Title\s*ID\s*:\s*([0-9A-F]{8})/i);
+            let foundID = null;
 
-            if (match && match[1]) {
-                const newID = match[1].toUpperCase();
-                console.log(`[Deep Scan] 🔥 Success! Found ID: ${newID}`);
+            try {
+                
+                const data = JSON.parse(stdout);
+                if (Array.isArray(data) && data.length > 0 && data[0].title_id) {
+                    foundID = data[0].title_id.toUpperCase();
+                }
+            } catch (parseError) {
+                console.error(`[Deep Scan] JSON Parse Error:`, parseError.message);
+            }
+
+            if (foundID) {
+                console.log(`[Deep Scan] 🔥 Success! Found ID using x360tid: ${foundID}`);
                 
                 
-                updateGameCacheID(gamePath, newID);
+                updateGameCacheID(gamePath, foundID);
                 
-                resolve({ success: true, titleID: newID });
+                resolve({ success: true, titleID: foundID });
             } else {
-                console.error(`[Deep Scan] Failed to find ID even with verbose mode.`);
+                console.error(`[Deep Scan] Failed to find ID with x360tid.`);
                 resolve({ success: false, error: "Could not extract ID from this file." });
             }
         });
@@ -3463,11 +3572,6 @@ ipcMain.handle('get-played-games-list', async (event, xuid) => {
         return { success: false, error: e.message };
     }
 });
-
-
-
-
-
 
 
 ipcMain.handle('get-game-achievements', async (event, titleID, xuid, forceRefresh = false) => {
