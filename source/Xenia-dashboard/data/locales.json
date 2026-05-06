@@ -38,6 +38,7 @@
       "netplay_only_alert": "The Friends List is only available when using the Xenia Netplay version. Please select your Netplay executable in the Core Configuration settings to access this feature.",
       "add": "Add Friend"
     },
+    
     "dashboard_menu": {
       "myxbox": "MY XENIA",
       "my_xbox": "MY XENIA",
@@ -286,6 +287,15 @@
   "dev_role": "Software Architect & UI Designer",
   "thanks_msg": "This project wouldn't be possible without these incredible open-source tools and communities:",
   "guide_title": "Guide"
+    },
+    "scan_tool": {
+      "title": "Scan Tool Required (x360tid)",
+      "missing": "Tool is missing from the system",
+      "desc": "This app relies on the x360tid fast tool to read ZAR and ISO games. You can download and install it automatically now.",
+      "fail": "Download failed, check your internet!",
+      "auto_btn": "Auto Download & Install",
+      "downloading": "Downloading and Extracting...",
+      "success": "Installed Successfully!"
     }
   },
   "ar": {
@@ -595,6 +605,15 @@
   "dev_role": "مهندس البرمجيات ومصمم الواجهة",
   "thanks_msg": "لم يكن هذا المشروع ممكناً لولا هذه الأدوات والمجتمعات الرائعة مفتوحة المصدر:",
   "guide_title": "دليل الاستخدام"
+    },
+    "scan_tool": {
+      "title": "أداة الفحص المطلوبة (x360tid)",
+      "missing": "الأداة مفقودة من النظام",
+      "desc": "يعتمد هذا التطبيق على أداة x360tid السريعة لقراءة ألعاب ZAR و ISO. يمكنك تنزيلها وتثبيتها تلقائيًا الآن.",
+      "fail": "فشل التنزيل، تحقق من اتصالك بالإنترنت!",
+      "auto_btn": "التنزيل والتثبيت التلقائي",
+      "downloading": "جاري التنزيل والاستخراج...",
+      "success": "تم التثبيت بنجاح!"
     }
   },
  "zh": {
@@ -902,6 +921,15 @@
       "dev_role": "软件工程师与界面设计师",
       "thanks_msg": "没有这些出色的开源工具和社区，这个项目将无法实现：",
       "guide_title": "使用指南"
+    },
+    "scan_tool": {
+      "title": "必需的扫描工具（x360tid）",
+      "missing": "系统缺少工具",
+      "desc": "此应用程序依赖于快速的 x360tid 工具来读取 ZAR 和 ISO 游戏。您现在可以自动下载和安装它。",
+      "fail": "下载失败，请检查您的互联网连接！",
+      "auto_btn": "自动下载和安装",
+      "downloading": "正在下载和提取...",
+      "success": "安装成功！"
     }
   },
   
@@ -1211,6 +1239,15 @@
       "dev_role": "ソフトウェアエンジニアとUIデザイナー",
       "thanks_msg": "これらの素晴らしいオープンソースツールとコミュニティがなければ、このプロジェクトは実現しませんでした：",
       "guide_title": "使用ガイド"
+    },
+    "scan_tool": {
+      "title": "必要なスキャンツール（x360tid）",
+      "missing": "システムにツールがありません",
+      "desc": "このアプリは、ZARとISOゲームを読み取るための高速なx360tidツールに依存しています。今すぐ自動でダウンロードしてインストールできます。",
+      "fail": "ダウンロードに失敗しました。インターネット接続を確認してください！",
+      "auto_btn": "自動でダウンロードしてインストール",
+      "downloading": "ダウンロードと抽出中...",
+      "success": "インストール成功！"
     }
   },
 
@@ -1519,6 +1556,15 @@
       "dev_role": "소프트웨어 아키텍트 및 UI 디자이너",
       "thanks_msg": "이 놀라운 오픈 소스 도구와 커뮤니티 없이는 이 프로젝트가 불가능했습니다:",
       "guide_title": "가이드"
+    },
+    "scan_tool": {
+      "title": "필수 스캔 도구 (x360tid)",
+      "missing": "시스템에 도구가 없습니다",
+      "desc": "이 앱은 ZAR 및 ISO 게임을 읽기 위한 빠른 x360tid 도구에 의존합니다. 지금 자동으로 다운로드하여 설치할 수 있습니다.",
+      "fail": "다운로드 실패. 인터넷 연결을 확인하세요!",
+      "auto_btn": "자동으로 다운로드하여 설치",
+      "downloading": "다운로드 및 추출 중...",
+      "success": "설치 성공!"
     }
   },
 
@@ -1827,6 +1873,15 @@
       "dev_role": "Инженер-программист и дизайнер интерфейса",
       "thanks_msg": "Этот проект был бы невозможен без этих замечательных инструментов с открытым исходным кодом и сообществ:",
       "guide_title": "Руководство по использованию"
+    },
+    "scan_tool": {
+      "title": "Необходимый инструмент сканирования (x360tid)",
+      "missing": "Инструмент отсутствует в вашей системе",
+      "desc": "Это приложение полагается на быстрый инструмент x360tid для чтения игр ZAR и ISO. Вы можете автоматически загрузить и установить его сейчас.",
+      "fail": "Не удалось загрузить. Проверьте подключение к интернету!",
+      "auto_btn": "Автоматически загрузить и установить",
+      "downloading": "Загрузка и распаковка...",
+      "success": "Успешная установка!"
     }
   },
 
@@ -2135,6 +2190,15 @@
       "dev_role": "Softwarearchitekt & UI-Designer",
       "thanks_msg": "Dieses Projekt wäre ohne diese unglaublichen Open-Source-Tools und Communities nicht möglich gewesen:",
       "guide_title": "Anleitung"
+    },
+    "scan_tool": {
+      "title": "Erforderliches Scan-Tool (x360tid)",
+      "missing": "Das Tool fehlt in Ihrem System",
+      "desc": "Diese Anwendung ist auf das schnelle x360tid-Tool angewiesen, um ZAR- und ISO-Spiele zu lesen. Sie können es jetzt automatisch herunterladen und installieren.",
+      "fail": "Download fehlgeschlagen. Überprüfen Sie Ihre Internetverbindung!",
+      "auto_btn": "Automatisch herunterladen und installieren",
+      "downloading": "Herunterladen und entpacken...",
+      "success": "Erfolgreich installiert!"
     }
   },
 
@@ -2443,6 +2507,15 @@
       "dev_role": "Arquiteto de Software e Designer de UI",
       "thanks_msg": "Este projeto não seria possível sem estas incríveis ferramentas e comunidades de código aberto:",
       "guide_title": "Guia"
+    },
+    "scan_tool": {
+      "title": "Ferramenta de Varredura Necessária (x360tid)",
+      "missing": "A ferramenta está faltando em seu sistema",
+      "desc": "Este aplicativo depende da rápida ferramenta x360tid para ler jogos ZAR e ISO. Você pode baixá-la e instalá-la automaticamente agora.",
+      "fail": "Falha no download. Verifique sua conexão com a internet!",
+      "auto_btn": "Baixar e instalar automaticamente",
+      "downloading": "Baixando e extraindo...",
+      "success": "Instalado com sucesso!"
     }
   },
 
@@ -2751,6 +2824,15 @@
       "dev_role": "Arquitecto de Software y Diseñador UI",
       "thanks_msg": "Este proyecto no sería posible sin estas increíbles herramientas y comunidades de código abierto:",
       "guide_title": "Guía"
+    },
+    "scan_tool": {
+      "title": "Herramienta de Escaneo Requerida (x360tid)",
+      "missing": "La herramienta falta en su sistema",
+      "desc": "Esta aplicación depende de la rápida herramienta x360tid para leer juegos ZAR e ISO. Puede descargarla e instalarla automáticamente ahora.",
+      "fail": "Fallo en la descarga. ¡Verifique su conexión a internet!",
+      "auto_btn": "Descargar e instalar automáticamente",
+      "downloading": "Descargando y extrayendo...",
+      "success": "¡Instalado con éxito!"
     }
   },
 
@@ -3059,6 +3141,15 @@
       "dev_role": "Yazılım Mimarı ve Arayüz Tasarımcısı",
       "thanks_msg": "Bu proje, bu inanılmaz açık kaynak araçları ve toplulukları olmadan mümkün olmazdı:",
       "guide_title": "Kılavuz"
+    },
+    "scan_tool": {
+      "title": "Gerekli Tarama Aracı (x360tid)",
+      "missing": "Araç sisteminizde eksik",
+      "desc": "Bu uygulama, ZAR ve ISO oyunlarını okumak için hızlı x360tid aracına dayanır. Şimdi otomatik olarak indirip kurabilirsiniz.",
+      "fail": "İndirme başarısız oldu. İnternet bağlantınızı kontrol edin!",
+      "auto_btn": "Otomatik olarak indir ve kur",
+      "downloading": "İndiriliyor ve çıkarılıyor...",
+      "success": "Başarıyla kuruldu!"
     }
   },
 
@@ -3367,6 +3458,15 @@
       "dev_role": "Architetto Software e UI Designer",
       "thanks_msg": "Questo progetto non sarebbe stato possibile senza questi incredibili strumenti open source e comunità:",
       "guide_title": "Guida"
+    },
+    "scan_tool": {
+      "title": "Strumento di Scansione Richiesto (x360tid)",
+      "missing": "Strumento mancante nel tuo sistema",
+      "desc": "Questa applicazione si basa sullo strumento x360tid veloce per leggere i giochi ZAR e ISO. Ora puoi scaricarlo e installarlo automaticamente.",
+      "fail": "Download fallito. Controlla la tua connessione internet!",
+      "auto_btn": "Scarica e installa automaticamente",
+      "downloading": "Scaricamento e estrazione in corso...",
+      "success": "Installato con successo!"
     }
   },
 
@@ -3675,6 +3775,15 @@
       "dev_role": "Architecte Logiciel et Designer UI",
       "thanks_msg": "Ce projet n'aurait pas été possible sans ces incroyables outils et communautés open source :",
       "guide_title": "Guide"
+    },
+    "scan_tool": {
+      "title": "Outil de Scan Requis (x360tid)",
+      "missing": "Outil manquant sur votre système",
+      "desc": "Cette application repose sur le rapide outil x360tid pour lire les jeux ZAR et ISO. Maintenant, vous pouvez le télécharger et l'installer automatiquement.",
+      "fail": "Téléchargement échoué. Vérifiez votre connexion internet !",
+      "auto_btn": "Télécharger et installer automatiquement", 
+      "downloading": "Téléchargement et extraction en cours...",
+      "success": "Installation réussie !"
     }
   }
 }
