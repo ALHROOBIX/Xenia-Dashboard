@@ -78,7 +78,7 @@ This project stands on the shoulders of giants. Special thanks to these incredib
 
 | How to Install | طريقة التثبيت |
 | :--- | ---: |
-| 1. Download the theme file from the Releases tab.<br>2. Extract the `NEX-metro` folder into the `systems` folder located inside your main **Xenia Dashboard** directory.<br>3. Launch the Xenia Dashboard program.<br>4. Go to **Settings > Themes**.<br>5. You will see the new theme there; select it to apply! | <div dir="rtl">1. قم بتحميل ملف الثيم.<br>2. استخرج المجلد `NEX-metro` بداخل مجلد `systems` الموجود في مسار برنامج **Xenia Dashboard** الأساسي.<br>3. قم بتشغيل برنامج Xenia Dashboard.<br>4. اذهب إلى **الإعدادات (Settings) > الثيمات (Themes)**.<br>5. سوف يظهر الثيم الجديد هناك، قم باختياره لتفعيله فوراً!</div> |
+| 1. Download the theme file from the Releases tab.<br>2. Extract the `Themes` folder into the `systems` folder located inside your main **Xenia Dashboard** directory.<br>3. Launch the Xenia Dashboard program.<br>4. Go to **Settings > Themes**.<br>5. You will see the new theme there; select it to apply! | <div dir="rtl">1. قم بتحميل ملف الثيم.<br>2. استخرج المجلد `Themes` بداخل مجلد `systems` الموجود في مسار برنامج **Xenia Dashboard** الأساسي.<br>3. قم بتشغيل برنامج Xenia Dashboard.<br>4. اذهب إلى **الإعدادات (Settings) > الثيمات (Themes)**.<br>5. سوف يظهر الثيم الجديد هناك، قم باختياره لتفعيله فوراً!</div> |
 <br/>
 <div align="center">
 
