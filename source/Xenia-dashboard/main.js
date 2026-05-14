@@ -1,5 +1,5 @@
 
-const { app, BrowserWindow, ipcMain, dialog, shell, session, nativeImage } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell, session, nativeImage, screen } = require('electron');
 const path = require('path');
 const { default: Store } = require('electron-store');
 const fs = require('fs').promises; 
@@ -471,8 +471,16 @@ function createWindow() {
         mainWindow.webContents.send('window-focus');
     });
 
-    
     mainWindow.loadFile(getEntryPoint());
+
+    mainWindow.webContents.on('did-finish-load', () => {
+        const primaryDisplay = screen.getPrimaryDisplay();
+        const { width, height } = primaryDisplay.bounds;
+
+        const scaleFactor = Math.min(width / 1920, height / 1080);
+
+        mainWindow.webContents.setZoomFactor(scaleFactor);
+    });
 }
 
 
