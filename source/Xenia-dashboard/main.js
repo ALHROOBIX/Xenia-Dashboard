@@ -7,10 +7,8 @@ const fsSync = require('fs');
 const axios = require('axios');
 const decompress = require('decompress'); 
 const { exec, spawn } = require('child_process');
-const USER_DATA_PATH = app.getPath('userData');
 const { exec: execCb } = require('child_process');
 const util = require('util');
-const { truncateSync } = require('original-fs');
 const execPromise = util.promisify(execCb);
 
 
@@ -189,23 +187,10 @@ async function getContentRootPath() {
         
         return path.join(process.env.LOCALAPPDATA, 'Xenia', 'content');
     } else if (platform === 'linux' && launchMethod === 'native') {
-        return path.join(require('os').homedir(), '.local', 'share', 'Xenia', 'content');
+        return path.join(path.dirname(xeniaPath), 'content');
     }
     
     return path.join(path.dirname(xeniaPath), 'content');
-}
-
-
-function getResourcePath(relativePath) {
-    if (app.isPackaged) {
-        
-        
-        return path.join(process.resourcesPath, relativePath);
-    } else {
-        
-        
-        return path.join(__dirname, relativePath);
-    }
 }
 
 
@@ -275,7 +260,8 @@ async function getXeniaConfigPath() {
 
         if (platform === 'linux' && launchMethod === 'native') {
             const os = require('os');
-            configPath = path.join(os.homedir(), '.local', 'share', 'Xenia', configFileName);
+            
+            configPath = path.join(path.dirname(xeniaPath), configFileName);
             
             const configDir = path.dirname(configPath);
             if (!fsSync.existsSync(configDir)) {
@@ -471,14 +457,20 @@ function createWindow() {
         mainWindow.webContents.send('window-focus');
     });
 
+    
     mainWindow.loadFile(getEntryPoint());
 
+    
     mainWindow.webContents.on('did-finish-load', () => {
+        
         const primaryDisplay = screen.getPrimaryDisplay();
         const { width, height } = primaryDisplay.bounds;
 
+        
+        
         const scaleFactor = Math.min(width / 1920, height / 1080);
 
+        
         mainWindow.webContents.setZoomFactor(scaleFactor);
     });
 }
@@ -799,7 +791,7 @@ function registerIpcHandlers() {
             const platform = require('os').platform();
             const launchMethod = store.get('linuxLaunchMethod') || 'native'; 
             if (platform === 'linux' && launchMethod === 'native') {
-                configPath = path.join(require('os').homedir(), '.local', 'share', 'Xenia', configFileName);
+                configPath = path.join(path.dirname(xeniaPath), configFileName);
             } else {
                 configPath = path.join(path.dirname(xeniaPath), configFileName);
             }
@@ -846,7 +838,7 @@ function registerIpcHandlers() {
             const platform = require('os').platform();
             const launchMethod = store.get('linuxLaunchMethod') || 'native'; 
             if (platform === 'linux' && launchMethod === 'native') {
-                configPath = path.join(require('os').homedir(), '.local', 'share', 'Xenia', configFileName);
+                configPath = path.join(path.dirname(xeniaPath), configFileName);
             } else {
                 configPath = path.join(path.dirname(xeniaPath), configFileName);
             }
@@ -927,7 +919,7 @@ function registerIpcHandlers() {
             const platform = require('os').platform();
             const launchMethod = store.get('linuxLaunchMethod') || 'native'; 
             if (platform === 'linux' && launchMethod === 'native') {
-                configPath = path.join(require('os').homedir(), '.local', 'share', 'Xenia', configFileName);
+                configPath = path.join(path.dirname(xeniaPath), configFileName);
             } else {
                 configPath = path.join(path.dirname(xeniaPath), configFileName);
             }
@@ -1517,22 +1509,6 @@ ipcMain.handle('scan-zar-titleid', async (event, gamePath) => {
         }
     });
 });
-
-
-async function ensureCacheDirs() {
-    try {
-        if (!fsSync.existsSync(CACHE_DIR)) fsSync.mkdirSync(CACHE_DIR, { recursive: true });
-        
-        
-        const binPath = path.join(CONFIG_DIR, 'assets', 'bin');
-        const winPath = path.join(binPath, 'win');
-        const linuxPath = path.join(binPath, 'linux');
-
-        [winPath, linuxPath].forEach(p => {
-            if (!fsSync.existsSync(p)) fsSync.mkdirSync(p, { recursive: true });
-        });
-    } catch (err) { console.error('Error creating dirs:', err); }
-}
 
 
 ipcMain.handle('check-x360tid-status', async () => {
@@ -2739,11 +2715,6 @@ ipcMain.handle('download-xenia', async (event, platform, variant = 'standard') =
             return { success: false, error: `Python Error: ${error.message}` };
         }
     });
-    
-    ipcMain.handle('savePatchState', async (event, titleID, patchName, isEnabled) => {
-        console.error("[CRITICAL] 'savePatchState' was called, but is deprecated. Use 'saveAllPatchesForGame'.");
-        return { success: false, error: "'savePatchState' is deprecated." };
-    });
 
     ipcMain.handle('saveAllPatchesForGame', async (event, patchFileName, patchList, patchHeader) => {
         const dynamicDirResult = await getXeniaPatchesPath();
@@ -2862,493 +2833,207 @@ ipcMain.handle('delete-game', async (event, gamePath) => {
     }
 });
 
-}
 
+ipcMain.handle('get-local-game-metadata', async (event, titleID) => {
+    if (!titleID) return { found: false, error: "No TitleID provided" };
 
-
-async function autoCleanupArt() {
-    try {
-        console.log('[Auto-Cleanup] Checking for orphaned images...');
-        
-        
-        if (!fsSync.existsSync(CACHE_FILE)) return;
-        if (!fsSync.existsSync(ART_DIR)) return;
-
-        
-        const data = await fs.readFile(CACHE_FILE, 'utf-8');
-        const cache = JSON.parse(data);
-        const validFiles = new Set();
-
-        
-        Object.values(cache).forEach(gameData => {
-            ['coverUrl', 'heroUrl', 'logoUrl', 'iconUrl'].forEach(key => {
-                const url = gameData[key];
-                if (url && typeof url === 'string' && url.startsWith('app-art://')) {
-                    const fileName = url.replace('app-art://', '').split('?')[0];
-                    validFiles.add(fileName);
-                }
-            });
-        });
-
-        
-        const filesOnDisk = await fs.readdir(ART_DIR);
-        let deletedCount = 0;
-
-        for (const file of filesOnDisk) {
-            
-            if (file.startsWith('.') || file === 'db.json') continue;
-
-            if (!validFiles.has(file)) {
-                await fs.unlink(path.join(ART_DIR, file));
-                deletedCount++;
-            }
-        }
-        
-        if (deletedCount > 0) {
-            console.log(`[Auto-Cleanup] Successfully deleted ${deletedCount} unused images.`);
-        }
-    } catch (error) {
-        console.error('[Auto-Cleanup] Error:', error.message);
-    }
-}
-
-
-(async () => {
-    try {
-        const { default: Store } = await import('electron-store');
-
-        await app.whenReady();
-        
-        store = new Store({ cwd: CONFIG_DIR, name: 'nxe-user-config' });
-        console.log(`[Debug] Config saved to: ${path.join(CONFIG_DIR, 'nxe-user-config.json')}`);
-        console.log(`[Debug] Cache saved to: ${CACHE_DIR}`);
-
-
-        
-        
-        session.defaultSession.protocol.registerFileProtocol('app-art', (req, callback) => {
-            try {
-                
-                let rawUrl = req.url.replace('app-art://', '');
-                let decodedPath = decodeURIComponent(rawUrl).split('?')[0];
-
-                let finalPath = '';
-
-                
-                
-                
-                if (process.platform === 'win32') {
-                    
-                    
-                    if (decodedPath.startsWith('/') && /^\/[a-zA-Z]:/.test(decodedPath)) {
-                        decodedPath = decodedPath.substring(1);
-                    }
-                    
-                    
-                    finalPath = path.normalize(decodedPath);
-
-                    
-                    if (!path.isAbsolute(finalPath)) {
-                        finalPath = path.join(ART_DIR, path.basename(finalPath));
-                    }
-                }
-                else {
-                    
-                    finalPath = decodedPath;
-                    
-                    
-                    if (!finalPath.startsWith('/')) {
-                        finalPath = path.join(ART_DIR, finalPath);
-                    }
-                }
-
-                
-                if (fsSync.existsSync(finalPath)) {
-                    return callback({ path: finalPath });
-                } else {
-                    
-                    const fallbackPath = path.join(ART_DIR, path.basename(finalPath));
-                    if (fsSync.existsSync(fallbackPath)) {
-                        return callback({ path: fallbackPath });
-                    }
-                }
-
-                console.error(`[Protocol] File not found: ${finalPath}`);
-                callback({ error: -6 }); 
-            } catch (e) {
-                console.error('[Protocol] Error:', e);
-                callback({ error: -2 });
-            }
-        });
-
-        
-        session.defaultSession.protocol.registerFileProtocol('app-sys', (req, callback) => {
-            try {
-                let rawUrl = req.url.replace('app-sys://', '');
-                let decodedPath = decodeURIComponent(rawUrl).split('?')[0];
-
-                if (process.platform === 'win32' && decodedPath.startsWith('/') && /^\/[a-zA-Z]:/.test(decodedPath)) {
-                    decodedPath = decodedPath.substring(1);
-                }
-                
-                const finalPath = path.join(SYSTEMS_DIR, path.normalize(decodedPath));
-                
-                if (fsSync.existsSync(finalPath)) {
-                    return callback({ path: finalPath });
-                }
-                console.error(`[Sys Protocol] File not found: ${finalPath}`);
-                callback({ error: -6 });
-            } catch (e) {
-                callback({ error: -2 });
-            }
-        });
-        
-        session.defaultSession.protocol.registerFileProtocol('app-core', (req, callback) => {
-            try {
-                let rawUrl = req.url.replace('app-core://', '');
-                let decodedPath = decodeURIComponent(rawUrl).split('?')[0];
-                
-                
-                const finalPath = path.join(__dirname, path.normalize(decodedPath));
-                
-                if (fsSync.existsSync(finalPath)) {
-                    return callback({ path: finalPath });
-                }
-                console.error(`[Core Protocol] File not found: ${finalPath}`);
-                callback({ error: -6 });
-            } catch (e) {
-                callback({ error: -2 });
-            }
-        });
-
-        await ensureCacheDirs();
-        await autoCleanupArt();
-        registerIpcHandlers();
-        createWindow();
-        
-        startControllerService();
-
-        app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
-    } catch (error) {
-        console.error('فشل في تهيئة التطبيق:', error);
-        app.quit();
-    }
-})();
-
-async function readTitleIDFromFile(gamePath) {
-    const toolPath = getBinaryPath('x360tid');
-
-    console.log(`[x360tid] Target Binary Path: ${toolPath}`);
-
+    const cleanID = titleID.toUpperCase();
     
-    if (!fsSync.existsSync(toolPath)) {
-        console.error(`[x360tid] Binary not found at ${toolPath}. Skipping file scan.`);
-        return null;
+    
+    if (localGameDB[cleanID]) {
+        const data = localGameDB[cleanID];
+        console.log(`[LocalDB] Found match for ${cleanID}: ${data.title.full}`);
+        
+        return {
+            found: true,
+            metadata: {
+                title: data.title.full,
+                developer: data.developer,
+                publisher: data.publisher,
+                description: data.description ? (data.description.full || data.description.short) : '',
+                rating: data.user_rating,
+                releaseDate: data.release_date,
+                genre: (data.genre && Array.isArray(data.genre)) ? data.genre.join(', ') : (data.genre || 'Unknown'),
+                
+                assets: {
+                    cover: data.artwork.boxart,
+                    hero: data.artwork.background,
+                    logo: data.artwork.banner,
+                    icon: data.artwork.icon,
+                    screenshots: data.artwork.gallery || []
+                }
+            }
+        };
+    }
+    
+    return { found: false, error: "TitleID not found in local database" };
+});
+
+
+ipcMain.handle('update-local-db', async () => {
+    
+    
+    loadLocalDB();
+    return { success: true, count: Object.keys(localGameDB).length };
+});
+
+
+ipcMain.handle('translate-text', async (event, text, targetLang) => {
+    try {
+        
+        const lang = targetLang || 'en';
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${lang}&dt=t&q=${encodeURIComponent(text)}`;
+        
+        const response = await axios.get(url);
+        
+        
+        const translatedText = response.data[0].map(s => s[0]).join('');
+        return { success: true, translatedText };
+    } catch (error) {
+        console.error("Translation Error:", error);
+        return { success: false, error: error.message };
+    }
+});
+
+
+ipcMain.handle('get-user-gamerpic', async (event, xuid, slot) => {
+    const xeniaPath = store.get('xeniaPath');
+    
+    
+    if (slot !== undefined && slot !== null) {
+        const customPic = store.get(`customAvatar_slot_${slot}`);
+        if (customPic && fsSync.existsSync(customPic)) {
+            
+            const normalizedPath = customPic.replace(/\\/g, '/');
+            return { success: true, url: `app-art:///${normalizedPath}` }; 
+        }
     }
 
     
-    if (require('os').platform() !== 'win32') {
-        try { fsSync.chmodSync(toolPath, 0o755); } 
-        catch (chmodError) { if (chmodError.code !== 'EROFS') console.warn(`[x360tid] chmod warning: ${chmodError.message}`); }
+    const launchMethod = store.get('linuxLaunchMethod') || 'native';
+    if (!xeniaPath || !xuid) return { success: false };
+
+    let contentRoot;
+    if (process.platform === 'linux' && launchMethod === 'native') {
+        contentRoot = path.join(path.dirname(xeniaPath), 'content');
+    } else {
+        contentRoot = path.join(path.dirname(xeniaPath), 'content');
     }
 
-    return new Promise((resolve) => {
-        
-        const command = `"${toolPath}" -j "${gamePath}"`;
-        
-        exec(command, (error, stdout, stderr) => {
-            if (error && !stdout) {
-                console.warn(`[x360tid] Failed to run on ${gamePath}: ${error.message}`);
-                resolve(null);
-                return;
-            }
-            
-            try {
-                
-                const data = JSON.parse(stdout);
-                
-                
-                if (Array.isArray(data) && data.length > 0 && data[0].title_id) {
-                    const titleId = data[0].title_id.toUpperCase();
-                    console.log(`[x360tid] Found Title ID via JSON: ${titleId} for ${gamePath}`);
-                    resolve(titleId);
-                    return;
-                }
-            } catch (parseError) {
-                console.warn(`[x360tid] Failed to parse JSON output: ${parseError.message}`);
-            }
-            
-            console.warn(`[x360tid] Ran successfully but no Title ID found in JSON.`);
-            resolve(null);
-        });
-    });
-}
+    const gpdPath = await findProfileGPD(path.join(contentRoot, xuid));
+    if (!gpdPath) return { success: false };
 
-
-
-ipcMain.handle('deep-scan-game', async (event, gamePath) => {
-    const toolPath = getBinaryPath('x360tid');
-    console.log(`[Deep Scan] Starting x360tid JSON scan for: ${gamePath}`);
+    const toolboxPath = getBinaryPath('xenia_toolbox');
+    const outputPath = path.join(CACHE_DIR, `gamerpic_${xuid}.png`);
 
     return new Promise((resolve) => {
-        
-        const command = `"${toolPath}" -j "${gamePath}"`;
-
-        exec(command, { 
-            maxBuffer: 1024 * 1024 * 10, 
-            timeout: 30000 
-        }, (error, stdout, stderr) => {
-            let foundID = null;
-
-            try {
-                
-                const data = JSON.parse(stdout);
-                if (Array.isArray(data) && data.length > 0 && data[0].title_id) {
-                    foundID = data[0].title_id.toUpperCase();
-                }
-            } catch (parseError) {
-                console.error(`[Deep Scan] JSON Parse Error:`, parseError.message);
-            }
-
-            if (foundID) {
-                console.log(`[Deep Scan] 🔥 Success! Found ID using x360tid: ${foundID}`);
-                
-                
-                updateGameCacheID(gamePath, foundID);
-                
-                resolve({ success: true, titleID: foundID });
-            } else {
-                console.error(`[Deep Scan] Failed to find ID with x360tid.`);
-                resolve({ success: false, error: "Could not extract ID from this file." });
-            }
+        const child = require('child_process').spawn(toolboxPath, ['image', gpdPath, outputPath]);
+        child.on('close', () => {
+            if (fsSync.existsSync(outputPath)) {
+                resolve({ success: true, url: `app-art://${path.basename(outputPath)}?t=${Date.now()}` });
+            } else resolve({ success: false });
         });
     });
 });
 
 
-async function updateGameCacheID(gamePath, newID) {
+
+
+
+
+ipcMain.handle('search-steamgriddb-assets', async (event, { gameName, type }) => {
+    const apiKey = store.get('steamGridDBKey');
+    if (!apiKey) return { success: false, error: "API Key missing" };
+
     try {
-        const cache = await loadCache();
-        const gameName = path.basename(gamePath, path.extname(gamePath));
+        const headers = { 'Authorization': `Bearer ${apiKey}` };
         
-        if (cache[gameName]) {
-            cache[gameName].titleID = newID;
-        } else {
-            cache[gameName] = { titleID: newID };
+        
+        const searchRes = await axios.get(`https://www.steamgriddb.com/api/v2/search/autocomplete/${encodeURIComponent(gameName)}`, { headers });
+        
+        if (!searchRes.data.success || !searchRes.data.data.length) {
+            return { success: false, error: "Game not found on SteamGridDB" };
         }
-        await saveCache(cache);
-    } catch(e) { console.error("Cache update failed:", e); }
-}
 
-
-
-function findLocalArt(basePath) {
-    const exts = ['.png', '.jpg', '.jpeg'];
-    let art = { coverUrl: '', heroUrl: '', logoUrl: '' };
-    for (const ext of exts) {
-        if (!art.coverUrl && fsSync.existsSync(`${basePath}-cover${ext}`)) art.coverUrl = `app-art://${basePath}-cover${ext}`;
-        if (!art.heroUrl && fsSync.existsSync(`${basePath}-hero${ext}`)) art.heroUrl = `app-art://${basePath}-hero${ext}`;
-        if (!art.logoUrl && fsSync.existsSync(`${basePath}-logo${ext}`)) art.logoUrl = `app-art://${basePath}-logo${ext}`;
-    }
-    return art;
-}
-function cleanGameName(name) {
-    return name.replace(/\s*\(.*?\)\s*/g, ' ').replace(/\s*\[.*?\]\s*/g, ' ').trim();
-}
-async function fetchGamesInBackground(games, apiKey, cache) {
-    const newCache = { ...cache };
-    let artFetched = false;
-    for (const game of games) {
-        try {
-            const art = await fetchGameArt(game.cleanName, apiKey, game.originalName);
-            if (art && (art.coverUrl || art.heroUrl || art.logoUrl || art.iconUrl)) {
-                newCache[game.originalName] = art;
-                artFetched = true;
-            }
-        } catch (e) {
-            console.error(`[SteamGridDB] Error for ${game.cleanName}: ${e.message}`);
-        }
-    }
-    if (artFetched) {
-        await saveCache(newCache);
-        console.log('[SteamGridDB] Background fetch complete. Cache updated.');
-        if (mainWindow) mainWindow.webContents.send('art-updated');
-    }
-}
-async function fetchGameArt(cleanName, apiKey, originalName) {
-    const headers = { 'Authorization': `Bearer ${apiKey}`, 'User-Agent': 'Xbox-NXE-Launcher (v1.0)' };
-    try {
-        const searchRes = await axios.get(`https://www.steamgriddb.com/api/v2/search/autocomplete/${encodeURIComponent(cleanName)}`, { headers });
-        if (!searchRes.data.success || !searchRes.data.data.length) throw new Error('Not found');
         const gameId = searchRes.data.data[0].id;
-        const [grid, hero, logo, icon] = await Promise.all([
-            axios.get(`https://www.steamgriddb.com/api/v2/grids/game/${gameId}`, { headers }).catch(() => ({ data: { data: [] } })),
-            axios.get(`https://www.steamgriddb.com/api/v2/heroes/game/${gameId}`, { headers }).catch(() => ({ data: { data: [] } })),
-            axios.get(`https://www.steamgriddb.com/api/v2/logos/game/${gameId}`, { headers }).catch(() => ({ data: { data: [] } })),
-            axios.get(`https://www.steamgriddb.com/api/v2/icons/game/${gameId}`, { headers }).catch(() => ({ data: { data: [] } }))
-        ]);
-        const safeName = originalName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-        const download = async (url, type) => {
-            if (!url) return '';
-            try {
-                const res = await axios({ url, method: 'GET', responseType: 'stream' });
-                const dest = path.join(ART_DIR, `${safeName}-${type}.png`);
-                const writer = fsSync.createWriteStream(dest);
-                res.data.pipe(writer);
-                await new Promise((resolve, reject) => {
-                    writer.on('finish', resolve);
-                    writer.on('error', reject);
-                });
-                return `app-art://${path.basename(dest)}`;
-            } catch (e) { return ''; }
-        };
-        return {
-            coverUrl: await download(grid.data.data[0]?.url, 'cover'),
-            heroUrl: await download(hero.data.data[0]?.url, 'hero'),
-            logoUrl: await download(logo.data.data[0]?.url, 'logo'),
-            iconUrl: await download(icon.data.data[0]?.url, 'icon')
-        };
-    } catch (e) { return null; }
-}
-
-
-
-
-
-
-
-const CACHE_DATA_DIR = path.join(CONFIG_DIR, 'data');
-
-
-if (!fsSync.existsSync(CACHE_DATA_DIR)) {
-    try { fsSync.mkdirSync(CACHE_DATA_DIR, { recursive: true }); } catch (e) {}
-}
-
-const COMPAT_CACHE_FILE = path.join(CACHE_DATA_DIR, 'compatibility_cache.json');
-let compatCache = {};
-
-
-try {
-    if (fsSync.existsSync(COMPAT_CACHE_FILE)) {
-        compatCache = JSON.parse(fsSync.readFileSync(COMPAT_CACHE_FILE, 'utf-8'));
-    }
-} catch (e) { console.warn("[Compat] Cache reset"); }
-
-function saveCompatCache() {
-    try { fsSync.writeFileSync(COMPAT_CACHE_FILE, JSON.stringify(compatCache, null, 2)); } catch (e) {}
-}
-
-async function fetchGameCompatibility(query) {
-    if (!query) return { state: 'unknown', tags: [], issues: [] };
-
-    let cleanQuery = query.trim();
-    let isTitleID = false;
-
-    
-    const titleIdPattern = /^[0-9A-F]{8}$/i;
-    
-    if (titleIdPattern.test(cleanQuery)) {
-        console.log(`[Compat] 🎯 Searching by ID: ${cleanQuery}`);
-        isTitleID = true;
-    } else {
-        cleanQuery = query
-            .replace(/\s*[\(\[].*?[\)\]]/g, "") 
-            .replace(/[^a-zA-Z0-9\s\-\:]/g, "") 
-            .replace(/\s+/g, " ")               
-            .trim();
-        console.log(`[Compat] 🔍 Searching by Name: "${cleanQuery}"`);
-    }
-    
-    
-    
-    
-    const CACHE_DURATION = 604800000; 
-
-    const now = Date.now();
-    if (compatCache[cleanQuery] && (now - compatCache[cleanQuery].timestamp < CACHE_DURATION)) { 
-        return compatCache[cleanQuery].data;
-    }
-
-    
-    console.log(`[Compat] 🌐 Connecting to GitHub for: "${cleanQuery}" (Live Check)`);
-
-    try {
-        const searchUrl = `https://github.com/xenia-canary/game-compatibility/issues?q=is%3Aissue+state%3Aopen+${encodeURIComponent(cleanQuery)}`;
+        let endpoint = '';
         
-        const response = await axios.get(searchUrl, {
-            headers: { 
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml'
-            },
-            timeout: 15000
+        
+        switch (type) {
+            case 'cover': endpoint = 'grids'; break;
+            case 'hero':  endpoint = 'heroes'; break;
+            case 'logo':  endpoint = 'logos'; break;
+            case 'icon':  endpoint = 'icons'; break;
+        }
+
+        const assetsRes = await axios.get(`https://www.steamgriddb.com/api/v2/${endpoint}/game/${gameId}`, { headers });
+        
+        if (!assetsRes.data.success) return { success: false, error: "Failed to fetch assets" };
+
+        
+        const assets = assetsRes.data.data.map(item => {
+            
+            const isIconOrLogo = (type === 'icon' || type === 'logo');
+            
+            return {
+                
+                
+                thumb: isIconOrLogo ? item.url : (item.thumb || item.url),
+                
+                full: item.url
+            };
         });
 
-        const html = response.data;
-        
-        
-        const regex = />\s*(state-[a-z]+|supports-[a-z0-9]+|gpu-[a-z0-9\-]+|audio-[a-z0-9\-]+|tech-[a-z0-9\-]+|marketplace-[a-z]+)\s*</g;
-        
-        let match;
-        const foundLabels = [];
-        
-        while ((match = regex.exec(html)) !== null) {
-            const label = match[1].trim(); 
-            if (!foundLabels.includes(label)) {
-                foundLabels.push(label);
-            }
-        }
-
-        console.log(`[Compat] Found labels for "${cleanQuery}":`, foundLabels);
-
-        let result = { state: 'unknown', tags: [], issues: [] };
-        
-        
-        const statePriority = [
-            'state-playable', 
-            'state-gameplay', 
-            'state-menus', 
-            'state-title', 
-            'state-intro', 
-            'state-load',    
-            'state-hang',    
-            'state-crash', 
-            'state-nothing'
-        ];
-
-        
-        for (const p of statePriority) {
-            if (foundLabels.includes(p)) {
-                result.state = p;
-                break;
-            }
-        }
-
-        
-        if (result.state === 'unknown' && foundLabels.length > 0 && isTitleID) {
-             const anyState = foundLabels.find(l => l.startsWith('state-'));
-             if (anyState) result.state = anyState;
-        }
-
-        
-        foundLabels.forEach(label => {
-            if (label.startsWith('supports-')) {
-                result.tags.push(label.replace('supports-', '')); 
-            } else if (label.startsWith('gpu-') || label.startsWith('audio-') || label.startsWith('tech-')) {
-                result.issues.push(label);
-            }
-        });
-
-        
-        compatCache[cleanQuery] = { timestamp: now, data: result };
-        saveCompatCache();
-
-        return result;
+        return { success: true, assets: assets };
 
     } catch (error) {
-        console.error(`[Compat] Error fetching: ${error.message}`);
-        return { state: 'unknown', tags: [], issues: [] };
+        console.error("[Art Manager] Fetch Error:", error.message);
+        return { success: false, error: error.message };
     }
-}
+});
+
+
+ipcMain.handle('update-game-art', async (event, { gameName, type, url, isLocal }) => {
+    try {
+        const cache = await loadCache();
+        
+        
+        if (!cache[gameName]) cache[gameName] = {};
+
+        let finalUrl = url;
+
+        if (!isLocal && url.startsWith('http')) {
+            
+            const safeNameForFile = gameName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            const ext = type === 'icon' ? '.png' : '.jpg';
+            const destPath = path.join(ART_DIR, `${safeNameForFile}-${type}-${Date.now()}${ext}`);
+            
+            const response = await axios({ url, method: 'GET', responseType: 'stream' });
+            const writer = fsSync.createWriteStream(destPath);
+            response.data.pipe(writer);
+            
+            await new Promise((resolve, reject) => {
+                writer.on('finish', resolve);
+                writer.on('error', reject);
+            });
+            
+            finalUrl = `app-art://${path.basename(destPath)}`;
+        }
+
+        
+        if (type === 'cover') cache[gameName].coverUrl = finalUrl;
+        if (type === 'hero') cache[gameName].heroUrl = finalUrl;
+        if (type === 'logo') cache[gameName].logoUrl = finalUrl;
+        if (type === 'icon') cache[gameName].iconUrl = finalUrl;
+
+        await saveCache(cache); 
+        return { success: true, path: finalUrl };
+
+    } catch (error) {
+        console.error("[Art Manager] Save Error:", error);
+        return { success: false, error: error.message };
+    }
+});
 
 
 ipcMain.handle('get-game-compatibility', async (event, query) => {
@@ -3705,6 +3390,479 @@ ipcMain.handle('set-active-profile-slot', async (event, slotIndex) => {
 });
 
 
+
+ipcMain.handle('deep-scan-game', async (event, gamePath) => {
+    const toolPath = getBinaryPath('x360tid');
+    console.log(`[Deep Scan] Starting x360tid JSON scan for: ${gamePath}`);
+
+    return new Promise((resolve) => {
+        
+        const command = `"${toolPath}" -j "${gamePath}"`;
+
+        exec(command, { 
+            maxBuffer: 1024 * 1024 * 10, 
+            timeout: 30000 
+        }, (error, stdout, stderr) => {
+            let foundID = null;
+
+            try {
+                
+                const data = JSON.parse(stdout);
+                if (Array.isArray(data) && data.length > 0 && data[0].title_id) {
+                    foundID = data[0].title_id.toUpperCase();
+                }
+            } catch (parseError) {
+                console.error(`[Deep Scan] JSON Parse Error:`, parseError.message);
+            }
+
+            if (foundID) {
+                console.log(`[Deep Scan] 🔥 Success! Found ID using x360tid: ${foundID}`);
+                
+                
+                updateGameCacheID(gamePath, foundID);
+                
+                resolve({ success: true, titleID: foundID });
+            } else {
+                console.error(`[Deep Scan] Failed to find ID with x360tid.`);
+                resolve({ success: false, error: "Could not extract ID from this file." });
+            }
+        });
+    });
+});
+
+}
+
+
+
+async function autoCleanupArt() {
+    try {
+        console.log('[Auto-Cleanup] Checking for orphaned images...');
+        
+        
+        if (!fsSync.existsSync(CACHE_FILE)) return;
+        if (!fsSync.existsSync(ART_DIR)) return;
+
+        
+        const data = await fs.readFile(CACHE_FILE, 'utf-8');
+        const cache = JSON.parse(data);
+        const validFiles = new Set();
+
+        
+        Object.values(cache).forEach(gameData => {
+            ['coverUrl', 'heroUrl', 'logoUrl', 'iconUrl'].forEach(key => {
+                const url = gameData[key];
+                if (url && typeof url === 'string' && url.startsWith('app-art://')) {
+                    const fileName = url.replace('app-art://', '').split('?')[0];
+                    validFiles.add(fileName);
+                }
+            });
+        });
+
+        
+        const filesOnDisk = await fs.readdir(ART_DIR);
+        let deletedCount = 0;
+
+        for (const file of filesOnDisk) {
+            
+            if (file.startsWith('.') || file === 'db.json') continue;
+
+            if (!validFiles.has(file)) {
+                await fs.unlink(path.join(ART_DIR, file));
+                deletedCount++;
+            }
+        }
+        
+        if (deletedCount > 0) {
+            console.log(`[Auto-Cleanup] Successfully deleted ${deletedCount} unused images.`);
+        }
+    } catch (error) {
+        console.error('[Auto-Cleanup] Error:', error.message);
+    }
+}
+
+
+(async () => {
+    try {
+        const { default: Store } = await import('electron-store');
+
+        await app.whenReady();
+        
+        store = new Store({ cwd: CONFIG_DIR, name: 'nxe-user-config' });
+        console.log(`[Debug] Config saved to: ${path.join(CONFIG_DIR, 'nxe-user-config.json')}`);
+        console.log(`[Debug] Cache saved to: ${CACHE_DIR}`);
+
+
+        
+        
+        session.defaultSession.protocol.registerFileProtocol('app-art', (req, callback) => {
+            try {
+                
+                let rawUrl = req.url.replace('app-art://', '');
+                let decodedPath = decodeURIComponent(rawUrl).split('?')[0];
+
+                let finalPath = '';
+
+                
+                
+                
+                if (process.platform === 'win32') {
+                    
+                    
+                    if (decodedPath.startsWith('/') && /^\/[a-zA-Z]:/.test(decodedPath)) {
+                        decodedPath = decodedPath.substring(1);
+                    }
+                    
+                    
+                    finalPath = path.normalize(decodedPath);
+
+                    
+                    if (!path.isAbsolute(finalPath)) {
+                        finalPath = path.join(ART_DIR, path.basename(finalPath));
+                    }
+                }
+                else {
+                    
+                    finalPath = decodedPath;
+                    
+                    
+                    if (!finalPath.startsWith('/')) {
+                        finalPath = path.join(ART_DIR, finalPath);
+                    }
+                }
+
+                
+                if (fsSync.existsSync(finalPath)) {
+                    return callback({ path: finalPath });
+                } else {
+                    
+                    const fallbackPath = path.join(ART_DIR, path.basename(finalPath));
+                    if (fsSync.existsSync(fallbackPath)) {
+                        return callback({ path: fallbackPath });
+                    }
+                }
+
+                console.error(`[Protocol] File not found: ${finalPath}`);
+                callback({ error: -6 }); 
+            } catch (e) {
+                console.error('[Protocol] Error:', e);
+                callback({ error: -2 });
+            }
+        });
+
+        
+        session.defaultSession.protocol.registerFileProtocol('app-sys', (req, callback) => {
+            try {
+                let rawUrl = req.url.replace('app-sys://', '');
+                let decodedPath = decodeURIComponent(rawUrl).split('?')[0];
+
+                if (process.platform === 'win32' && decodedPath.startsWith('/') && /^\/[a-zA-Z]:/.test(decodedPath)) {
+                    decodedPath = decodedPath.substring(1);
+                }
+                
+                const finalPath = path.join(SYSTEMS_DIR, path.normalize(decodedPath));
+                
+                if (fsSync.existsSync(finalPath)) {
+                    return callback({ path: finalPath });
+                }
+                console.error(`[Sys Protocol] File not found: ${finalPath}`);
+                callback({ error: -6 });
+            } catch (e) {
+                callback({ error: -2 });
+            }
+        });
+        
+        session.defaultSession.protocol.registerFileProtocol('app-core', (req, callback) => {
+            try {
+                let rawUrl = req.url.replace('app-core://', '');
+                let decodedPath = decodeURIComponent(rawUrl).split('?')[0];
+                
+                
+                const finalPath = path.join(__dirname, path.normalize(decodedPath));
+                
+                if (fsSync.existsSync(finalPath)) {
+                    return callback({ path: finalPath });
+                }
+                console.error(`[Core Protocol] File not found: ${finalPath}`);
+                callback({ error: -6 });
+            } catch (e) {
+                callback({ error: -2 });
+            }
+        });
+
+        await ensureCacheDirs();
+        await autoCleanupArt();
+        registerIpcHandlers();
+        createWindow();
+        
+        startControllerService();
+
+        app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
+    } catch (error) {
+        console.error('فشل في تهيئة التطبيق:', error);
+        app.quit();
+    }
+})();
+
+async function readTitleIDFromFile(gamePath) {
+    const toolPath = getBinaryPath('x360tid');
+
+    console.log(`[x360tid] Target Binary Path: ${toolPath}`);
+
+    
+    if (!fsSync.existsSync(toolPath)) {
+        console.error(`[x360tid] Binary not found at ${toolPath}. Skipping file scan.`);
+        return null;
+    }
+
+    
+    if (require('os').platform() !== 'win32') {
+        try { fsSync.chmodSync(toolPath, 0o755); } 
+        catch (chmodError) { if (chmodError.code !== 'EROFS') console.warn(`[x360tid] chmod warning: ${chmodError.message}`); }
+    }
+
+    return new Promise((resolve) => {
+        
+        const command = `"${toolPath}" -j "${gamePath}"`;
+        
+        exec(command, (error, stdout, stderr) => {
+            if (error && !stdout) {
+                console.warn(`[x360tid] Failed to run on ${gamePath}: ${error.message}`);
+                resolve(null);
+                return;
+            }
+            
+            try {
+                
+                const data = JSON.parse(stdout);
+                
+                
+                if (Array.isArray(data) && data.length > 0 && data[0].title_id) {
+                    const titleId = data[0].title_id.toUpperCase();
+                    console.log(`[x360tid] Found Title ID via JSON: ${titleId} for ${gamePath}`);
+                    resolve(titleId);
+                    return;
+                }
+            } catch (parseError) {
+                console.warn(`[x360tid] Failed to parse JSON output: ${parseError.message}`);
+            }
+            
+            console.warn(`[x360tid] Ran successfully but no Title ID found in JSON.`);
+            resolve(null);
+        });
+    });
+}
+
+async function updateGameCacheID(gamePath, newID) {
+    try {
+        const cache = await loadCache();
+        const gameName = path.basename(gamePath, path.extname(gamePath));
+        
+        if (cache[gameName]) {
+            cache[gameName].titleID = newID;
+        } else {
+            cache[gameName] = { titleID: newID };
+        }
+        await saveCache(cache);
+    } catch(e) { console.error("Cache update failed:", e); }
+}
+function cleanGameName(name) {
+    return name.replace(/\s*\(.*?\)\s*/g, ' ').replace(/\s*\[.*?\]\s*/g, ' ').trim();
+}
+async function fetchGamesInBackground(games, apiKey, cache) {
+    const newCache = { ...cache };
+    let artFetched = false;
+    for (const game of games) {
+        try {
+            const art = await fetchGameArt(game.cleanName, apiKey, game.originalName);
+            if (art && (art.coverUrl || art.heroUrl || art.logoUrl || art.iconUrl)) {
+                newCache[game.originalName] = art;
+                artFetched = true;
+            }
+        } catch (e) {
+            console.error(`[SteamGridDB] Error for ${game.cleanName}: ${e.message}`);
+        }
+    }
+    if (artFetched) {
+        await saveCache(newCache);
+        console.log('[SteamGridDB] Background fetch complete. Cache updated.');
+        if (mainWindow) mainWindow.webContents.send('art-updated');
+    }
+}
+async function fetchGameArt(cleanName, apiKey, originalName) {
+    const headers = { 'Authorization': `Bearer ${apiKey}`, 'User-Agent': 'Xbox-NXE-Launcher (v1.0)' };
+    try {
+        const searchRes = await axios.get(`https://www.steamgriddb.com/api/v2/search/autocomplete/${encodeURIComponent(cleanName)}`, { headers });
+        if (!searchRes.data.success || !searchRes.data.data.length) throw new Error('Not found');
+        const gameId = searchRes.data.data[0].id;
+        const [grid, hero, logo, icon] = await Promise.all([
+            axios.get(`https://www.steamgriddb.com/api/v2/grids/game/${gameId}`, { headers }).catch(() => ({ data: { data: [] } })),
+            axios.get(`https://www.steamgriddb.com/api/v2/heroes/game/${gameId}`, { headers }).catch(() => ({ data: { data: [] } })),
+            axios.get(`https://www.steamgriddb.com/api/v2/logos/game/${gameId}`, { headers }).catch(() => ({ data: { data: [] } })),
+            axios.get(`https://www.steamgriddb.com/api/v2/icons/game/${gameId}`, { headers }).catch(() => ({ data: { data: [] } }))
+        ]);
+        const safeName = originalName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+        const download = async (url, type) => {
+            if (!url) return '';
+            try {
+                const res = await axios({ url, method: 'GET', responseType: 'stream' });
+                const dest = path.join(ART_DIR, `${safeName}-${type}.png`);
+                const writer = fsSync.createWriteStream(dest);
+                res.data.pipe(writer);
+                await new Promise((resolve, reject) => {
+                    writer.on('finish', resolve);
+                    writer.on('error', reject);
+                });
+                return `app-art://${path.basename(dest)}`;
+            } catch (e) { return ''; }
+        };
+        return {
+            coverUrl: await download(grid.data.data[0]?.url, 'cover'),
+            heroUrl: await download(hero.data.data[0]?.url, 'hero'),
+            logoUrl: await download(logo.data.data[0]?.url, 'logo'),
+            iconUrl: await download(icon.data.data[0]?.url, 'icon')
+        };
+    } catch (e) { return null; }
+}
+
+
+
+
+
+
+
+const CACHE_DATA_DIR = path.join(CONFIG_DIR, 'data');
+
+
+if (!fsSync.existsSync(CACHE_DATA_DIR)) {
+    try { fsSync.mkdirSync(CACHE_DATA_DIR, { recursive: true }); } catch (e) {}
+}
+
+const COMPAT_CACHE_FILE = path.join(CACHE_DATA_DIR, 'compatibility_cache.json');
+let compatCache = {};
+
+
+try {
+    if (fsSync.existsSync(COMPAT_CACHE_FILE)) {
+        compatCache = JSON.parse(fsSync.readFileSync(COMPAT_CACHE_FILE, 'utf-8'));
+    }
+} catch (e) { console.warn("[Compat] Cache reset"); }
+
+function saveCompatCache() {
+    try { fsSync.writeFileSync(COMPAT_CACHE_FILE, JSON.stringify(compatCache, null, 2)); } catch (e) {}
+}
+
+async function fetchGameCompatibility(query) {
+    if (!query) return { state: 'unknown', tags: [], issues: [] };
+
+    let cleanQuery = query.trim();
+    let isTitleID = false;
+
+    
+    const titleIdPattern = /^[0-9A-F]{8}$/i;
+    
+    if (titleIdPattern.test(cleanQuery)) {
+        console.log(`[Compat] 🎯 Searching by ID: ${cleanQuery}`);
+        isTitleID = true;
+    } else {
+        cleanQuery = query
+            .replace(/\s*[\(\[].*?[\)\]]/g, "") 
+            .replace(/[^a-zA-Z0-9\s\-\:]/g, "") 
+            .replace(/\s+/g, " ")               
+            .trim();
+        console.log(`[Compat] 🔍 Searching by Name: "${cleanQuery}"`);
+    }
+    
+    
+    
+    
+    const CACHE_DURATION = 604800000; 
+
+    const now = Date.now();
+    if (compatCache[cleanQuery] && (now - compatCache[cleanQuery].timestamp < CACHE_DURATION)) { 
+        return compatCache[cleanQuery].data;
+    }
+
+    
+    console.log(`[Compat] 🌐 Connecting to GitHub for: "${cleanQuery}" (Live Check)`);
+
+    try {
+        const searchUrl = `https://github.com/xenia-canary/game-compatibility/issues?q=is%3Aissue+state%3Aopen+${encodeURIComponent(cleanQuery)}`;
+        
+        const response = await axios.get(searchUrl, {
+            headers: { 
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml'
+            },
+            timeout: 15000
+        });
+
+        const html = response.data;
+        
+        
+        const regex = />\s*(state-[a-z]+|supports-[a-z0-9]+|gpu-[a-z0-9\-]+|audio-[a-z0-9\-]+|tech-[a-z0-9\-]+|marketplace-[a-z]+)\s*</g;
+        
+        let match;
+        const foundLabels = [];
+        
+        while ((match = regex.exec(html)) !== null) {
+            const label = match[1].trim(); 
+            if (!foundLabels.includes(label)) {
+                foundLabels.push(label);
+            }
+        }
+
+        console.log(`[Compat] Found labels for "${cleanQuery}":`, foundLabels);
+
+        let result = { state: 'unknown', tags: [], issues: [] };
+        
+        
+        const statePriority = [
+            'state-playable', 
+            'state-gameplay', 
+            'state-menus', 
+            'state-title', 
+            'state-intro', 
+            'state-load',    
+            'state-hang',    
+            'state-crash', 
+            'state-nothing'
+        ];
+
+        
+        for (const p of statePriority) {
+            if (foundLabels.includes(p)) {
+                result.state = p;
+                break;
+            }
+        }
+
+        
+        if (result.state === 'unknown' && foundLabels.length > 0 && isTitleID) {
+             const anyState = foundLabels.find(l => l.startsWith('state-'));
+             if (anyState) result.state = anyState;
+        }
+
+        
+        foundLabels.forEach(label => {
+            if (label.startsWith('supports-')) {
+                result.tags.push(label.replace('supports-', '')); 
+            } else if (label.startsWith('gpu-') || label.startsWith('audio-') || label.startsWith('tech-')) {
+                result.issues.push(label);
+            }
+        });
+
+        
+        compatCache[cleanQuery] = { timestamp: now, data: result };
+        saveCompatCache();
+
+        return result;
+
+    } catch (error) {
+        console.error(`[Compat] Error fetching: ${error.message}`);
+        return { state: 'unknown', tags: [], issues: [] };
+    }
+}
+
 async function findProfileGPD(dir) {
     try {
         const entries = await fs.readdir(dir, { withFileTypes: true });
@@ -3720,147 +3878,6 @@ async function findProfileGPD(dir) {
     } catch (e) { return null; }
     return null;
 }
-
-
-ipcMain.handle('get-user-gamerpic', async (event, xuid, slot) => {
-    const xeniaPath = store.get('xeniaPath');
-    
-    
-    if (slot !== undefined && slot !== null) {
-        const customPic = store.get(`customAvatar_slot_${slot}`);
-        if (customPic && fsSync.existsSync(customPic)) {
-            
-            const normalizedPath = customPic.replace(/\\/g, '/');
-            return { success: true, url: `app-art:///${normalizedPath}` }; 
-        }
-    }
-
-    
-    const launchMethod = store.get('linuxLaunchMethod') || 'native';
-    if (!xeniaPath || !xuid) return { success: false };
-
-    let contentRoot;
-    if (process.platform === 'linux' && launchMethod === 'native') {
-        contentRoot = path.join(require('os').homedir(), '.local', 'share', 'Xenia', 'content');
-    } else {
-        contentRoot = path.join(path.dirname(xeniaPath), 'content');
-    }
-
-    const gpdPath = await findProfileGPD(path.join(contentRoot, xuid));
-    if (!gpdPath) return { success: false };
-
-    const toolboxPath = getBinaryPath('xenia_toolbox');
-    const outputPath = path.join(CACHE_DIR, `gamerpic_${xuid}.png`);
-
-    return new Promise((resolve) => {
-        const child = require('child_process').spawn(toolboxPath, ['image', gpdPath, outputPath]);
-        child.on('close', () => {
-            if (fsSync.existsSync(outputPath)) {
-                resolve({ success: true, url: `app-art://${path.basename(outputPath)}?t=${Date.now()}` });
-            } else resolve({ success: false });
-        });
-    });
-});
-
-
-
-
-
-
-ipcMain.handle('search-steamgriddb-assets', async (event, { gameName, type }) => {
-    const apiKey = store.get('steamGridDBKey');
-    if (!apiKey) return { success: false, error: "API Key missing" };
-
-    try {
-        const headers = { 'Authorization': `Bearer ${apiKey}` };
-        
-        
-        const searchRes = await axios.get(`https://www.steamgriddb.com/api/v2/search/autocomplete/${encodeURIComponent(gameName)}`, { headers });
-        
-        if (!searchRes.data.success || !searchRes.data.data.length) {
-            return { success: false, error: "Game not found on SteamGridDB" };
-        }
-
-        const gameId = searchRes.data.data[0].id;
-        let endpoint = '';
-        
-        
-        switch (type) {
-            case 'cover': endpoint = 'grids'; break;
-            case 'hero':  endpoint = 'heroes'; break;
-            case 'logo':  endpoint = 'logos'; break;
-            case 'icon':  endpoint = 'icons'; break;
-        }
-
-        const assetsRes = await axios.get(`https://www.steamgriddb.com/api/v2/${endpoint}/game/${gameId}`, { headers });
-        
-        if (!assetsRes.data.success) return { success: false, error: "Failed to fetch assets" };
-
-        
-        const assets = assetsRes.data.data.map(item => {
-            
-            const isIconOrLogo = (type === 'icon' || type === 'logo');
-            
-            return {
-                
-                
-                thumb: isIconOrLogo ? item.url : (item.thumb || item.url),
-                
-                full: item.url
-            };
-        });
-
-        return { success: true, assets: assets };
-
-    } catch (error) {
-        console.error("[Art Manager] Fetch Error:", error.message);
-        return { success: false, error: error.message };
-    }
-});
-
-
-ipcMain.handle('update-game-art', async (event, { gameName, type, url, isLocal }) => {
-    try {
-        const cache = await loadCache();
-        
-        
-        if (!cache[gameName]) cache[gameName] = {};
-
-        let finalUrl = url;
-
-        if (!isLocal && url.startsWith('http')) {
-            
-            const safeNameForFile = gameName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-            const ext = type === 'icon' ? '.png' : '.jpg';
-            const destPath = path.join(ART_DIR, `${safeNameForFile}-${type}-${Date.now()}${ext}`);
-            
-            const response = await axios({ url, method: 'GET', responseType: 'stream' });
-            const writer = fsSync.createWriteStream(destPath);
-            response.data.pipe(writer);
-            
-            await new Promise((resolve, reject) => {
-                writer.on('finish', resolve);
-                writer.on('error', reject);
-            });
-            
-            finalUrl = `app-art://${path.basename(destPath)}`;
-        }
-
-        
-        if (type === 'cover') cache[gameName].coverUrl = finalUrl;
-        if (type === 'hero') cache[gameName].heroUrl = finalUrl;
-        if (type === 'logo') cache[gameName].logoUrl = finalUrl;
-        if (type === 'icon') cache[gameName].iconUrl = finalUrl;
-
-        await saveCache(cache); 
-        return { success: true, path: finalUrl };
-
-    } catch (error) {
-        console.error("[Art Manager] Save Error:", error);
-        return { success: false, error: error.message };
-    }
-});
-
 
 
 
@@ -3923,65 +3940,3 @@ function loadLocalDB() {
 
 
 loadLocalDB();
-
-
-ipcMain.handle('get-local-game-metadata', async (event, titleID) => {
-    if (!titleID) return { found: false, error: "No TitleID provided" };
-
-    const cleanID = titleID.toUpperCase();
-    
-    
-    if (localGameDB[cleanID]) {
-        const data = localGameDB[cleanID];
-        console.log(`[LocalDB] Found match for ${cleanID}: ${data.title.full}`);
-        
-        return {
-            found: true,
-            metadata: {
-                title: data.title.full,
-                developer: data.developer,
-                publisher: data.publisher,
-                description: data.description ? (data.description.full || data.description.short) : '',
-                rating: data.user_rating,
-                releaseDate: data.release_date,
-                genre: (data.genre && Array.isArray(data.genre)) ? data.genre.join(', ') : (data.genre || 'Unknown'),
-                
-                assets: {
-                    cover: data.artwork.boxart,
-                    hero: data.artwork.background,
-                    logo: data.artwork.banner,
-                    icon: data.artwork.icon,
-                    screenshots: data.artwork.gallery || []
-                }
-            }
-        };
-    }
-    
-    return { found: false, error: "TitleID not found in local database" };
-});
-
-
-ipcMain.handle('update-local-db', async () => {
-    
-    
-    loadLocalDB();
-    return { success: true, count: Object.keys(localGameDB).length };
-});
-
-
-ipcMain.handle('translate-text', async (event, text, targetLang) => {
-    try {
-        
-        const lang = targetLang || 'en';
-        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${lang}&dt=t&q=${encodeURIComponent(text)}`;
-        
-        const response = await axios.get(url);
-        
-        
-        const translatedText = response.data[0].map(s => s[0]).join('');
-        return { success: true, translatedText };
-    } catch (error) {
-        console.error("Translation Error:", error);
-        return { success: false, error: error.message };
-    }
-});
