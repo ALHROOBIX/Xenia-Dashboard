@@ -776,6 +776,162 @@ function sendProgress(payload) {
 
 
 function registerIpcHandlers() {
+
+    ipcMain.handle('manage-system-content', async (event, { action, titleId, fileName, filePath, type, contentType }) => {
+    const cliPath = getBinaryPath('xbox-install'); 
+    const contentRoot = await getContentRootPath();
+
+    if (!fsSync.existsSync(cliPath)) {
+        return { success: false, error: "xbox-install tool not found in bin folder." };
+    }
+
+    
+    const platform = require('os').platform();
+    if (platform !== 'win32') {
+        try { fsSync.chmodSync(cliPath, 0o755); } 
+        catch (err) { if (err.code !== 'EROFS') console.warn(`[System] Failed to chmod xbox-install: ${err.message}`); }
+    }
+
+    const activeXuid = store.get('xuid');
+    
+    
+    
+    let globalArgs = ['--json', '--content-root', contentRoot];
+    
+    
+    let profileArgs = [...globalArgs];
+    if (activeXuid) {
+        profileArgs.push('--xuid', activeXuid);
+    }
+
+    
+    const runCLI = (args) => new Promise((resolve) => {
+        const child = spawn(cliPath, args);
+        let output = '';
+        
+        child.stdout.on('data', (d) => output += d.toString());
+        
+        child.on('close', (code) => {
+            try {
+                const parsed = JSON.parse(output);
+                
+                
+                if (parsed.ok === false) {
+                    resolve({ success: false, error: parsed.message || "Operation failed in CLI." });
+                } else {
+                    resolve({ success: true, data: parsed });
+                }
+            } catch (e) {
+                console.error("[xbox-install Output Error]", output);
+                resolve({ success: false, error: "Failed to parse tool output." });
+            }
+        });
+        
+        child.on('error', (err) => resolve({ success: false, error: err.message }));
+    });
+
+    try {
+        if (action === 'get-all') {
+            const titlesRes = await runCLI(['list', ...profileArgs]);
+            if (!titlesRes.success || !titlesRes.data || !titlesRes.data.titles) return titlesRes;
+
+            let allPackages = [];
+            for (const tid of titlesRes.data.titles) {
+                const pkgRes = await runCLI(['list', '--disabled', ...profileArgs, tid]);
+                
+                if (pkgRes.success && pkgRes.data.packages) {
+                    
+                    let realGameName = `Unknown Game`;
+                    let gameIconUrl = '';
+                    const cleanTid = tid.toUpperCase();
+                    if (localGameDB && localGameDB[cleanTid]) {
+                        realGameName = localGameDB[cleanTid].title.full;
+                        gameIconUrl = localGameDB[cleanTid].artwork.icon || '';
+                    }
+
+                    
+                    const enrichedPackages = pkgRes.data.packages.map(p => ({
+                        ...p,
+                        title_id: tid,
+                        game_name: realGameName,
+                        iconUrl: gameIconUrl
+                    }));
+                    
+                    allPackages.push(...enrichedPackages);
+                }
+            }
+
+            const typeMap = { 'tu': '000B0000', 'dlc': '00000002', 'saves': '00000001' };
+            const filterTarget = typeMap[type];
+            
+            if (filterTarget) {
+                allPackages = allPackages.filter(p => p.content_type === filterTarget);
+            }
+
+            return { success: true, data: allPackages };
+        }
+        else if (action === 'install') {
+            
+            let args;
+            if (contentType  === 'saves') {
+                args = ['install', ...profileArgs, filePath];
+            } else { 
+                args = ['install', ...globalArgs, filePath];
+            }
+            return await runCLI(args);
+        }
+        else if (action === 'uninstall') {
+            
+            let args;
+            if (contentType === 'saves') {
+                args = ['uninstall', ...profileArgs, titleId, fileName];
+            } else {
+                args = ['uninstall', ...globalArgs, titleId, fileName];
+            }
+            return await runCLI(args);
+        }
+        else if (action === 'toggle') {
+            const cmd = type === 'enable' ? 'enable' : 'disable';
+            let args;
+            if (contentType === 'saves') {
+                args = [cmd, ...profileArgs, titleId, fileName];
+            } else {
+                args = [cmd, ...globalArgs, titleId, fileName];
+            }
+            return await runCLI(args);
+        }
+        else if (action === 'export-save') {
+            if (!titleId || !fileName) {
+                return { success: false, error: "Missing titleId or fileName" };
+            }
+            const outputDir = path.join(CONFIG_DIR, 'Backups');
+            if (!fsSync.existsSync(outputDir)) {
+                await fs.mkdir(outputDir, { recursive: true });
+            }
+
+            
+            let args = ['export-save', ...profileArgs, titleId, fileName, outputDir];
+
+            
+            return new Promise((resolve) => {
+                const child = spawn(cliPath, args);
+                let stdout = '', stderr = '';
+                child.stdout.on('data', (d) => stdout += d.toString());
+                child.stderr.on('data', (d) => stderr += d.toString());
+                child.on('close', (code) => {
+                    if (code === 0) {
+                        resolve({ success: true, message: stdout.trim() || "Export successful." });
+                    } else {
+                        resolve({ success: false, error: stderr.trim() || stdout.trim() || "Export failed." });
+                    }
+                });
+                child.on('error', (err) => resolve({ success: false, error: err.message }));
+            });
+        }
+    } catch (e) {
+        return { success: false, error: e.message };
+    }
+});
     
     ipcMain.handle('get-friends-list', async () => {
         try {
@@ -1096,8 +1252,21 @@ ipcMain.handle('apply-optimized-settings', async (event, { titleID, gameConfigPa
                 headers: { 'User-Agent': 'Xenia-Dashboard-Updater' }
             });
 
-            const latestVersion = remoteRelease.tag_name.replace('v', '');
-            const hasUpdate = latestVersion !== currentVersion;
+            
+            const latestVersion = remoteRelease.tag_name.replace(/^v/i, '').trim();
+            
+            
+            const isNewer = (curr, late) => {
+                const c = curr.split('.').map(Number);
+                const l = late.split('.').map(Number);
+                for (let i = 0; i < Math.max(c.length, l.length); i++) {
+                    if ((l[i] || 0) > (c[i] || 0)) return true;
+                    if ((l[i] || 0) < (c[i] || 0)) return false;
+                }
+                return false;
+            };
+
+            const hasUpdate = isNewer(currentVersion, latestVersion);
 
             return {
                 success: true,
@@ -1185,6 +1354,89 @@ ipcMain.handle('apply-optimized-settings', async (event, { titleID, gameConfigPa
 
         } catch (error) {
             console.error('[x360tid Download Error]', error);
+            return { success: false, error: error.message };
+        }
+    });
+    
+    ipcMain.handle('check-xbox-install-status', async () => {
+        const toolPath = getBinaryPath('xbox-install');
+        return { exists: fsSync.existsSync(toolPath) };
+    });
+
+    
+    ipcMain.handle('download-xbox-install', async () => {
+        try {
+            const platform = require('os').platform();
+            const isWin = platform === 'win32';
+            
+            
+            const assetName = isWin ? 'xbox-install-windows.zip' : 'xbox-install-linux.zip';
+            const osFolder = isWin ? 'win' : 'linux';
+            const binaryName = isWin ? 'xbox-install.exe' : 'xbox-install';
+
+            const repoUrl = 'https://api.github.com/repos/ALHROOBIX/Xbox-Content-Installer/releases/latest';
+            
+            
+            const { data: release } = await axios.get(repoUrl, { headers: { 'User-Agent': 'Xenia-Dashboard' }});
+            const asset = release.assets.find(a => a.name === assetName);
+            if (!asset) throw new Error(`Asset ${assetName} not found in the latest release.`);
+
+            
+            const tempDir = path.join(CONFIG_DIR, 'temp_downloads');
+            const zipPath = path.join(tempDir, assetName);
+            const extractDir = path.join(tempDir, 'xbox_install_extracted');
+            const finalTargetDir = path.join(CONFIG_DIR, 'assets', 'bin', osFolder);
+            
+            if (!fsSync.existsSync(tempDir)) await fs.mkdir(tempDir, { recursive: true });
+            if (fsSync.existsSync(extractDir)) await fs.rm(extractDir, { recursive: true, force: true });
+            await fs.mkdir(extractDir, { recursive: true });
+            if (!fsSync.existsSync(finalTargetDir)) await fs.mkdir(finalTargetDir, { recursive: true });
+
+            
+            const response = await axios({ url: asset.browser_download_url, method: 'GET', responseType: 'stream' });
+            const writer = fsSync.createWriteStream(zipPath);
+            response.data.pipe(writer);
+            await new Promise((r, j) => { writer.on('finish', r); writer.on('error', j); });
+
+            
+            await decompress(zipPath, extractDir);
+
+            
+            async function findBinary(dir, targetName) {
+                const entries = await fs.readdir(dir, { withFileTypes: true });
+                for (const entry of entries) {
+                    const fullPath = path.join(dir, entry.name);
+                    if (entry.isDirectory()) {
+                        const found = await findBinary(fullPath, targetName);
+                        if (found) return found;
+                    } else if (entry.name === targetName) {
+                        return fullPath;
+                    }
+                }
+                return null;
+            }
+
+            const foundBinaryPath = await findBinary(extractDir, binaryName);
+            if (!foundBinaryPath) throw new Error(`${binaryName} not found in the extracted files.`);
+
+            
+            const targetBinaryPath = path.join(finalTargetDir, binaryName);
+            if (fsSync.existsSync(targetBinaryPath)) await fs.unlink(targetBinaryPath);
+            await fs.copyFile(foundBinaryPath, targetBinaryPath);
+
+            
+            if (!isWin) {
+                await fs.chmod(targetBinaryPath, 0o755);
+            }
+
+            
+            await fs.rm(extractDir, { recursive: true, force: true });
+            await fs.unlink(zipPath);
+
+            return { success: true };
+
+        } catch (error) {
+            console.error('[xbox-install Download Error]', error);
             return { success: false, error: error.message };
         }
     });

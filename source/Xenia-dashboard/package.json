@@ -1,6 +1,6 @@
 {
   "name": "xenia-dashboard",
-  "version": "1.2.6",
+  "version": "1.2.7",
   "description": "Xbox 360 Dashboard for Xenia Emulator",
   "main": "main.js",
   "author": "ALHROOBIX",
@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "electron": "^38.3.0",
-    "electron-builder": "^24.6.0"
+    "electron-builder": "^26.8.1"
   },
   "build": {
     "appId": "com.alhroobix.xenia.dashboard",
@@ -31,7 +31,7 @@
     "win": {
       "target": "portable",
       "icon": "assets/icons/icon.ico",
-      "requestedExecutionLevel": "asInvoker", 
+      "requestedExecutionLevel": "asInvoker",
       "verifyUpdateCodeSignature": false,
       "artifactName": "${productName}.${ext}"
     },

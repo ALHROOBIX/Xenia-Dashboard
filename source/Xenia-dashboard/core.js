@@ -368,11 +368,29 @@ document.addEventListener('alpine:init', () => {
         focusedFriendIndex: 0,
         appUpdateInfo: {
             status: 'idle', 
-            currentVer: '1.2.6',
+            currentVer: '1.2.7',
             remoteVer: '---',
             message: 'Press (Y) to check for updates',
-            percentage: 0
-        }
+            percentage: 0,
+            showAppUpdateNotify: false,
+            appUpdateDownloadState: 'idle', 
+            newAppVersionFound: ''
+        },
+
+        
+        contentCategories: [
+            { id: 'tu', name: 'Title Updates', icon: 'assets/icons/xenia canary.png' },
+            { id: 'dlc', name: 'Game DLCs', icon: 'assets/icons/xbox 360-gamepad.png' },
+            { id: 'saves', name: 'Saved Games', icon: 'assets/icons/database.png' }
+        ],
+        focusedContentCategoryIndex: 0,
+        contentItems: [],
+        focusedContentItemIndex: 0,
+        contentPanelFocus: 'menu', 
+        isContentLoading: false,
+        xboxInstallStatus: { exists: true },
+        showXboxInstallNotify: false,
+        xboxInstallDownloadState: 'idle',
         
     });
 
@@ -406,6 +424,236 @@ document.addEventListener('alpine:init', () => {
 
     
     Alpine.store('actions', {
+
+        
+        async autoCheckAppUpdate() {
+            const app = Alpine.store('app');
+            try {
+                const result = await window.electronAPI.checkAppUpdate();
+                
+                
+                const actuallyHasUpdate = isNewerVersion(result.currentVersion, result.latestVersion);
+
+                if (result.success && actuallyHasUpdate) {
+                    app.newAppVersionFound = result.latestVersion;
+                    app.showAppUpdateNotify = true;
+                    app.appUpdateDownloadState = 'idle';
+                    this.playSound('panelUnfold');
+                }
+            } catch (e) {
+                console.error("Auto check app update failed:", e);
+            }
+        },
+
+        
+        async startAutoAppUpdate() {
+            const app = Alpine.store('app');
+            if (app.appUpdateDownloadState === 'downloading') return;
+
+            this.playSound('select');
+            app.appUpdateDownloadState = 'downloading';
+
+            
+            const platform = window.navigator.platform.toLowerCase().includes('win') ? 'win' : 'linux';
+            
+            
+            const result = await window.electronAPI.downloadAppUpdate(platform);
+            
+            if (!result.success) {
+                app.appUpdateDownloadState = 'error';
+                alert("Update failed: " + result.error);
+            }
+        },
+
+        async checkXboxInstallTool() {
+            const app = Alpine.store('app');
+            const status = await window.electronAPI.checkXboxInstallStatus();
+            app.xboxInstallStatus = status;
+            if (!status.exists) {
+                app.showXboxInstallNotify = true;
+            } else {
+                app.showXboxInstallNotify = false;
+            }
+        },
+
+        async downloadXboxInstallTool() {
+            const app = Alpine.store('app');
+            if (app.xboxInstallDownloadState === 'downloading') return;
+
+            this.playSound('select');
+            app.xboxInstallDownloadState = 'downloading';
+
+            try {
+                const result = await window.electronAPI.downloadXboxInstall();
+                if (result.success) {
+                    this.playSound('channelUp');
+                    app.xboxInstallDownloadState = 'success';
+                    app.xboxInstallStatus.exists = true;
+                    
+                    
+                    setTimeout(() => {
+                        app.showXboxInstallNotify = false;
+                        app.xboxInstallDownloadState = 'idle';
+                        this.loadSystemContent(); 
+                    }, 2000);
+                } else {
+                    app.xboxInstallDownloadState = 'error';
+                }
+            } catch (e) {
+                app.xboxInstallDownloadState = 'error';
+            }
+        },
+
+        async exportFocusedSave() {
+            const app = Alpine.store('app');
+            const item = app.contentItems[app.focusedContentItemIndex];
+            
+            if (!item || item.content_type !== '00000001') return;
+
+            this.playSound('select');
+            app.isContentLoading = true;
+
+            try {
+                const result = await window.electronAPI.manageSystemContent({
+                    action: 'export-save',
+                    titleId: item.title_id,
+                    fileName: item.file_name,
+                    
+                });
+
+                if (result.success) {
+                    alert("Save exported successfully to Backups folder.");
+                    this.playSound('channelUp');
+                } else {
+                    alert("Export failed: " + result.error);
+                }
+            } catch (e) {
+                alert("Error: " + e.message);
+            }
+            app.isContentLoading = false;
+        },
+
+        async loadSystemContent() {
+            const app = Alpine.store('app');
+            app.isContentLoading = true;
+            
+            
+            await this.checkXboxInstallTool();
+            if (!app.xboxInstallStatus.exists) {
+                app.isContentLoading = false;
+                return; 
+            }
+            
+
+            app.contentItems = [];
+            app.focusedContentItemIndex = 0;
+
+            const activeCat = app.contentCategories[app.focusedContentCategoryIndex].id;
+            
+            try {
+                const result = await window.electronAPI.manageSystemContent({ action: 'get-all', type: activeCat });
+                if (result.success && result.data) {
+                    app.contentItems = result.data;
+                }
+            } catch (e) {
+                console.error("Failed to load content:", e);
+            }
+            app.isContentLoading = false;
+        },
+
+        async installSystemContent() {
+            const filePath = await window.electronAPI.openFile();
+            if (!filePath) return;
+
+            this.playSound('select');
+            const app = Alpine.store('app');
+            app.isContentLoading = true;
+
+            try {
+                
+                const activeCat = app.contentCategories[app.focusedContentCategoryIndex].id;
+                const result = await window.electronAPI.manageSystemContent({
+                    action: 'install',
+                    filePath: filePath,
+                    contentType: activeCat   
+                });
+                if (result.success) {
+                    this.playSound('channelUp');
+                    await this.loadSystemContent(); 
+                } else {
+                    alert("Install failed: " + result.error);
+                    app.isContentLoading = false;
+                }
+            } catch (e) {
+                alert("Error during install.");
+                app.isContentLoading = false;
+            }
+        },
+
+        async toggleFocusedContent() {
+            const app = Alpine.store('app');
+            const item = app.contentItems[app.focusedContentItemIndex];
+            if (!item) return;
+
+            this.playSound('select');
+            app.isContentLoading = true;
+            const newStatus = item.disabled ? 'enable' : 'disable';
+
+            
+            const activeCat = app.contentCategories[app.focusedContentCategoryIndex].id;
+
+            try {
+                const result = await window.electronAPI.manageSystemContent({ 
+                    action: 'toggle', 
+                    type: newStatus, 
+                    titleId: item.title_id, 
+                    fileName: item.file_name,
+                    contentType: activeCat   
+                });
+
+                if (result.success) {
+                    item.disabled = !item.disabled;
+                } else {
+                    alert(`Toggle Failed: ${result.error}`);
+                }
+            } catch (e) {
+                console.error("Failed to toggle:", e);
+                alert(`Error: ${e.message}`);
+            }
+            app.isContentLoading = false;
+        },
+
+        async deleteFocusedContent() {
+            const app = Alpine.store('app');
+            const item = app.contentItems[app.focusedContentItemIndex];
+            if (!item) return;
+
+            if (!confirm(`Are you sure you want to uninstall ${item.display_name || item.file_name}?`)) return;
+
+            this.playSound('back');
+            app.isContentLoading = true;
+
+            const activeCat = app.contentCategories[app.focusedContentCategoryIndex].id;
+
+            try {
+                const result = await window.electronAPI.manageSystemContent({ 
+                    action: 'uninstall', 
+                    titleId: item.title_id, 
+                    fileName: item.file_name,
+                    contentType: activeCat   
+                });
+
+                if (result.success) {
+                    await this.loadSystemContent();
+                } else {
+                    alert("Uninstall failed: " + result.error);
+                    app.isContentLoading = false;
+                }
+            } catch (e) {
+                console.error("Failed to uninstall:", e);
+                app.isContentLoading = false;
+            }
+        },
 
         async downloadX360tid() {
             const app = Alpine.store('app');
@@ -2756,6 +3004,13 @@ document.addEventListener('alpine:init', () => {
                     app.focusedIndex = 0;
                     this.scrollToFocusedElement('about-item-0');
                     break;  
+
+                case 'settings-content':
+                    app.focusedCollection = 'contentCategories';
+                    app.focusedContentCategoryIndex = 0;
+                    app.contentPanelFocus = 'menu';
+                    this.loadSystemContent();
+                    break;
             }
             
         },
@@ -4313,6 +4568,16 @@ document.addEventListener('alpine:init', () => {
             }
             return;
         }
+        if (app.showAppUpdateNotify) {
+            e.preventDefault();
+            if (key === 'y' || key === 'Y') {
+                actions.startAutoAppUpdate();
+            } else if (key === 'Escape' || key === 'b' || key === 'B') {
+                app.showAppUpdateNotify = false;
+                actions.playSound('back');
+            }
+            return; 
+        }
         
         
         if (key === 'Tab') { 
@@ -4351,6 +4616,7 @@ document.addEventListener('alpine:init', () => {
             if (key === 'Escape') actions.toggleGuide();
             return;
         }
+        
 
         if (key === 'p' || key === 'P') {
             if (app.currentView === 'game-library' && !app.isKeyboardOpen && !app.isGuideOpen) {
@@ -4611,6 +4877,96 @@ document.addEventListener('alpine:init', () => {
             }
             return;
         }
+        
+        
+        
+        if (app.currentView === 'settings-content' && !app.isGuideOpen && !app.isKeyboardOpen) {
+
+            
+            if (app.showXboxInstallNotify) {
+                e.preventDefault();
+                if (key === 'y' || key === 'Y') {
+                    actions.downloadXboxInstallTool();
+                } else if (key === 'Escape' || key === 'Backspace' || key === 'b' || key === 'B') {
+                    actions.goBack();
+                }
+                return; 
+            }
+            
+            
+            if (key === 'ArrowRight') {
+                if (app.contentPanelFocus === 'menu' && app.contentItems.length > 0) {
+                    app.contentPanelFocus = 'list';
+                    app.focusedContentItemIndex = 0;
+                    actions.playSound('focus');
+                }
+            } 
+            
+            else if (key === 'ArrowLeft') {
+                if (app.contentPanelFocus === 'list') {
+                    app.contentPanelFocus = 'menu';
+                    actions.playSound('back');
+                }
+            } 
+            
+            else if (key === 'ArrowUp') {
+                if (app.contentPanelFocus === 'menu') {
+                    app.focusedContentCategoryIndex = Math.max(0, app.focusedContentCategoryIndex - 1);
+                    actions.loadSystemContent();
+                } else {
+                    app.focusedContentItemIndex = Math.max(0, app.focusedContentItemIndex - 1);
+                    actions.scrollToFocusedElement('sys-content-item-' + app.focusedContentItemIndex);
+                }
+                actions.playSound('focus');
+            } 
+            
+            else if (key === 'ArrowDown') {
+                if (app.contentPanelFocus === 'menu') {
+                    app.focusedContentCategoryIndex = Math.min(app.contentCategories.length - 1, app.focusedContentCategoryIndex + 1);
+                    actions.loadSystemContent();
+                } else {
+                    app.focusedContentItemIndex = Math.min(app.contentItems.length - 1, app.focusedContentItemIndex + 1);
+                    actions.scrollToFocusedElement('sys-content-item-' + app.focusedContentItemIndex);
+                }
+                actions.playSound('focus');
+            } 
+            
+            
+            else if (key === 'Enter') {
+                if (app.contentPanelFocus === 'menu' && app.contentItems.length > 0) {
+                    app.contentPanelFocus = 'list';
+                    actions.playSound('select');
+                } else if (app.contentPanelFocus === 'list') {
+                    actions.toggleFocusedContent();
+                }
+            } 
+            else if (key === 'x' || key === 'X') {
+                actions.installSystemContent();
+            } 
+            else if (key === 'y' || key === 'Y') {
+                if (app.contentPanelFocus === 'list') actions.deleteFocusedContent();
+            } 
+            else if (key === 'Escape' || key === 'Backspace') {
+                if (app.contentPanelFocus === 'list') {
+                    app.contentPanelFocus = 'menu';
+                    actions.playSound('back');
+                } else {
+                    actions.goBack();
+                }
+            }
+            else if (key === 'r' || key === 'R') {
+                if (app.contentPanelFocus === 'list') {
+                    const item = app.contentItems[app.focusedContentItemIndex];
+                    if (item && item.content_type === '00000001') { 
+                        actions.exportFocusedSave();
+                    }
+                }
+            }
+            
+            e.preventDefault();
+            return; 
+        }
+
 
         if (app.currentView === 'settings-audio') {
             const item = app.audioMenu[app.focusedIndex];
@@ -4956,6 +5312,7 @@ document.addEventListener('alpine:init', () => {
         setTimeout(async () => {
             
             await Alpine.store('actions').scanForGames(true);
+            await Alpine.store('actions').autoCheckAppUpdate();
         }, 1000);
         
         window.electronAPI.onArtUpdated(() => { 
@@ -5061,6 +5418,15 @@ document.addEventListener('alpine:init', () => {
                     actions.downloadX360tid();
                 } else if (message.event === 'button_b' && message.value === 1) {
                     app.showX360tidNotify = false;
+                    actions.playSound('back');
+                }
+                return; 
+            }
+            if (app.showAppUpdateNotify) {
+                if (message.event === 'button_y' && message.value === 1) {
+                    actions.startAutoAppUpdate();
+                } else if (message.event === 'button_b' && message.value === 1) {
+                    app.showAppUpdateNotify = false;
                     actions.playSound('back');
                 }
                 return; 
@@ -5548,6 +5914,103 @@ document.addEventListener('alpine:init', () => {
                     if (game && !game.titleID) {
                         actions.performDeepScan();
                         return; 
+                    }
+                }
+            }
+
+            
+            
+            
+            if (app.currentView === 'settings-content' && !app.isGuideOpen && !app.isKeyboardOpen) {
+                
+                
+                if (app.showXboxInstallNotify) {
+                    if (message.event === 'button_y' && message.value === 1) {
+                        actions.downloadXboxInstallTool();
+                    } else if (message.event === 'button_b' && message.value === 1) {
+                        actions.goBack();
+                    }
+                    return; 
+                }
+                
+                if (message.event === 'dpad_x') {
+                    if (message.value === 1) { 
+                        if (app.contentPanelFocus === 'menu' && app.contentItems.length > 0) {
+                            app.contentPanelFocus = 'list';
+                            app.focusedContentItemIndex = 0;
+                            actions.playSound('focus');
+                        }
+                    } else if (message.value === -1) { 
+                        if (app.contentPanelFocus === 'list') {
+                            app.contentPanelFocus = 'menu';
+                            actions.playSound('back');
+                        }
+                    }
+                    return; 
+                }
+                
+                if (message.event === 'dpad_y') {
+                    if (message.value === -1) { 
+                        if (app.contentPanelFocus === 'menu') {
+                            app.focusedContentCategoryIndex = Math.max(0, app.focusedContentCategoryIndex - 1);
+                            actions.loadSystemContent();
+                        } else {
+                            app.focusedContentItemIndex = Math.max(0, app.focusedContentItemIndex - 1);
+                            actions.scrollToFocusedElement('sys-content-item-' + app.focusedContentItemIndex);
+                        }
+                        actions.playSound('focus');
+                    } else if (message.value === 1) { 
+                        if (app.contentPanelFocus === 'menu') {
+                            app.focusedContentCategoryIndex = Math.min(app.contentCategories.length - 1, app.focusedContentCategoryIndex + 1);
+                            actions.loadSystemContent();
+                        } else {
+                            app.focusedContentItemIndex = Math.min(app.contentItems.length - 1, app.focusedContentItemIndex + 1);
+                            actions.scrollToFocusedElement('sys-content-item-' + app.focusedContentItemIndex);
+                        }
+                        actions.playSound('focus');
+                    }
+                    return;
+                }
+
+                
+                if (message.value === 1) {
+                    if (message.event === 'button_a') {
+                        if (app.contentPanelFocus === 'menu' && app.contentItems.length > 0) {
+                            app.contentPanelFocus = 'list';
+                            actions.playSound('select');
+                        } else if (app.contentPanelFocus === 'list') {
+                            actions.toggleFocusedContent();
+                        }
+                        return;
+                    }
+                    
+                    if (message.event === 'button_x') {
+                        actions.installSystemContent();
+                        return;
+                    }
+                    
+                    if (message.event === 'button_y') {
+                        if (app.contentPanelFocus === 'list') actions.deleteFocusedContent();
+                        return;
+                    }
+                    
+                    if (message.event === 'button_b') {
+                        if (app.contentPanelFocus === 'list') {
+                            app.contentPanelFocus = 'menu';
+                            actions.playSound('back');
+                        } else {
+                            actions.goBack();
+                        }
+                        return;
+                    }
+                    if (message.event === 'button_right_bumper') {
+                        if (app.contentPanelFocus === 'list') {
+                            const item = app.contentItems[app.focusedContentItemIndex];
+                            if (item && item.content_type === '00000001') {
+                                actions.exportFocusedSave();
+                            }
+                        }
+                        return;
                     }
                 }
             }

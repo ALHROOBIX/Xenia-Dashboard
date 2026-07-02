@@ -18,6 +18,12 @@
                         
                         <span x-text="item.name" style="flex-grow: 1;"></span>
                         
+                        <span class="info-badge" 
+                              x-show="item.type === 'external'" 
+                              style="background: rgba(242, 196, 14, 0.15); border: 1px solid rgba(242, 196, 14, 0.3); color: #f2c40e; margin-right: 10px; padding: 2px 8px; border-radius: 4px; font-size: 10px;">
+                            MOD
+                        </span>
+
                         <span class="nxe-settings-value" 
                               x-show="item.name === $store.app.currentTheme" 
                               x-text="$store.app.t('colors.active')">Active</span>

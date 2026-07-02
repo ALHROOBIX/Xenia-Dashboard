@@ -1,0 +1,189 @@
+<section class="page" id="settings-content" x-data>
+    <div class="nxe-settings-wrapper">
+        <h1 class="nxe-settings-title" x-text="$store.app.t('dashboard_menu.content')"></h1>
+        
+        <div class="nxe-settings-container" style="position: relative;">
+            
+            <div x-show="$store.app.showXboxInstallNotify" class="nxe-tool-download-overlay" style="display: none;">
+                <div class="nxe-tool-download-card">
+                    <img src="assets/icons/xenia canary.png" alt="Tool Icon">
+                    <h2 x-text="$store.app.t('install_tool.title')"></h2>
+                    <p x-html="$store.app.t('install_tool.desc')"></p>
+
+                    <div class="download-status" style="margin-top: 10px;" x-show="$store.app.xboxInstallDownloadState !== 'idle'">
+                        <span x-show="$store.app.xboxInstallDownloadState === 'downloading'" style="color: var(--nxe-brand-light); font-size: 1.2rem; font-weight: bold;" x-text="$store.app.t('install_tool.downloading')"></span>
+                        <span x-show="$store.app.xboxInstallDownloadState === 'success'" style="color: var(--nxe-btn-a); font-size: 1.2rem; font-weight: bold;" x-text="$store.app.t('install_tool.success')"></span>
+                        <span x-show="$store.app.xboxInstallDownloadState === 'error'" style="color: var(--nxe-alert-color); font-size: 1.2rem; font-weight: bold;" x-text="$store.app.t('install_tool.error')"></span>
+                    </div>
+
+                    <div class="tool-footer-hint" x-show="$store.app.xboxInstallDownloadState === 'idle' || $store.app.xboxInstallDownloadState === 'error'">
+                        <span class="button-icon y">Y</span>
+                        <span x-text="$store.app.t('install_tool.download_btn')"></span>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="nxe-settings-menu">
+                <template x-for="(cat, index) in $store.app.contentCategories" :key="cat.id">
+                    <div class="nxe-settings-item"
+                         :class="{'focused': $store.app.contentPanelFocus === 'menu' && $store.app.focusedContentCategoryIndex === index}"
+                         @click="$store.app.contentPanelFocus = 'menu'; $store.app.focusedContentCategoryIndex = index; $store.actions.loadSystemContent();">
+                        <img class="nxe-settings-icon" :src="cat.icon" alt="">
+                        <span x-text="$store.app.t('contentCategories.' + cat.id)"></span>
+                    </div>
+                </template>
+            </nav>
+                    
+            <div class="nxe-settings-description config-editor-options" style="padding: 20px;">
+                <div x-show="$store.app.isContentLoading && !$store.app.showXboxInstallNotify" style="text-align: center; color: var(--nxe-brand-light); font-size: 1.2rem;">
+                    <span x-text="$store.app.t('generic.loading')"></span>
+                </div>
+
+                <div x-show="!$store.app.isContentLoading && !$store.app.showXboxInstallNotify && $store.app.contentItems.length === 0" style="text-align: center; color: var(--nxe-text-secondary); margin-top: 20px;">
+                    <span x-text="$store.app.t('content.no_items')"></span>
+                    <br>
+                    <span style="font-size: 0.9rem;" x-text="$store.app.t('content.press_x_to_install')"></span>
+                </div>
+
+                <div class="config-options-wrapper" x-show="!$store.app.isContentLoading && !$store.app.showXboxInstallNotify">
+                    <template x-for="(item, index) in $store.app.contentItems" :key="item.file_name">
+                        <div class="config-option"
+                             :class="{'focused': $store.app.contentPanelFocus === 'list' && $store.app.focusedContentItemIndex === index}"
+                             :id="'sys-content-item-' + index"
+                             style="cursor: pointer;">
+                            
+                            <div style="display: flex; flex-direction: column; max-width: 75%;">
+                                <strong style="font-size: 1.2rem; color: var(--nxe-text-primary);" x-text="item.display_name || item.file_name"></strong>
+                                <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--nxe-brand-primary); margin-top: 4px;">
+                                    <img :src="item.iconUrl || 'assets/icons/placeholder.png'" style="width: 20px; height: 20px; border-radius: 4px; object-fit: cover;" alt="Game Icon">
+                                    
+                                    <span x-text="item.game_name + ' | ' + $store.app.t('content.title_id_label') + ': ' + item.title_id"></span>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span x-show="item.disabled" style="background: var(--nxe-alert-color); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold;" x-text="$store.app.t('content.disabled')"></span>
+                                <span x-show="!item.disabled" style="background: var(--nxe-brand-dark); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold;" x-text="$store.app.t('content.active')"></span>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div> 
+
+    <footer class="nxe-footer-left">
+        <div class="footer-button" x-show="$store.app.contentPanelFocus === 'list' && $store.app.contentItems.length > 0 && !$store.app.showXboxInstallNotify">
+            <span class="button-icon a">A</span> 
+            <span x-text="$store.app.t('content.toggle')"></span>
+        </div>
+        
+        <div class="footer-button" x-show="$store.app.contentPanelFocus === 'list' && $store.app.contentItems.length > 0 && !$store.app.showXboxInstallNotify">
+            <span class="button-icon y">Y</span> 
+            <span x-text="$store.app.t('content.delete')"></span>
+        </div>
+
+        <div class="footer-button" x-show="!$store.app.showXboxInstallNotify">
+            <span class="button-icon x">X</span> 
+            <span x-text="$store.app.t('content.install_' + $store.app.contentCategories[$store.app.focusedContentCategoryIndex].id)"></span>
+        </div>
+
+        <div class="footer-button" @click.prevent="$store.actions.goBack()">
+            <span class="button-icon b">B</span> 
+            <span x-text="$store.app.t('generic.back')"></span>
+        </div>
+        
+        <div class="footer-button"
+            x-show="$store.app.contentPanelFocus === 'list' &&
+                    $store.app.contentItems.length > 0 &&
+                    $store.app.contentItems[$store.app.focusedContentItemIndex]?.content_type === '00000001' &&
+                    !$store.app.showXboxInstallNotify">
+            <span class="button-icon rb">RB</span>
+            <span x-text="$store.app.t('content.export_save')"></span>
+        </div>
+    </footer>
+    <style>
+    html[dir="rtl"] #settings-content {
+        direction: ltr !important;
+    }
+    
+    
+    .nxe-tool-download-overlay {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(8px);
+        z-index: 100;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 10px;
+    }
+    .nxe-tool-download-card {
+        background: linear-gradient(135deg, rgba(40,40,40,0.9), rgba(15,15,15,0.95));
+        border: 2px solid var(--nxe-brand-primary);
+        border-radius: 12px;
+        padding: 40px;
+        width: 80%;
+        max-width: 500px;
+        text-align: center;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.8), inset 0 0 20px rgba(144, 195, 29, 0.2);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+    .nxe-tool-download-card img {
+        width: 80px; height: 80px;
+        filter: drop-shadow(0 0 15px var(--nxe-brand-primary));
+        margin-bottom: 10px;
+    }
+    .nxe-tool-download-card h2 {
+        color: #fff; margin: 0; font-size: 2.2rem; font-weight: 700; text-shadow: 0 2px 5px rgba(0,0,0,0.8);
+    }
+    .nxe-tool-download-card p {
+        color: var(--nxe-text-secondary); font-size: 1.1rem; line-height: 1.6; margin: 0;
+    }
+    .tool-footer-hint {
+        display: flex; align-items: center; gap: 12px; margin-top: 25px;
+        background: rgba(0,0,0,0.5); padding: 10px 25px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1);
+        color: #fff; font-size: 1.2rem; font-weight: bold;
+    }
+
+    .button-icon.rb {
+        background: #ffffff !important;
+        color: #000000 !important;
+        min-width: 32px !important;
+        height: 18px !important;
+        border-radius: 4px 4px 2px 2px !important;
+        border-bottom: 2px solid #ffffff !important;
+        font-size: 10px !important;
+        font-weight: 800 !important;
+        line-height: 18px !important;
+        padding: 0 5px !important;
+        margin-right: 5px !important;
+        box-shadow: 0 4px 4px rgba(0, 0, 0, 0.407) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    html[dir="rtl"] .nxe-settings-wrapper {
+        position: absolute;
+        top: 55%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: left !important;
+        direction: ltr  !important;
+    }
+    html[dir="rtl"] #settings-content .nxe-settings-item {
+        display: flex !important;
+        align-items: center !important;
+        gap: 15px !important;
+    }
+    </style>
+</section>

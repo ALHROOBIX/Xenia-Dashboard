@@ -109,6 +109,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     addFriend: (data) => ipcRenderer.invoke('add-friend', data),
     editFriend: (data) => ipcRenderer.invoke('edit-friend', data),     
     deleteFriend: (xuid) => ipcRenderer.invoke('delete-friend', xuid), 
+    manageSystemContent: (payload) => ipcRenderer.invoke('manage-system-content', payload),
+    checkXboxInstallStatus: () => ipcRenderer.invoke('check-xbox-install-status'),
+    downloadXboxInstall: () => ipcRenderer.invoke('download-xbox-install'),
     
     quitApp: () => ipcRenderer.invoke('quit-app')
 });

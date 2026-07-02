@@ -45,6 +45,7 @@
       "About": "ABOUT",
       "about": "ABOUT",
       "media": "MEDIA",
+      "content": "SYSTEM CONTENT",
       "system": "SYSTEM SETTINGS",
       "opentray": "OPEN TRAY",
       "closetray": "CLOSE TRAY",
@@ -296,6 +297,43 @@
       "auto_btn": "Auto Download & Install",
       "downloading": "Downloading and Extracting...",
       "success": "Installed Successfully!"
+    },
+    "contentCategories": {
+      "tu": "Title Update",
+      "dlc": "DLC",
+      "saves": "Saves"
+    },
+    "install_tool": {
+      "title": "Tool Required",
+      "desc": "The <strong>Xbox Content Installer</strong> tool is required to manage DLCs, Title Updates, and Saves.",
+      "downloading": "Downloading & Installing...",
+      "success": "Successfully Installed!",
+      "error": "Download Failed. Please try again.",
+      "download_btn": "Download Tool"
+    },
+    "content": {
+    "no_items": "No items found for this category.",
+    "press_x_to_install": "Press (X) to Install new package.",
+    "title_id_label": "Title ID",
+    "disabled": "DISABLED",
+    "active": "ACTIVE",
+    "toggle": "Toggle Enable/Disable",
+    "delete": "Delete",
+    "install_package": "Install Package",
+    "install_tu": "Install Title Update",
+    "install_dlc": "Install DLC",
+    "install_saves": "Install Save",
+    "export_save": "Export Save"
+    },
+    "app_update": {
+      "title": "Dashboard Update Available",
+      "version_prefix": "Version ",
+      "version_suffix": " is now available!",
+      "description": "A new version of the Xenia Dashboard has been released. Would you like to download and install it now? The app will restart automatically.",
+      "failed": "Update Failed. Try again later.",
+      "update_now": "Update Now",
+      "downloading": "Downloading Update...",
+      "ask_later": "Ask Me Later"
     }
   },
   "ar": {
@@ -344,6 +382,7 @@
       "About": "حول",
       "about": "حول",
       "games": "الألعاب",
+      "content": "محتوى النظام",
       "media": "الوسائط",
       "system": "النظام",
       "opentray": "تشغيل اللعبة",
@@ -614,6 +653,43 @@
       "auto_btn": "التنزيل والتثبيت التلقائي",
       "downloading": "جاري التنزيل والاستخراج...",
       "success": "تم التثبيت بنجاح!"
+    },
+    "contentCategories": {
+      "tu": "تحديث اللعبة",
+      "dlc": "إضافة محتوى",
+      "saves": "الحفظ"
+    },
+    "install_tool": {
+      "title": "أداة التثبيت المطلوبة",
+      "desc": "تتطلب أداة <strong>Xbox Content Installer</strong> لإدارة الإضافات، تحديثات اللعبة، والحفظ.",
+      "downloading": "جاري التنزيل والتثبيت...",
+      "success": "تم التثبيت بنجاح!",
+      "error": "فشل التنزيل. يرجى المحاولة مرة أخرى.",
+      "download_btn": "تنزيل الأداة"
+    },
+    "content": {
+    "no_items": "لم يتم العثور على عناصر لهذه الفئة.",
+    "press_x_to_install": "اضغط (X) لتثبيت الحزمة الجديدة.",
+    "title_id_label": "Title ID",
+    "disabled": "معطل",
+    "active": "مفعل",
+    "toggle": "تبديل التفعيل/التعطيل",
+    "delete": "حذف",
+    "install_package": "تثبيت الحزمة",
+    "install_tu": "تثبيت تحديث اللعبة",
+    "install_dlc": "تثبيت إضافة المحتوى",
+    "install_saves": "تثبيت الحفظ",
+    "export_save": "تصدير الحفظ"
+    },
+    "app_update": {
+      "title": "تحديث الواجهة متاح",
+      "version_prefix": "الإصدار ",
+      "version_suffix": " متاح الآن!",
+      "description": "تم إصدار نسخة جديدة من واجهة Xenia. هل ترغب في تنزيلها وتثبيتها الآن؟ سيتم إعادة تشغيل التطبيق تلقائيًا.",
+      "failed": "فشل التحديث. حاول مرة أخرى لاحقًا.",
+      "update_now": "تحديث الآن",
+      "downloading": "جاري تنزيل التحديث...",
+      "ask_later": "اسألني لاحقًا"
     }
   },
  "zh": {
@@ -662,6 +738,7 @@
       "About": "关于",
       "about": "关于",
       "games": "游戏",
+      "content": "系统内容",
       "media": "媒体",
       "system": "系统",
       "opentray": "运行游戏",
@@ -930,6 +1007,43 @@
       "auto_btn": "自动下载和安装",
       "downloading": "正在下载和提取...",
       "success": "安装成功！"
+    },
+    "contentCategories": {
+      "tu": "游戏更新",
+      "dlc": "内容扩展包",
+      "saves": "存档"
+    },
+    "install_tool": {
+      "title": "必需的安装工具",
+      "desc": "需要 <strong>Xbox Content Installer</strong> 工具来管理扩展包、游戏更新和存档。",
+      "downloading": "正在下载和安装...",
+      "success": "安装成功！",
+      "error": "下载失败，请重试。",
+      "download_btn": "下载工具"
+    },
+    "content": {
+      "no_items": "未找到此类别的内容。",
+      "press_x_to_install": "按 (X) 安装新扩展包。",
+      "title_id_label": "游戏 ID",
+      "disabled": "禁用",
+      "active": "启用",
+      "toggle": "切换启用/禁用",
+      "delete": "删除",
+      "install_package": "安装包",
+      "install_tu": "安装游戏更新",
+      "install_dlc": "安装内容扩展包",
+      "install_saves": "安装存档",
+      "export_save": "导出存档"
+    },
+    "app_update": {
+      "title": "仪表板更新可用",
+      "version_prefix": "版本 ",
+      "version_suffix": " 可用！",
+      "description": "Xenia 仪表板的新版本已发布。您想现在下载并安装吗？应用将自动重启。",
+      "failed": "更新失败，请稍后再试。",
+      "update_now": "立即更新",
+      "downloading": "正在下载更新...",
+      "ask_later": "稍后提醒我"
     }
   },
   
@@ -980,6 +1094,7 @@
       "about": "について",
       "games": "ゲーム",
       "media": "メディア",
+      "content": "システムコンテンツ",
       "system": "システム",
       "opentray": "ゲームを起動",
       "closetray": "トレイを閉じる",
@@ -1248,6 +1363,43 @@
       "auto_btn": "自動でダウンロードしてインストール",
       "downloading": "ダウンロードと抽出中...",
       "success": "インストール成功！"
+    },
+    "contentCategories": {
+      "tu": "ゲームアップデート",
+      "dlc": "コンテンツDLC",
+      "saves": "セーブデータ"
+    },
+    "install_tool": {
+      "title": "必要なインストールツール",
+      "desc": "<strong>Xbox Content Installer</strong> ツールは、DLC、ゲームアップデート、セーブデータを管理するために必要です。",
+      "downloading": "ダウンロードとインストール中...",
+      "success": "インストール成功！",
+      "error": "ダウンロードに失敗しました。もう一度お試しください。",
+      "download_btn": "ツールをダウンロード"
+    },
+    "content": {
+      "no_items": "このカテゴリのコンテンツはありません。",
+      "press_x_to_install": "Xを押してインストールします。",
+      "title_id_label": "ゲームID",
+      "disabled": "無効",
+      "active": "有効",
+      "toggle": "切り替え",
+      "delete": "削除",
+      "install_package": "パッケージインストール",
+      "install_tu": "ゲームアップデートをインストール",
+      "install_dlc": "コンテンツDLCをインストール",
+      "install_saves": "セーブデータをインストール",
+      "export_save": "セーブデータをエクスポート"
+    },
+    "app_update": {
+      "title": "ダッシュボードの更新が利用可能です",
+      "version_prefix": "バージョン ",
+      "version_suffix": " が利用可能です！",
+      "description": "Xeniaダッシュボードの新しいバージョンがリリースされました。今すぐダウンロードしてインストールしますか？アプリは自動的に再起動します。",
+      "failed": "更新に失敗しました。後でもう一度お試しください。",
+      "update_now": "今すぐ更新",
+      "downloading": "更新をダウンロード中...",
+      "ask_later": "後で通知する"
     }
   },
 
@@ -1297,6 +1449,7 @@
       "About": "정보",
       "about": "정보",
       "games": "게임",
+      "content": "콘텐츠",
       "media": "미디어",
       "system": "시스템",
       "opentray": "게임 실행",
@@ -1565,6 +1718,43 @@
       "auto_btn": "자동으로 다운로드하여 설치",
       "downloading": "다운로드 및 추출 중...",
       "success": "설치 성공!"
+    },
+    "contentCategories": {
+      "tu": "게임 업데이트",
+      "dlc": "콘텐츠 DLC",
+      "saves": "저장 데이터"
+    },
+    "install_tool": {
+      "title": "필수 설치 도구",
+      "desc": "<strong>Xbox Content Installer</strong> 도구는 DLC, 게임 업데이트 및 저장 데이터를 관리하는 데 필요합니다.",
+      "downloading": "다운로드 및 설치 중...",
+      "success": "설치 성공!",
+      "error": "다운로드 실패. 다시 시도하세요.",
+      "download_btn": "도구 다운로드"
+    },
+    "content": {
+      "no_items": "이 카테고리의 콘텐츠가 없습니다.",
+      "press_x_to_install": "X를 눌러 설치하세요.",
+      "title_id_label": "타이틀 ID",
+      "disabled": "비활성화됨",
+      "active": "활성화됨",
+      "toggle": "전환",
+      "delete": "삭제",
+      "install_package": "패키지 설치",
+      "install_tu": "게임 업데이트 설치",
+      "install_dlc": "콘텐츠 DLC 설치",
+      "install_saves": "저장 데이터 설치",
+      "export_save": "저장 데이터 내보내기"
+    },
+    "app_update": {
+      "title": "대시보드 업데이트가 사용 가능합니다",
+      "version_prefix": "버전 ",
+      "version_suffix": "이 사용 가능합니다!",
+      "description": "Xenia 대시보드의 새 버전이 출시되었습니다. 지금 다운로드하여 설치하시겠습니까? 앱이 자동으로 재시작됩니다.",
+      "failed": "업데이트 실패. 나중에 다시 시도하세요.",
+      "update_now": "지금 업데이트",
+      "downloading": "업데이트 다운로드 중...",
+      "ask_later": "나중에 알림"
     }
   },
 
@@ -1614,6 +1804,7 @@
       "About": "О ПРОГРАММЕ",
       "about": "О ПРОГРАММЕ",
       "games": "Игры",
+      "content": "Контент",
       "media": "Медиа",
       "system": "Система",
       "opentray": "Запустить игру",
@@ -1882,6 +2073,43 @@
       "auto_btn": "Автоматически загрузить и установить",
       "downloading": "Загрузка и распаковка...",
       "success": "Успешная установка!"
+    },
+    "contentCategories": {
+      "tu": "Обновление игры",
+      "dlc": "Контент DLC",
+      "saves": "Сохраненные данные"
+    },
+    "install_tool": {
+      "title": "Необходимый инструмент установки",
+      "desc": "<strong>Инструмент установки контента Xbox</strong> необходим для управления DLC, обновлениями игр и сохраненными данными.",
+      "downloading": "Загрузка и установка...",
+      "success": "Успешная установка!",
+      "error": "Не удалось загрузить. Попробуйте еще раз.",
+      "download_btn": "Загрузить инструмент"
+    },
+    "content": {
+      "no_items": "Содержание в этой категории отсутствует.",
+      "press_x_to_install": "Нажмите (X) для установки.",
+      "title_id_label": "ID ТИТУЛА",
+      "disabled": "Отключено",
+      "active": "Включено",
+      "toggle": "Переключить",
+      "delete": "Удалить",
+      "install_package": "Установить пакет",
+      "install_tu": "Установить обновление игры",
+      "install_dlc": "Установить контент DLC",
+      "install_saves": "Установить сохраненные данные",
+      "export_save": "Экспортировать сохраненные данные"
+    },
+    "app_update": {
+      "title": "Обновление панели управления доступно",
+      "version_prefix": "Версия ",
+      "version_suffix": "доступна!",
+      "description": "Вышла новая версия панели управления Xenia. Хотите скачать и установить ее сейчас? Приложение автоматически перезапустится.",
+      "failed": "Не удалось обновить. Попробуйте позже.",
+      "update_now": "Обновить сейчас",
+      "downloading": "Загрузка обновления...",
+      "ask_later": "Напомнить позже"
     }
   },
 
@@ -1931,6 +2159,7 @@
       "About": "ÜBER",
       "about": "ÜBER",
       "games": "Spiele",
+      "content": "Inhalt",
       "media": "Medien",
       "system": "System",
       "opentray": "Spiel starten",
@@ -2199,6 +2428,43 @@
       "auto_btn": "Automatisch herunterladen und installieren",
       "downloading": "Herunterladen und entpacken...",
       "success": "Erfolgreich installiert!"
+    },
+    "contentCategories": {
+      "tu": "Spiel-Update",
+      "dlc": "DLC-Inhalt",
+      "saves": "Gespeicherte Daten"
+    },
+    "install_tool": {
+      "title": "Erforderliches Tool zur Installation",
+      "desc": "<strong>Xbox Content Installer Tool</strong> ist erforderlich, um DLCs, Spiel-Updates und gespeicherte Daten zu verwalten.",
+      "downloading": "Herunterladen und installieren...",
+      "success": "Erfolgreich installiert!",
+      "error": "Download fehlgeschlagen. Bitte versuchen Sie es erneut.",
+      "download_btn": "Tool herunterladen"
+    },
+    "content": {
+      "no_items": "Inhalt in dieser Kategorie fehlt.",
+      "press_x_to_install": "Drücke (X) zum Installieren.",
+      "title_id_label": "TITEL-ID",
+      "disabled": "Deaktiviert",
+      "active": "Aktiv",
+      "toggle": "An/Ausschalten",
+      "delete": "Löschen",
+      "install_package": "Paket installieren",
+      "install_tu": "Spiel-Update installieren",
+      "install_dlc": "DLC-Inhalt installieren",
+      "install_saves": "Gespeicherte Daten installieren",
+      "export_save": "Gespeicherte Daten exportieren"
+    },
+    "app_update": {
+      "title": "Neueste Dashboard-Update verfügbar",
+      "version_prefix": "Version ",
+      "version_suffix": "verfügbar!",
+      "description": "Eine neue Version der Dashboard-Oberfläche von Xenia ist verfügbar. Möchten Sie sie jetzt herunterladen und installieren? Die App wird automatisch neu gestartet.",
+      "failed": "Update fehlgeschlagen. Bitte versuchen Sie es später erneut.",
+      "update_now": "Jetzt aktualisieren",
+      "downloading": "Update wird heruntergeladen...",
+      "ask_later": "Später erinnern"
     }
   },
 
@@ -2248,6 +2514,7 @@
       "About": "SOBRE",
       "about": "SOBRE",
       "games": "Jogos",
+      "content": "Conteúdo",
       "media": "Mídia",
       "system": "Sistema",
       "opentray": "Iniciar Jogo",
@@ -2516,6 +2783,43 @@
       "auto_btn": "Baixar e instalar automaticamente",
       "downloading": "Baixando e extraindo...",
       "success": "Instalado com sucesso!"
+    },
+    "contentCategories": {
+      "tu": "Atualização de Jogo",
+      "dlc": "Conteúdo DLC",
+      "saves": "Dados Salvos"
+    },
+    "install_tool": {
+      "title": "Ferramenta Necessária para Instalação",
+      "desc": "<strong>Xbox Content Installer Tool</strong> é necessário para gerenciar DLCs, atualizações de jogos e dados salvos.",
+      "downloading": "Baixando e instalando...",
+      "success": "Instalado com sucesso!",
+      "error": "Falha no download. Tente novamente.",
+      "download_btn": "Baixar Ferramenta"
+    },
+    "content": {
+      "no_items": "Nenhum item desta categoria está disponível.",
+      "press_x_to_install": "Pressione (X) para instalar.",
+      "title_id_label": "ID DO TÍTULO",
+      "disabled": "Desativado",
+      "active": "Ativo",
+      "toggle": "Alternar",
+      "delete": "Excluir",
+      "install_package": "Instalar pacote",
+      "install_tu": "Instalar atualização de jogo",
+      "install_dlc": "Instalar conteúdo DLC",
+      "install_saves": "Instalar dados salvos",
+      "export_save": "Exportar dados salvos"
+    },
+    "app_update": {
+      "title": "Atualização Disponível do Painel de Controle",
+      "version_prefix": "Versão ",
+      "version_suffix": "disponível!",
+      "description": "Uma nova versão do painel de controle da Xenia está disponível. Você pode baixá-la e instalá-la agora? O aplicativo será reiniciado automaticamente.",
+      "failed": "Falha na atualização. Tente novamente mais tarde.",
+      "update_now": "Atualizar Agora",
+      "downloading": "Atualizando...",
+      "ask_later": "Lembrar mais tarde"
     }
   },
 
@@ -2565,6 +2869,7 @@
       "About": "ACERCA DE",
       "about": "ACERCA DE",
       "games": "Juegos",
+      "content": "Contenido",
       "media": "Medios",
       "system": "Sistema",
       "opentray": "Iniciar Juego",
@@ -2833,6 +3138,43 @@
       "auto_btn": "Descargar e instalar automáticamente",
       "downloading": "Descargando y extrayendo...",
       "success": "¡Instalado con éxito!"
+    },
+    "contentCategories": {
+      "tu": "Actualización de Juego",
+      "dlc": "Contenido DLC",
+      "saves": "Datos Guardados"
+    },
+    "install_tool": {
+      "title": "Herramienta Requerida para Instalación",
+      "desc": "<strong>Xbox Content Installer Tool</strong> es necesario para gestionar DLCs, actualizaciones de juegos y datos guardados.",
+      "downloading": "Descargando e instalando...",
+      "success": "Instalado con éxito!",
+      "error": "Fallo en la descarga. Inténtelo de nuevo.",
+      "download_btn": "Descargar Herramienta"
+    },
+    "content": {
+      "no_items": "No hay elementos de esta categoría disponibles.",
+      "press_x_to_install": "Presiona (X) para instalar.",
+      "title_id_label": "ID DE TÍTULO",
+      "disabled": "Desactivado",
+      "active": "Activo",
+      "toggle": "Alternar",
+      "delete": "Eliminar",
+      "install_package": "Instalar paquete",
+      "install_tu": "Instalar actualización de juego",
+      "install_dlc": "Instalar contenido DLC",
+      "install_saves": "Instalar datos guardados",
+      "export_save": "Exportar datos guardados"
+    },
+    "app_update": {
+      "title": "Actualización Disponible del Panel de Control",
+      "version_prefix": "Versión ",
+      "version_suffix": "disponible!",
+      "description": "Una nueva versión del panel de control de Xenia está disponible. Puede descargarla e instalarla ahora? La aplicación se reiniciará automáticamente.",
+      "failed": "Fallo en la actualización. Inténtelo de nuevo más tarde.",
+      "update_now": "Actualizar Ahora",
+      "downloading": "Actualizando...",
+      "ask_later": "Recordar más tarde"
     }
   },
 
@@ -2882,6 +3224,7 @@
       "About": "HAKKINDA",
       "about": "HAKKINDA",
       "games": "Oyunlar",
+      "content": "İçerik",
       "media": "Medya",
       "system": "Sistem",
       "opentray": "Oyunu Başlat",
@@ -3150,6 +3493,43 @@
       "auto_btn": "Otomatik olarak indir ve kur",
       "downloading": "İndiriliyor ve çıkarılıyor...",
       "success": "Başarıyla kuruldu!"
+    },
+    "contentCategories": {
+      "tu": "Oyun Güncelleme",
+      "dlc": "DLC İçerik",
+      "saves": "Kaydedilen Veriler"
+    },
+    "install_tool": {
+      "title": "İndirme Aracı",
+      "desc": "<strong>Xbox Content Installer Tool</strong> DLC'leri, oyun güncellemelerini ve kaydedilen verileri yönetmek için gereklidir.",
+      "downloading": "İndiriliyor ve kuruluyor...",
+      "success": "Başarıyla kuruldu!",
+      "error": "İndirme başarısız oldu. Lütfen tekrar deneyin.",
+      "download_btn": "Aracı İndir"
+    },
+    "content": {
+      "no_items": "Bu kategoride herhangi bir öğe yok.",
+      "press_x_to_install": "Kurmak için (X) tuşuna basın.",
+      "title_id_label": "BAŞLIK KİMLİĞİ",
+      "disabled": "Devre dışı",
+      "active": "Etkin",
+      "toggle": "Değiştir",
+      "delete": "Sil",
+      "install_package": "Paket Kur",
+      "install_tu": "Oyun Güncellemesini Kur",
+      "install_dlc": "DLC İçeriğini Kur",
+      "install_saves": "Kaydedilen Verileri Kur",
+      "export_save": "Kaydedilen Verileri Dışa Aktar"
+    },
+    "app_update": {
+      "title": "Kontrol Paneli Güncellemesi Mevcut",
+      "version_prefix": "Sürüm ",
+      "version_suffix": "mevcut!",
+      "description": "Xenia kontrol panelinin yeni bir sürümü mevcut. Şimdi indirip kurmak ister misiniz? Uygulama otomatik olarak yeniden başlayacaktır.",
+      "failed": "Güncelleme başarısız oldu. Lütfen daha sonra tekrar deneyin.",
+      "update_now": "Şimdi Güncelle",
+      "downloading": "Güncelleniyor...",
+      "ask_later": "Daha Sonra Hatırlat"
     }
   },
 
@@ -3199,6 +3579,7 @@
       "About": "INFORMAZIONI",
       "about": "INFORMAZIONI",
       "games": "Giochi",
+      "content": "Contenuti",
       "media": "Media",
       "system": "Sistema",
       "opentray": "Avvia Gioco",
@@ -3467,6 +3848,43 @@
       "auto_btn": "Scarica e installa automaticamente",
       "downloading": "Scaricamento e estrazione in corso...",
       "success": "Installato con successo!"
+    },
+    "contentCategories": {
+      "tu": "Aggiornamento Gioco",
+      "dlc": "Contenuto DLC",
+      "saves": "Dati Salvati"
+    },
+    "install_tool": {
+      "title": "Strumento di Download",
+      "desc": "<strong>Xbox Content Installer Tool</strong> è necessario per gestire DLC, aggiornamenti di gioco e dati salvati.",
+      "downloading": "Scaricamento e installazione in corso...",
+      "success": "Installato con successo!",
+      "error": "Download fallito. Riprova.",
+      "download_btn": "Scarica Strumento"
+    },
+    "content": {
+      "no_items": "Questa categoria non contiene alcun elemento.",
+      "press_x_to_install": "Premi (X) per installare.",
+      "title_id_label": "ID TITOLO",
+      "disabled": "Disabilitato",
+      "active": "Attivo",
+      "toggle": "Alterna",
+      "delete": "Elimina",
+      "install_package": "Installa Package",
+      "install_tu": "Installa Aggiornamento Gioco",
+      "install_dlc": "Installa Contenuto DLC",
+      "install_saves": "Installa Dati Salvati",
+      "export_save": "Esporta Dati Salvati"
+    },
+    "app_update": {
+      "title": "Aggiornamento Pannello di Controllo Disponibile",
+      "version_prefix": "Versione ",
+      "version_suffix": " disponibile!",
+      "description": "È disponibile una nuova versione del pannello di controllo Xenia. Vuoi scaricarla e installarla ora? L'app si riavvierà automaticamente.",
+      "failed": "Aggiornamento fallito. Riprova più tardi.",
+      "update_now": "Aggiorna Ora",
+      "downloading": "Aggiornamento in corso...",
+      "ask_later": "Ricordamelo Più Tardi"
     }
   },
 
@@ -3516,6 +3934,7 @@
       "About": "À PROPOS",
       "about": "À PROPOS",
       "games": "Jeux",
+      "content": "Contenu",
       "media": "Médias",
       "system": "Système",
       "opentray": "Lancer le Jeu",
@@ -3784,6 +4203,43 @@
       "auto_btn": "Télécharger et installer automatiquement", 
       "downloading": "Téléchargement et extraction en cours...",
       "success": "Installation réussie !"
+    },
+    "contentCategories": {
+      "tu": "Mise à Jour du Jeu",
+      "dlc": "Contenu DLC",
+      "saves": "Données Sauvegardées"
+    },
+    "install_tool": {
+      "title": "Outil d'Installation",
+      "desc": "<strong>Xbox Content Installer Tool</strong> est requis pour gérer les DLC, les mises à jour de jeu et les données sauvegardées.",
+      "downloading": "Téléchargement et installation en cours...",
+      "success": "Installation réussie !",
+      "error": "Échec du téléchargement. Veuillez réessayer.",
+      "download_btn": "Télécharger l'Outil"
+    },
+    "content": {
+      "no_items": "Cette catégorie ne contient aucun élément.",
+      "press_x_to_install": "Appuyez sur (X) pour installer.",
+      "title_id_label": "ID DU TITRE",
+      "disabled": "Désactivé",
+      "active": "Actif",
+      "toggle": "Basculer",
+      "delete": "Supprimer",
+      "install_package": "Installer le Package",
+      "install_tu": "Installer la Mise à Jour du Jeu",
+      "install_dlc": "Installer le Contenu DLC",
+      "install_saves": "Installer les Données Sauvegardées",
+      "export_save": "Exporter les Données Sauvegardées"
+    },
+    "app_update": {
+      "title": "Mise à Jour du Panneau de Contrôle Disponible",
+      "version_prefix": "Version ",
+      "version_suffix": " disponible !",
+      "description": "Une nouvelle version du panneau de contrôle Xenia est disponible. Voulez-vous la télécharger et l'installer maintenant ? L'application redémarrera automatiquement.",
+      "failed": "Échec de la mise à jour. Veuillez réessayer plus tard.",
+      "update_now": "Mettre à Jour Maintenant",
+      "downloading": "Mise à jour en cours...",
+      "ask_later": "Me le rappeler plus tard"
     }
   }
 }

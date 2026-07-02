@@ -14,6 +14,7 @@
         { "id": "opentray", "name": "OPEN TRAY", "view": "opentray", "icon": "assets/icons/start.png" },
         { "id": "achievements", "name": "ACHIEVEMENTS", "view": "achievements", "icon": "assets/icons/achievements.png" },
         { "id": "gamelibrary", "name": "GAME LIBRARY", "view": "game-library", "icon": "assets/icons/games.png" },
+        { "id": "content", "name": "SYSTEM CONTENT", "view": "settings-content", "icon": "assets/icons/content.webp" },
         { "id": "settings", "name": "SYSTEM SETTINGS", "view": "settings-hub", "icon": "assets/icons/Setting.png" }
       ]
     }

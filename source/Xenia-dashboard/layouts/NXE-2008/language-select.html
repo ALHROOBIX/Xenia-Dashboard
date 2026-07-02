@@ -47,8 +47,7 @@
                         </div>
                     </template>
                 </div>
-
-                                <div id="lang-item-2"
+                <div id="lang-item-2"
                      class="nxe-settings-item"
                      :class="{'focused': $store.app.focusedIndex === 2}"
                      @click="$store.actions.setLanguage('zh')">
@@ -248,9 +247,9 @@
                 </div>
 
             </nav>
-                    
+
             <div class="nxe-settings-description">
-                
+
                 <h3>Language Selection</h3>
                 <hr class="desc-separator">
 
@@ -313,11 +312,11 @@
                     <p class="desc-text">Change the dashboard language to <strong>Français</strong>.</p>
                     <p class="desc-sub">System menus, settings.</p>
                 </div>
-                
+
             </div>
-            
+
         </div>
-    </div> 
+    </div>
 
     <footer class="nxe-footer-left">
         <div class="footer-button" id="btn-a">
@@ -351,19 +350,22 @@
         </footer>
 
     <style>
+
+        
         .nxe-settings-container {
             display: flex;
-            flex-direction: row;
-            gap: 0;
+            flex-direction: row; 
+            gap: 0; 
             padding-top: 20px;
             min-height: 450px;
             height: auto;
         }
 
+        
         .nxe-settings-menu {
             background: rgba(0,0,0,0.25);
             overflow: hidden;
-            flex: 0 0 40%;
+            flex: 0 0 40%; 
             border-right: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             flex-direction: column;
@@ -371,6 +373,7 @@
             
         }
 
+        
         .nxe-settings-item {
             padding: 18px 25px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
@@ -380,8 +383,9 @@
             cursor: pointer;
             transition: all 0.15s ease-out;
             position: relative;
-            color: rgba(255, 255, 255, 0.6);
+            color: rgba(255, 255, 255, 0.6); 
         }
+
 
         .item-content {
             display: flex;
@@ -389,18 +393,22 @@
             gap: 15px;
         }
 
+        
         .nxe-settings-item.focused {
+            
             background: linear-gradient(180deg, #1c75bc 0%, #0c4b85 100%); 
+            
             box-shadow: 
                 0 0 10px rgba(28, 117, 188, 0.6),
                 inset 0 1px 0 rgba(255, 255, 255, 0.4);
-            color: white;
-            transform: scale(1.03) translateX(5px);
+            color: white; 
+            transform: scale(1.03) translateX(5px); 
             z-index: 10;
             border-radius: 4px;
             border-bottom-color: transparent;
         }
 
+        
         .main-text {
             font-size: 1.3rem;
             font-weight: bold;
@@ -414,11 +422,13 @@
             display: block;
         }
 
+        
         .flag-icon {
             font-size: 2rem;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
         }
 
+        
         .active-badge {
             background: rgba(255, 255, 255, 0.2);
             border: 1px solid rgba(255, 255, 255, 0.4);
@@ -431,13 +441,15 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         
+        
         .nxe-settings-item.focused .active-badge {
             background: white;
             color: #0c4b85;
         }
 
+        
         .nxe-settings-description {
-            flex: 1;
+            flex: 1; 
             padding: 30px 40px;
             background: rgba(0, 0, 0, 0.25);
             color: #ddd;
@@ -470,6 +482,7 @@
             color: rgba(255, 255, 255, 0.5);
         }
 
+        
         .is-rtl .nxe-settings-container {
             flex-direction: row-reverse;
         }
@@ -480,9 +493,8 @@
         }
 
         .is-rtl .nxe-settings-item.focused {
-            transform: scale(1.03) translateX(-5px);
+            transform: scale(1.03) translateX(-5px); 
         }
-
         html[dir="rtl"] .nxe-settings-wrapper{
             
             text-align: left !important;
