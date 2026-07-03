@@ -10,6 +10,7 @@ const { exec, spawn } = require('child_process');
 const { exec: execCb } = require('child_process');
 const util = require('util');
 const execPromise = util.promisify(execCb);
+const sevenBin = require('7zip-bin');
 
 
 
@@ -2571,23 +2572,29 @@ ipcMain.handle('scanForThemes', async () => {
         };
         await fs.writeFile(versionFile, JSON.stringify(data, null, 2));
     }
-    
+
 ipcMain.handle('check-xenia-update', async (event, platform, variant = 'standard') => {
     try {
-        let repoUrl = 'https://api.github.com/repos/xenia-canary/xenia-canary-releases/releases/latest';
+        
+        let repoUrl = 'https://api.github.com/repos/xenia-canary/xenia-canary/releases/latest';
         let folderName = platform === 'win' ? 'xenia-win' : 'xenia-linux';
-        let exeName = platform === 'win' ? 'xenia_canary.exe' : 'xenia_canary';
+        
+        let exeName = platform === 'win' ? 'xenia_canary.exe' : 'xenia_canary.AppImage';
 
         
         if (variant === 'netplay') {
             repoUrl = 'https://api.github.com/repos/AdrianCassar/xenia-canary/releases/latest';
             folderName = platform === 'win' ? 'xenia-netplay-win' : 'xenia-netplay-linux';
-            exeName = platform === 'win' ? 'xenia_canary_netplay.exe' : 'xenia_canary_netplay';
+            exeName = platform === 'win' ? 'xenia_canary_netplay.exe' : 'xenia_canary_netplay.AppImage';
         }
 
         const targetDir = path.join(CONFIG_DIR, 'assets', folderName);
         const versionFile = path.join(targetDir, 'version.json');
-        const exePath = path.join(targetDir, exeName);
+        
+        const possibleExePaths = [
+            path.join(targetDir, exeName),
+            path.join(targetDir, exeName.replace('.AppImage', '')) 
+        ];
 
         
         const { data: remoteRelease } = await axios.get(repoUrl, {
@@ -2595,20 +2602,20 @@ ipcMain.handle('check-xenia-update', async (event, platform, variant = 'standard
             timeout: 5000
         });
 
+        if (!remoteRelease) {
+            return { success: false, error: "No latest release found on GitHub." };
+        }
+
         let localData = null;
         let isInstalled = false;
         let isVersionFileExists = false;
 
         
-        if (fsSync.existsSync(exePath)) {
-            isInstalled = true;
-        } else if (platform !== 'win') {
-            try {
-                if (fsSync.existsSync(targetDir)) {
-                    const files = await fs.readdir(targetDir);
-                    if (files.some(f => f.includes('xenia') && !f.endsWith('.json'))) isInstalled = true;
-                }
-            } catch(e) {}
+        for (const p of possibleExePaths) {
+            if (fsSync.existsSync(p)) {
+                isInstalled = true;
+                break;
+            }
         }
 
         
@@ -2651,7 +2658,8 @@ ipcMain.handle('check-xenia-update', async (event, platform, variant = 'standard
             remote: {
                 tag: remoteRelease.tag_name,
                 date: remoteRelease.published_at,
-                hash: remoteRelease.target_commitish.substring(0, 7)
+                
+                hash: remoteRelease.target_commitish ? remoteRelease.target_commitish.substring(0, 7) : remoteRelease.tag_name
             },
             local: localData ? {
                 tag: localData.tag_name,
@@ -2671,22 +2679,14 @@ ipcMain.handle('check-xenia-update', async (event, platform, variant = 'standard
 
 
 ipcMain.handle('download-xenia', async (event, platform, variant = 'standard') => {
-    let repoUrl = 'https://api.github.com/repos/xenia-canary/xenia-canary-releases/releases/latest';
-    let winAssetName = 'xenia_canary_windows.zip';
-    const linuxAssetPrefix = 'xenia_canary_linux'; 
-    let binaryName = platform === 'win' ? 'xenia_canary.exe' : 'xenia_canary';
-    
-    
+    let repoUrl = 'https://api.github.com/repos/xenia-canary/xenia-canary/releases/latest';
     let folderName = platform === 'win' ? 'xenia-win' : 'xenia-linux';
+    let binaryName = platform === 'win' ? 'xenia_canary.exe' : 'xenia_canary.AppImage';
 
-    
     if (variant === 'netplay') {
         repoUrl = 'https://api.github.com/repos/AdrianCassar/xenia-canary/releases/latest';
-        winAssetName = 'xenia_canary_netplay_windows.zip';
-        binaryName = 'xenia_canary_netplay.exe';
-        
-        
         folderName = platform === 'win' ? 'xenia-netplay-win' : 'xenia-netplay-linux';
+        binaryName = platform === 'win' ? 'xenia_canary_netplay.exe' : 'xenia_canary_netplay.AppImage';
     }
 
     const downloadDir = path.join(CONFIG_DIR, 'temp_downloads');
@@ -2700,22 +2700,43 @@ ipcMain.handle('download-xenia', async (event, platform, variant = 'standard') =
     };
 
     let downloadPath = '';
-    let savedBinaryPath = ''; 
+    let savedBinaryPath = '';
 
-    async function findFileRecursive(dir, filename) {
+    
+    async function findFileRecursive(dir, filename, fallbackExtensions = []) {
         const entries = await fs.readdir(dir, { withFileTypes: true });
         for (const entry of entries) {
             const fullPath = path.join(dir, entry.name);
             if (entry.isDirectory()) {
-                const found = await findFileRecursive(fullPath, filename);
+                const found = await findFileRecursive(fullPath, filename, fallbackExtensions);
                 if (found) return found;
-            } else if (entry.name === filename) return fullPath;
+            } else {
+                if (entry.name === filename) return fullPath;
+                for (const ext of fallbackExtensions) {
+                    if (entry.name.endsWith(ext) && entry.name.toLowerCase().includes('xenia')) return fullPath;
+                }
+            }
         }
         return null;
     }
 
-    try {
+    
+    const getSevenBinPath = () => {
+        const sevenBin = require('7zip-bin');
+        let binPath = sevenBin.path7za || sevenBin.path7z;
+        if (binPath && fsSync.existsSync(binPath)) {
+            return binPath;
+        }
         
+        try {
+            const { execSync } = require('child_process');
+            const whichResult = execSync('which 7z 2>/dev/null || which 7za 2>/dev/null', { encoding: 'utf-8' }).trim();
+            if (whichResult && fsSync.existsSync(whichResult)) return whichResult;
+        } catch (e) {}
+        throw new Error('7zip not found. Please install 7-Zip or p7zip.');
+    };
+
+    try {
         sendLocalProgress({ status: 'Connecting to GitHub server...', percentage: 0, step: 'connect' });
 
         const { data: release } = await axios.get(repoUrl, { 
@@ -2723,13 +2744,24 @@ ipcMain.handle('download-xenia', async (event, platform, variant = 'standard') =
             timeout: 20000 
         });
 
+        if (!release) throw new Error("No latest release found on GitHub.");
+
+        
         let foundAsset = null;
-        if (platform === 'win') foundAsset = release.assets.find(a => a.name === winAssetName);
-        else foundAsset = release.assets.find(a => a.name.startsWith(linuxAssetPrefix));
+        if (platform === 'win') {
+            foundAsset = release.assets.find(a => 
+                a.name.toLowerCase().includes('windows') && 
+                (a.name.endsWith('.zip') || a.name.endsWith('.7z'))
+            );
+        } else {
+            foundAsset = release.assets.find(a => 
+                a.name.toLowerCase().includes('linux') && 
+                (a.name.endsWith('.AppImage') || a.name.endsWith('.zip') || a.name.endsWith('.tar.gz'))
+            );
+        }
 
         if (!foundAsset) throw new Error(`Release asset not found for ${platform}`);
 
-        
         if (!fsSync.existsSync(downloadDir)) await fs.mkdir(downloadDir, { recursive: true });
         downloadPath = path.join(downloadDir, foundAsset.name);
         if (fsSync.existsSync(downloadPath)) await fs.unlink(downloadPath);
@@ -2756,25 +2788,60 @@ ipcMain.handle('download-xenia', async (event, platform, variant = 'standard') =
             writer.on('error', reject);
         });
 
-        
         sendLocalProgress({ status: 'Extracting files (Unpacking)...', percentage: 100, step: 'extract' });
         
         if (fsSync.existsSync(tempExtractDir)) await fs.rm(tempExtractDir, { recursive: true, force: true });
         await fs.mkdir(tempExtractDir, { recursive: true });
 
-        if (platform === 'win') await decompress(downloadPath, tempExtractDir);
-        else await execPromise(`tar -xf "${downloadPath}" -C "${tempExtractDir}"`);
         
+        const ext = path.extname(foundAsset.name).toLowerCase();
+
+        if (ext === '.appimage') {
+            
+            await fs.copyFile(downloadPath, path.join(tempExtractDir, binaryName));
+        } 
+        else if (ext === '.7z' || ext === '.zip' || ext === '.tar.gz' || ext === '.tgz') {
+            
+            const sevenPath = getSevenBinPath();
+            
+            if (process.platform !== 'win32') {
+                try { await fs.chmod(sevenPath, 0o755); } catch (e) {}
+            }
+
+            const { execFile } = require('child_process');
+            await new Promise((resolve, reject) => {
+                const args = ['x', downloadPath, `-o${tempExtractDir}`, '-y'];
+                console.log(`[7zip] Running: ${sevenPath} ${args.join(' ')}`);
+                const proc = execFile(sevenPath, args, { cwd: downloadDir });
+                let stderr = '';
+                proc.stderr.on('data', (data) => { stderr += data.toString(); });
+                proc.on('close', (code) => {
+                    if (code === 0) {
+                        resolve();
+                    } else {
+                        reject(new Error(`7zip extraction failed with code ${code}: ${stderr}`));
+                    }
+                });
+                proc.on('error', (err) => reject(err));
+            });
+        } 
+        else {
+            
+            if (platform === 'win') await decompress(downloadPath, tempExtractDir);
+            else await execPromise(`tar -xf "${downloadPath}" -C "${tempExtractDir}"`);
+        }
+
         sendLocalProgress({ status: 'Installing binaries...', percentage: 100, step: 'install' });
 
         if (!fsSync.existsSync(finalTargetDir)) await fs.mkdir(finalTargetDir, { recursive: true });
 
-        const foundBinaryPath = await findFileRecursive(tempExtractDir, binaryName);
+        const fallbackExts = platform === 'win' ? ['.exe'] : ['.AppImage', ''];
+        const foundBinaryPath = await findFileRecursive(tempExtractDir, binaryName, fallbackExts);
+        
         if (foundBinaryPath) {
             const targetBinaryPath = path.join(finalTargetDir, binaryName);
             if (fsSync.existsSync(targetBinaryPath)) await fs.unlink(targetBinaryPath);
             await fs.copyFile(foundBinaryPath, targetBinaryPath);
-            
             
             const portableFile = path.join(finalTargetDir, 'portable.txt');
             if (!fsSync.existsSync(portableFile)) {
@@ -2787,19 +2854,16 @@ ipcMain.handle('download-xenia', async (event, platform, variant = 'standard') =
             throw new Error(`Could not find ${binaryName} inside archive!`);
         }
 
-        
         if (platform !== 'win') {
             sendLocalProgress({ status: 'Setting permissions...', percentage: 100, step: 'config' });
             if (fsSync.existsSync(savedBinaryPath)) await fs.chmod(savedBinaryPath, 0o755);
         }
 
-        
         sendLocalProgress({ status: 'Cleaning up temporary files...', percentage: 100, step: 'cleanup' });
         await writeVersionFile(finalTargetDir, release);
         await fs.rm(tempExtractDir, { recursive: true, force: true });
         try { await fs.unlink(downloadPath); } catch(e){}
 
-        
         sendLocalProgress({ status: `Update Complete! (${release.tag_name})`, percentage: 100, step: 'done' });
         return { success: true, newPath: savedBinaryPath };
 
@@ -2819,98 +2883,161 @@ ipcMain.handle('download-xenia', async (event, platform, variant = 'standard') =
 });
 
 
-    ipcMain.handle('download-patches', async () => {
-        const downloadUrl = 'https://github.com/xenia-canary/game-patches/releases/latest/download/game-patches.zip';
-        const assetName = 'game-patches.zip';
-        const downloadDir = path.join(CONFIG_DIR, 'temp_downloads');
-        const downloadPath = path.join(downloadDir, assetName);
+ipcMain.handle('download-patches', async () => {
+    
+    const downloadUrl = 'https://github.com/xenia-canary/game-patches/releases/latest/download/game-patches.7z';
+    const assetName = 'game-patches.7z';
+    const downloadDir = path.join(CONFIG_DIR, 'temp_downloads');
+    const downloadPath = path.join(downloadDir, assetName);
+
+    const sendPatchProgress = (payload) => {
+        sendProgress({ ...payload, type: 'patches' });
+    };
+
+    try {
+        
+        const currentXeniaPath = store.get('xeniaPath');
+        let targetDirs = [];
+
+        if (currentXeniaPath && !currentXeniaPath.startsWith('Click')) {
+            const xeniaDir = path.dirname(currentXeniaPath);
+            const patchesDir = path.join(xeniaDir, 'patches');
+            targetDirs.push(patchesDir);
+            console.log(`[Patches] Target from settings: ${patchesDir}`);
+        } else {
+            targetDirs.push(path.join(CONFIG_DIR, 'assets', 'xenia-win', 'patches'));
+            targetDirs.push(path.join(CONFIG_DIR, 'assets', 'xenia-linux', 'patches'));
+        }
+
+        sendPatchProgress({ status: 'Preparing...', percentage: 0, step: 'connect' });
+        if (!fsSync.existsSync(downloadDir)) await fs.mkdir(downloadDir, { recursive: true });
 
         
-        const sendPatchProgress = (payload) => {
-            sendProgress({ ...payload, type: 'patches' });
-        };
-
-        try {
-            
-            const currentXeniaPath = store.get('xeniaPath');
-            let targetDirs = [];
-
-            if (currentXeniaPath && !currentXeniaPath.startsWith('Click')) {
-                const xeniaDir = path.dirname(currentXeniaPath);
-                const patchesDir = path.join(xeniaDir, 'patches');
-                targetDirs.push(patchesDir);
-                console.log(`[Patches] Target found from settings: ${patchesDir}`);
-            } else {
-                targetDirs.push(path.join(CONFIG_DIR, 'assets', 'xenia-win', 'patches'));
-                targetDirs.push(path.join(CONFIG_DIR, 'assets', 'xenia-linux', 'patches'));
+        for (const dir of targetDirs) {
+            if (fsSync.existsSync(dir)) {
+                await fs.rm(dir, { recursive: true, force: true });
             }
-
-            
-            sendPatchProgress({ status: 'Preparing...', percentage: 0, step: 'connect' });
-            if (!fsSync.existsSync(downloadDir)) await fs.mkdir(downloadDir, { recursive: true });
-
-            
-            for (const dir of targetDirs) {
-                if (fsSync.existsSync(dir)) {
-                    await fs.rm(dir, { recursive: true, force: true });
-                }
-                await fs.mkdir(dir, { recursive: true });
-            }
-
-            
-            sendPatchProgress({ status: `Downloading patches...`, percentage: 0, step: 'download' });
-            const writer = fsSync.createWriteStream(downloadPath);
-            const response = await axios({
-                url: downloadUrl, method: 'GET', responseType: 'stream'
-            });
-
-            const totalBytes = parseInt(response.headers['content-length'], 10);
-            let downloadedBytes = 0;
-
-            response.data.on('data', (chunk) => {
-                downloadedBytes += chunk.length;
-                const percentage = Math.floor((downloadedBytes / totalBytes) * 100);
-                
-                sendPatchProgress({ status: 'Downloading...', percentage: percentage, step: 'download' });
-            });
-
-            response.data.pipe(writer);
-            await new Promise((resolve, reject) => {
-                writer.on('finish', resolve);
-                writer.on('error', reject);
-            });
-
-            
-            sendPatchProgress({ status: 'Installing patches...', percentage: 100, step: 'extract' });
-            
-            for (const dir of targetDirs) {
-                console.log(`[Patches] Extracting to: ${dir}`);
-                
-                await decompress(downloadPath, dir, { strip: 1 });
-            }
-
-            
-            sendPatchProgress({ status: 'Cleaning up...', percentage: 100, step: 'cleanup' });
-            await fs.unlink(downloadPath);
-            if (fsSync.existsSync(downloadDir)) await fs.rm(downloadDir, { recursive: true, force: true });
-
-            
-            sendPatchProgress({ status: 'Patches installed successfully!', percentage: 100, step: 'done' });
-            return { success: true };
-
-        } catch (error) {
-            console.error('[Patches Error]', error.message);
-            
-            let errorMsg = error.message;
-            if (error.response && error.response.status === 403) {
-                errorMsg = "GitHub Rate Limit! Please wait.";
-            }
-
-            
-            sendPatchProgress({ status: `Error: ${errorMsg}`, percentage: 0, step: 'error' });
-            return { success: false, error: errorMsg };
+            await fs.mkdir(dir, { recursive: true });
         }
-    });
+
+        
+        sendPatchProgress({ status: 'Downloading patches...', percentage: 0, step: 'download' });
+        const writer = fsSync.createWriteStream(downloadPath);
+        const response = await axios({
+            url: downloadUrl,
+            method: 'GET',
+            responseType: 'stream'
+        });
+
+        const totalBytes = parseInt(response.headers['content-length'], 10);
+        let downloadedBytes = 0;
+        response.data.on('data', (chunk) => {
+            downloadedBytes += chunk.length;
+            const percentage = Math.floor((downloadedBytes / totalBytes) * 100);
+            sendPatchProgress({ status: 'Downloading...', percentage, step: 'download' });
+        });
+
+        response.data.pipe(writer);
+        await new Promise((resolve, reject) => {
+            writer.on('finish', resolve);
+            writer.on('error', reject);
+        });
+
+        sendPatchProgress({ status: 'Extracting patches...', percentage: 80, step: 'extract' });
+
+        
+        const extractTemp = path.join(downloadDir, 'patches_extracted');
+        if (fsSync.existsSync(extractTemp)) await fs.rm(extractTemp, { recursive: true, force: true });
+        await fs.mkdir(extractTemp, { recursive: true });
+
+        
+        const sevenBin = require('7zip-bin');
+        let sevenPath = sevenBin.path7za || sevenBin.path7z;
+
+        
+        if (!sevenPath || !fsSync.existsSync(sevenPath)) {
+            const { execSync } = require('child_process');
+            try {
+                const whichResult = execSync('which 7z 2>/dev/null || which 7za 2>/dev/null', { encoding: 'utf-8' }).trim();
+                if (whichResult && fsSync.existsSync(whichResult)) {
+                    sevenPath = whichResult;
+                }
+            } catch (e) {}
+        }
+
+        if (!sevenPath || !fsSync.existsSync(sevenPath)) {
+            throw new Error('7zip binary not found. Please install 7-Zip or p7zip.');
+        }
+
+        
+        if (process.platform !== 'win32') {
+            try { await fs.chmod(sevenPath, 0o755); } catch (e) {}
+        }
+
+        
+        const { execFile } = require('child_process');
+        await new Promise((resolve, reject) => {
+            const args = ['x', downloadPath, `-o${extractTemp}`, '-y'];
+            console.log(`[7zip] Running: ${sevenPath} ${args.join(' ')}`);
+            const proc = execFile(sevenPath, args, { cwd: downloadDir });
+            let stderr = '';
+            proc.stderr.on('data', (data) => { stderr += data.toString(); });
+            proc.on('close', (code) => {
+                if (code === 0) {
+                    resolve();
+                } else {
+                    reject(new Error(`7zip extraction failed with code ${code}: ${stderr}`));
+                }
+            });
+            proc.on('error', (err) => reject(err));
+        });
+
+        
+        let sourcePatchesDir = null;
+        const findPatchesDir = async (dir) => {
+            const entries = await fs.readdir(dir, { withFileTypes: true });
+            for (const entry of entries) {
+                const fullPath = path.join(dir, entry.name);
+                if (entry.isDirectory()) {
+                    const files = await fs.readdir(fullPath);
+                    if (files.some(f => f.endsWith('.patch.toml'))) {
+                        return fullPath;
+                    }
+                    const found = await findPatchesDir(fullPath);
+                    if (found) return found;
+                }
+            }
+            return null;
+        };
+        sourcePatchesDir = await findPatchesDir(extractTemp);
+        if (!sourcePatchesDir) {
+            
+            sourcePatchesDir = extractTemp;
+        }
+
+        sendPatchProgress({ status: 'Installing patches...', percentage: 90, step: 'install' });
+        for (const dir of targetDirs) {
+            await fs.cp(sourcePatchesDir, dir, { recursive: true, force: true });
+            console.log(`[Patches] Copied to: ${dir}`);
+        }
+
+        sendPatchProgress({ status: 'Cleaning up...', percentage: 95, step: 'cleanup' });
+        await fs.rm(extractTemp, { recursive: true, force: true });
+        await fs.unlink(downloadPath);
+
+        sendPatchProgress({ status: 'Patches installed successfully!', percentage: 100, step: 'done' });
+        return { success: true };
+
+    } catch (error) {
+        console.error('[Patches Error]', error.message);
+        let errorMsg = error.message;
+        if (error.response && error.response.status === 403) {
+            errorMsg = "GitHub Rate Limit! Please wait.";
+        }
+        sendPatchProgress({ status: `Error: ${errorMsg}`, percentage: 0, step: 'error' });
+        return { success: false, error: errorMsg };
+    }
+});
 
     ipcMain.handle('loadPatchesForGame', async (event, titleID, patchFileName) => {
         

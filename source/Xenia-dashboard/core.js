@@ -368,7 +368,7 @@ document.addEventListener('alpine:init', () => {
         focusedFriendIndex: 0,
         appUpdateInfo: {
             status: 'idle', 
-            currentVer: '1.2.7',
+            currentVer: '1.2.8',
             remoteVer: '---',
             message: 'Press (Y) to check for updates',
             percentage: 0,
