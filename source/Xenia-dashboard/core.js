@@ -368,13 +368,37 @@ document.addEventListener('alpine:init', () => {
         focusedFriendIndex: 0,
         appUpdateInfo: {
             status: 'idle', 
-            currentVer: '1.2.8',
+            currentVer: '1.2.9',
             remoteVer: '---',
             message: 'Press (Y) to check for updates',
             percentage: 0,
             showAppUpdateNotify: false,
             appUpdateDownloadState: 'idle', 
-            newAppVersionFound: ''
+            newAppVersionFound: '',
+            releaseNotes: ''
+
+        },
+        parseMarkdown(text) {
+            if (!text) return '';
+            let html = text
+                
+                .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+                .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+                .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+                
+                .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/gim, '<em>$1</em>')
+                
+                .replace(/\[(.*?)\]\((.*?)\)/gim, "<span style='color: #3d29c0ae; cursor:pointer; text-decoration:underline;' onclick=\"window.electronAPI.openFileInDefaultApp('$2')\">$1</span>")
+                
+                .replace(/^\s*[\-\*]\s+(.*)$/gim, '<ul><li>$1</li></ul>')
+                
+                .replace(/<\/ul>\n<ul>/gim, '')
+                
+                .replace(/^---/gim, '<hr class="nxe-md-hr">');
+
+            
+            return `<div style="white-space: pre-wrap; font-family: inherit;">${html}</div>`;
         },
 
         
@@ -436,6 +460,7 @@ document.addEventListener('alpine:init', () => {
 
                 if (result.success && actuallyHasUpdate) {
                     app.newAppVersionFound = result.latestVersion;
+                    app.appUpdateInfo.releaseNotes = result.releaseNotes || ''; 
                     app.showAppUpdateNotify = true;
                     app.appUpdateDownloadState = 'idle';
                     this.playSound('panelUnfold');
@@ -917,6 +942,7 @@ document.addEventListener('alpine:init', () => {
                 if (hasNewUpdate) {
                     app.appUpdateInfo.status = 'update-available';
                     app.appUpdateInfo.message = `New Version ${result.latestVersion} available!`;
+                    app.appUpdateInfo.releaseNotes = result.releaseNotes || ''; 
                 } else {
                     
                     app.appUpdateInfo.status = 'up-to-date';
@@ -2339,95 +2365,6 @@ document.addEventListener('alpine:init', () => {
             } catch (e) {
                 app.downloadStatuses[statusKey] = { status: `Error: ${e.message}`, percentage: 0, step: 'error', type: statusKey };
             }
-        },
-
-        
-        async loadView(viewName) {
-            const app = Alpine.store('app');
-            if (app.isPageTransitioning) return;
-            app.isPageTransitioning = true;
-            
-            
-            this.manageCoverLoading(viewName);
-            
-            const host = document.getElementById('view-host');
-            this.playSound('panelRight');
-            host.classList.add('nxe-page-blur-out');
-            await new Promise(r => setTimeout(r, 400)); 
-            
-            try {
-                const result = await window.electronAPI.loadLayout(viewName);
-                if (!result.success) throw new Error(result.error);
-                app.viewStack.push(app.currentView);
-                app.currentView = viewName;
-                app.currentViewHTML = result.html; 
-                this.setFocusContext(viewName);
-            } catch (err) {
-                app.currentViewHTML = `<h1 style="color:red;">Failed to load view: ${viewName}</h1>`;
-            }
-            
-            host.classList.remove('nxe-page-blur-out');
-            host.classList.add('nxe-page-slide-in');
-            await new Promise(r => setTimeout(r, 400)); 
-            host.classList.remove('nxe-page-slide-in');
-            app.isPageTransitioning = false;
-            Alpine.store('hooks').emit('onViewChange', { previousView: previousView, newView: viewName });
-        },
-
-        
-        async goBack() {
-            const app = Alpine.store('app');
-            if (app.isPageTransitioning || app.viewStack.length === 0) return;
-            app.isPageTransitioning = true;
-            this.playSound('panelLeft');
-            
-            
-            const targetView = app.viewStack[app.viewStack.length - 1];
-            this.manageCoverLoading(targetView);
-            
-            if (app.currentView === 'settings-colors') {
-                this.loadUserColors(); 
-            }
-
-            const previousView = app.viewStack.pop(); 
-            const host = document.getElementById('view-host');
-            host.classList.add('nxe-page-slide-out');
-            await new Promise(r => setTimeout(r, 400)); 
-            
-            if (app.currentView === 'patches-manager') {
-                app.patchList = []; 
-                app.patchHeader = {}; 
-                app.patchesLoadingError = null;
-                app.configFocusedPanel = 'categories'; 
-                app.configOptionIndex = 0;
-            }
-            if (app.currentView === 'settings-config') {
-                app.xeniaConfig = {}; 
-                app.configCategories = []; 
-                app.focusedConfigCategoryIndex = 0;
-                app.xeniaConfigError = null; 
-                app.configFocusedPanel = 'categories';
-                app.currentConfigOptions = []; 
-                app.configOptionIndex = 0; 
-                app.configSaveStatus = 'idle';
-                app.configMode = 'global';      
-                app.editingGameInfo = null;     
-            }
-            
-            try {
-                const result = await window.electronAPI.loadLayout(previousView);
-                if (!result.success) throw new Error(result.error);
-                app.currentView = previousView;
-                app.currentViewHTML = result.html; 
-                this.setFocusContext(previousView);
-            } catch (err) {
-                app.currentViewHTML = `<h1 style="color:red;">Failed to load view: ${previousView}</h1>`;
-            }
-            host.classList.remove('nxe-page-slide-out');
-            host.classList.add('nxe-page-unblur-in');
-            await new Promise(r => setTimeout(r, 400)); 
-            host.classList.remove('nxe-page-unblur-in');
-            app.isPageTransitioning = false;
         },
 
         async loadView(viewName) {
@@ -5412,6 +5349,18 @@ document.addEventListener('alpine:init', () => {
             Alpine.store('hooks').emit('onGamepadInput', message);
             const actions = Alpine.store('actions');
             const app = Alpine.store('app');
+
+            
+            if (message.event === 'dpad_x' && message.value === 0) {
+                if (keyRepeatTimers.x.delay) clearTimeout(keyRepeatTimers.x.delay);
+                if (keyRepeatTimers.x.interval) clearInterval(keyRepeatTimers.x.interval);
+                keyRepeatTimers.x = { delay: null, interval: null };
+            }
+            if (message.event === 'dpad_y' && message.value === 0) {
+                if (keyRepeatTimers.y.delay) clearTimeout(keyRepeatTimers.y.delay);
+                if (keyRepeatTimers.y.interval) clearInterval(keyRepeatTimers.y.interval);
+                keyRepeatTimers.y = { delay: null, interval: null };
+            }
 
             if (app.showX360tidNotify) {
                 if (message.event === 'button_y' && message.value === 1) {

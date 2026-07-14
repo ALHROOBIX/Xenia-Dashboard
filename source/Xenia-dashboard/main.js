@@ -5,13 +5,9 @@ const { default: Store } = require('electron-store');
 const fs = require('fs').promises; 
 const fsSync = require('fs');
 const axios = require('axios');
-const decompress = require('decompress'); 
 const { exec, spawn } = require('child_process');
-const { exec: execCb } = require('child_process');
-const util = require('util');
-const execPromise = util.promisify(execCb);
 const sevenBin = require('7zip-bin');
-
+const Seven = require('node-7z');
 
 
 app.commandLine.appendSwitch('force-device-scale-factor', '1');
@@ -396,6 +392,46 @@ async function saveCache(cacheData) {
     try {
         await fs.writeFile(CACHE_FILE, JSON.stringify(cacheData, null, 2));
     } catch (e) { console.error('Failed to save cache:', e); }
+}
+
+
+async function extractArchive(archivePath, targetDir) {
+    return new Promise((resolve, reject) => {
+        let pathTo7za = sevenBin.path7za || sevenBin.path7z;
+        
+        
+        
+        if (pathTo7za && pathTo7za.includes('app.asar')) {
+            pathTo7za = pathTo7za.replace('app.asar', 'app.asar.unpacked');
+        }
+
+        
+        if (!pathTo7za || !fsSync.existsSync(pathTo7za)) {
+            try {
+                const { execSync } = require('child_process');
+                const whichResult = execSync('which 7z 2>/dev/null || which 7za 2>/dev/null', { encoding: 'utf-8' }).trim();
+                if (whichResult && fsSync.existsSync(whichResult)) pathTo7za = whichResult;
+            } catch (e) {}
+        }
+
+        if (!pathTo7za || !fsSync.existsSync(pathTo7za)) {
+            return reject(new Error('7zip binary not found.'));
+        }
+
+        
+        if (process.platform !== 'win32') {
+            try { fsSync.chmodSync(pathTo7za, 0o755); } catch (e) {}
+        }
+
+        
+        const stream = Seven.extractFull(archivePath, targetDir, {
+            $bin: pathTo7za,
+            recursive: true
+        });
+
+        stream.on('end', () => resolve());
+        stream.on('error', (err) => reject(new Error(`Extraction failed: ${err.message}`)));
+    });
 }
 function getEntryPoint() {
     const currentTheme = store.get('currentTheme') || 'NXE-2008';
@@ -1138,7 +1174,7 @@ ipcMain.handle('download-optimized-settings', async () => {
         sendProgress({ type: 'optimized', status: 'Extracting files...', percentage: 50 });
 
         
-        await decompress(zipPath, extractTemp);
+        await extractArchive(zipPath, extractTemp);
 
         
         
@@ -1318,7 +1354,7 @@ ipcMain.handle('apply-optimized-settings', async (event, { titleID, gameConfigPa
             await new Promise((r, j) => { writer.on('finish', r); writer.on('error', j); });
 
             
-            await decompress(zipPath, extractDir);
+            await extractArchive(zipPath, extractDir);
 
             
             async function findBinary(dir, targetName) {
@@ -1400,7 +1436,7 @@ ipcMain.handle('apply-optimized-settings', async (event, { titleID, gameConfigPa
             await new Promise((r, j) => { writer.on('finish', r); writer.on('error', j); });
 
             
-            await decompress(zipPath, extractDir);
+            await extractArchive(zipPath, extractDir);
 
             
             async function findBinary(dir, targetName) {
@@ -1443,8 +1479,6 @@ ipcMain.handle('apply-optimized-settings', async (event, { titleID, gameConfigPa
     });
 
     
-    
-
     ipcMain.handle('download-app-update', async (event, platform) => {
         const repoUrl = 'https://api.github.com/repos/ALHROOBIX/Xenia-Dashboard/releases/latest';
         
@@ -1815,7 +1849,6 @@ ipcMain.handle('loadLocales', async () => {
 
 ipcMain.handle('launch-xenia-dashboard', async (event, xeniaPath) => {
     const platform = require('os').platform();
-    const fsPromises = require('fs').promises;
 
     console.log(`[Dashboard Launcher] Opening Xenia without game...`);
 
@@ -1848,7 +1881,7 @@ ipcMain.handle('launch-xenia-dashboard', async (event, xeniaPath) => {
             const launchMethod = store.get('linuxLaunchMethod', 'native'); 
             
             if (launchMethod === 'native') {
-                try { await fsPromises.chmod(xeniaPath, 0o755); } catch (e) {}
+                try { await fs.chmod(xeniaPath, 0o755); } catch (e) {}
                 currentXeniaProcess = spawn(xeniaPath, [], { 
                     detached: true, 
                     stdio: 'ignore',
@@ -1915,7 +1948,6 @@ ipcMain.handle('launch-xenia-dashboard', async (event, xeniaPath) => {
 
 ipcMain.handle('launchGame', async (event, xeniaPath, gamePath, titleID) => { 
     const platform = require('os').platform();
-    const fsPromises = require('fs').promises;
 
     console.log(`[Game Launcher] Request to launch: ${path.basename(gamePath)}`);
 
@@ -1971,7 +2003,7 @@ ipcMain.handle('launchGame', async (event, xeniaPath, gamePath, titleID) => {
             const launchMethod = store.get('linuxLaunchMethod', 'native'); 
             
             if (launchMethod === 'native') {
-                try { await fsPromises.chmod(xeniaPath, 0o755); } catch (e) { console.warn(`[Game Launcher] Failed to chmod: ${e.message}`); }
+                try { await fs.chmod(xeniaPath, 0o755); } catch (e) { console.warn(`[Game Launcher] Failed to chmod: ${e.message}`); }
                 console.log(`[Game Launcher] Spawning: ${xeniaPath} ${args.join(' ')}`);
                 
                 currentXeniaProcess = spawn(xeniaPath, args, { 
@@ -2720,22 +2752,6 @@ ipcMain.handle('download-xenia', async (event, platform, variant = 'standard') =
         return null;
     }
 
-    
-    const getSevenBinPath = () => {
-        const sevenBin = require('7zip-bin');
-        let binPath = sevenBin.path7za || sevenBin.path7z;
-        if (binPath && fsSync.existsSync(binPath)) {
-            return binPath;
-        }
-        
-        try {
-            const { execSync } = require('child_process');
-            const whichResult = execSync('which 7z 2>/dev/null || which 7za 2>/dev/null', { encoding: 'utf-8' }).trim();
-            if (whichResult && fsSync.existsSync(whichResult)) return whichResult;
-        } catch (e) {}
-        throw new Error('7zip not found. Please install 7-Zip or p7zip.');
-    };
-
     try {
         sendLocalProgress({ status: 'Connecting to GitHub server...', percentage: 0, step: 'connect' });
 
@@ -2799,36 +2815,9 @@ ipcMain.handle('download-xenia', async (event, platform, variant = 'standard') =
         if (ext === '.appimage') {
             
             await fs.copyFile(downloadPath, path.join(tempExtractDir, binaryName));
-        } 
-        else if (ext === '.7z' || ext === '.zip' || ext === '.tar.gz' || ext === '.tgz') {
+        } else {
             
-            const sevenPath = getSevenBinPath();
-            
-            if (process.platform !== 'win32') {
-                try { await fs.chmod(sevenPath, 0o755); } catch (e) {}
-            }
-
-            const { execFile } = require('child_process');
-            await new Promise((resolve, reject) => {
-                const args = ['x', downloadPath, `-o${tempExtractDir}`, '-y'];
-                console.log(`[7zip] Running: ${sevenPath} ${args.join(' ')}`);
-                const proc = execFile(sevenPath, args, { cwd: downloadDir });
-                let stderr = '';
-                proc.stderr.on('data', (data) => { stderr += data.toString(); });
-                proc.on('close', (code) => {
-                    if (code === 0) {
-                        resolve();
-                    } else {
-                        reject(new Error(`7zip extraction failed with code ${code}: ${stderr}`));
-                    }
-                });
-                proc.on('error', (err) => reject(err));
-            });
-        } 
-        else {
-            
-            if (platform === 'win') await decompress(downloadPath, tempExtractDir);
-            else await execPromise(`tar -xf "${downloadPath}" -C "${tempExtractDir}"`);
+            await extractArchive(downloadPath, tempExtractDir);
         }
 
         sendLocalProgress({ status: 'Installing binaries...', percentage: 100, step: 'install' });
@@ -2951,46 +2940,7 @@ ipcMain.handle('download-patches', async () => {
         await fs.mkdir(extractTemp, { recursive: true });
 
         
-        const sevenBin = require('7zip-bin');
-        let sevenPath = sevenBin.path7za || sevenBin.path7z;
-
-        
-        if (!sevenPath || !fsSync.existsSync(sevenPath)) {
-            const { execSync } = require('child_process');
-            try {
-                const whichResult = execSync('which 7z 2>/dev/null || which 7za 2>/dev/null', { encoding: 'utf-8' }).trim();
-                if (whichResult && fsSync.existsSync(whichResult)) {
-                    sevenPath = whichResult;
-                }
-            } catch (e) {}
-        }
-
-        if (!sevenPath || !fsSync.existsSync(sevenPath)) {
-            throw new Error('7zip binary not found. Please install 7-Zip or p7zip.');
-        }
-
-        
-        if (process.platform !== 'win32') {
-            try { await fs.chmod(sevenPath, 0o755); } catch (e) {}
-        }
-
-        
-        const { execFile } = require('child_process');
-        await new Promise((resolve, reject) => {
-            const args = ['x', downloadPath, `-o${extractTemp}`, '-y'];
-            console.log(`[7zip] Running: ${sevenPath} ${args.join(' ')}`);
-            const proc = execFile(sevenPath, args, { cwd: downloadDir });
-            let stderr = '';
-            proc.stderr.on('data', (data) => { stderr += data.toString(); });
-            proc.on('close', (code) => {
-                if (code === 0) {
-                    resolve();
-                } else {
-                    reject(new Error(`7zip extraction failed with code ${code}: ${stderr}`));
-                }
-            });
-            proc.on('error', (err) => reject(err));
-        });
+        await extractArchive(downloadPath, extractTemp);
 
         
         let sourcePatchesDir = null;

@@ -384,6 +384,12 @@
                                 :style="{ color: $store.app.appUpdateInfo.status === 'update-available' ? '#59c853' : '#fff' }"
                                 x-text="$store.app.appUpdateInfo.message"
                             ></p>
+                            
+                            <div x-show="$store.app.appUpdateInfo.status === 'update-available' && $store.app.appUpdateInfo.releaseNotes"
+                                 class="nxe-markdown-body"
+                                 style="margin-top: 10px; padding: 12px; background: rgba(0,0,0,0.6); border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); max-height: 130px; overflow-y: auto;"
+                                 x-html="$store.app.parseMarkdown($store.app.appUpdateInfo.releaseNotes)">
+                            </div>
 
                             <div x-show="$store.app.appUpdateInfo.status === 'downloading'" style="margin-top: 10px;">
                                 <div class="nxe-progress-bar" style="height: 12px; background: rgba(255,255,255,0.1); border-radius: 6px; overflow: hidden;">
