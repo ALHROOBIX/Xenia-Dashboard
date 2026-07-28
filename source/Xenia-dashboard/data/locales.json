@@ -309,7 +309,13 @@
       "downloading": "Downloading & Installing...",
       "success": "Successfully Installed!",
       "error": "Download Failed. Please try again.",
-      "download_btn": "Download Tool"
+      "download_btn": "Download Tool",
+      "update_title": "Tool Update Available",
+      "update_msg": "A new version of the Xbox Content Installer is available!",
+      "update_btn": "Update Tool",
+      "skip_btn": "Skip Update",
+      "local": "Local:",
+      "remote": "Remote:"
     },
     "content": {
     "no_items": "No items found for this category.",
@@ -678,7 +684,13 @@
       "downloading": "جاري التنزيل والتثبيت...",
       "success": "تم التثبيت بنجاح!",
       "error": "فشل التنزيل. يرجى المحاولة مرة أخرى.",
-      "download_btn": "تنزيل الأداة"
+      "download_btn": "تنزيل الأداة",
+      "update_title": "تحديث الأداة متاح",
+      "update_msg": "يتوفر إصدار جديد من أداة Xbox Content Installer!",
+      "update_btn": "تحديث الأداة",
+      "skip_btn": "تخطي التحديث",
+      "local": "المثبت:",
+      "remote": "الأحدث:"
     },
     "content": {
     "no_items": "لم يتم العثور على عناصر لهذه الفئة.",
@@ -1045,7 +1057,13 @@
       "downloading": "正在下载和安装...",
       "success": "安装成功！",
       "error": "下载失败，请重试。",
-      "download_btn": "下载工具"
+      "download_btn": "下载工具",
+      "update_title": "工具更新可用",
+      "update_msg": "Xbox Content Installer 工具的新版本可用！",
+      "update_btn": "更新工具",
+      "skip_btn": "跳过更新",
+      "local": "已安装：",
+      "remote": "最新："
     },
     "content": {
       "no_items": "未找到此类别的内容。",
@@ -1414,7 +1432,13 @@
       "downloading": "ダウンロードとインストール中...",
       "success": "インストール成功！",
       "error": "ダウンロードに失敗しました。もう一度お試しください。",
-      "download_btn": "ツールをダウンロード"
+      "download_btn": "ツールをダウンロード",
+      "update_title": "ツールの更新が利用可能です",
+      "update_msg": "Xbox Content Installerツールの新しいバージョンが利用可能です！",
+      "update_btn": "ツールを更新",
+      "skip_btn": "更新をスキップ",
+      "local": "インストール済み：",
+      "remote": "最新："
     },
     "content": {
       "no_items": "このカテゴリのコンテンツはありません。",
@@ -1782,7 +1806,13 @@
       "downloading": "다운로드 및 설치 중...",
       "success": "설치 성공!",
       "error": "다운로드 실패. 다시 시도하세요.",
-      "download_btn": "도구 다운로드"
+      "download_btn": "도구 다운로드",
+      "update_title": "도구 업데이트 가능",
+      "update_msg": "Xbox Content Installer 도구의 새 버전이 사용 가능합니다!",
+      "update_btn": "도구 업데이트",
+      "skip_btn": "업데이트 건너뛰기",
+      "local": "설치됨:",
+      "remote": "최신:"
     },
     "content": {
       "no_items": "이 카테고리의 콘텐츠가 없습니다.",
@@ -2150,7 +2180,13 @@
       "downloading": "Загрузка и установка...",
       "success": "Успешная установка!",
       "error": "Не удалось загрузить. Попробуйте еще раз.",
-      "download_btn": "Загрузить инструмент"
+      "download_btn": "Загрузить инструмент",
+      "update_title": "Доступно обновление инструмента",
+      "update_msg": "Доступна новая версия инструмента установки контента Xbox!",
+      "update_btn": "Обновить инструмент",
+      "skip_btn": "Пропустить обновление",
+      "local": "Установлено:",
+      "remote": "Последнее:"
     },
     "content": {
       "no_items": "Содержание в этой категории отсутствует.",
@@ -2518,7 +2554,13 @@
       "downloading": "Herunterladen und installieren...",
       "success": "Erfolgreich installiert!",
       "error": "Download fehlgeschlagen. Bitte versuchen Sie es erneut.",
-      "download_btn": "Tool herunterladen"
+      "download_btn": "Tool herunterladen",
+      "update_title": "Tool-Update verfügbar",
+      "update_msg": "Eine neue Version des Xbox Content Installer Tools ist verfügbar!",
+      "update_btn": "Tool aktualisieren",
+      "skip_btn": "Update überspringen",
+      "local": "Installiert:",
+      "remote": "Neueste:"
     },
     "content": {
       "no_items": "Inhalt in dieser Kategorie fehlt.",
@@ -2886,7 +2928,13 @@
       "downloading": "Baixando e instalando...",
       "success": "Instalado com sucesso!",
       "error": "Falha no download. Tente novamente.",
-      "download_btn": "Baixar Ferramenta"
+      "download_btn": "Baixar Ferramenta",
+      "update_title": "Atualização da Ferramenta Disponível",
+      "update_msg": "Uma nova versão do Xbox Content Installer Tool está disponível!",
+      "update_btn": "Atualizar Ferramenta",
+      "skip_btn": "Pular Atualização",
+      "local": "Instalado:",
+      "remote": "Mais Recente:"
     },
     "content": {
       "no_items": "Nenhum item desta categoria está disponível.",
@@ -3254,7 +3302,13 @@
       "downloading": "Descargando e instalando...",
       "success": "Instalado con éxito!",
       "error": "Fallo en la descarga. Inténtelo de nuevo.",
-      "download_btn": "Descargar Herramienta"
+      "download_btn": "Descargar Herramienta",
+      "update_title": "Actualización de Herramienta Disponible",
+      "update_msg": "Una nueva versión del Xbox Content Installer Tool está disponible!",
+      "update_btn": "Actualizar Herramienta",
+      "skip_btn": "Pular Actualización",
+      "local": "Instalado:",
+      "remote": "Más Reciente:"
     },
     "content": {
       "no_items": "No hay elementos de esta categoría disponibles.",
@@ -3622,7 +3676,13 @@
       "downloading": "İndiriliyor ve kuruluyor...",
       "success": "Başarıyla kuruldu!",
       "error": "İndirme başarısız oldu. Lütfen tekrar deneyin.",
-      "download_btn": "Aracı İndir"
+      "download_btn": "Aracı İndir",
+      "update_title": "Güncelleme Mevcut",
+      "update_msg": "Xbox Content Installer Tool için yeni bir sürüm mevcut!",
+      "update_btn": "Aracı Güncelle",
+      "skip_btn": "Güncellemeyi Atla",
+      "local": "Yüklü:",
+      "remote": "En Son:"
     },
     "content": {
       "no_items": "Bu kategoride herhangi bir öğe yok.",
@@ -3990,7 +4050,13 @@
       "downloading": "Scaricamento e installazione in corso...",
       "success": "Installato con successo!",
       "error": "Download fallito. Riprova.",
-      "download_btn": "Scarica Strumento"
+      "download_btn": "Scarica Strumento",
+      "update_title": "Aggiornamento Disponibile",
+      "update_msg": "È disponibile una nuova versione dello strumento Xbox Content Installer!",
+      "update_btn": "Aggiorna Strumento",
+      "skip_btn": "Salta Aggiornamento",
+      "local": "Installato:",
+      "remote": "Più Recente:"
     },
     "content": {
       "no_items": "Questa categoria non contiene alcun elemento.",
@@ -4358,7 +4424,13 @@
       "downloading": "Téléchargement et installation en cours...",
       "success": "Installation réussie !",
       "error": "Échec du téléchargement. Veuillez réessayer.",
-      "download_btn": "Télécharger l'Outil"
+      "download_btn": "Télécharger l'Outil",
+      "update_title": "Mise à Jour Disponible",
+      "update_msg": "Une nouvelle version de l'outil Xbox Content Installer est disponible !",
+      "update_btn": "Mettre à Jour l'Outil",
+      "skip_btn": "Passer la Mise à Jour",
+      "local": "Installé :",
+      "remote": "Plus récent :"
     },
     "content": {
       "no_items": "Cette catégorie ne contient aucun élément.",
