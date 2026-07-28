@@ -6,19 +6,43 @@
             
             <div x-show="$store.app.showXboxInstallNotify" class="nxe-tool-download-overlay" style="display: none;">
                 <div class="nxe-tool-download-card">
-                    <img src="assets/icons/xenia canary.png" alt="Tool Icon">
-                    <h2 x-text="$store.app.t('install_tool.title')"></h2>
-                    <p x-html="$store.app.t('install_tool.desc')"></p>
+                    
+                    <h2 x-text="!$store.app.xboxInstallStatus.exists ? ($store.app.t('install_tool.title') || 'Tool Required') : ($store.app.t('install_tool.update_title') || 'Tool Update Available')"></h2>
+                    
+                    
+                    <p class="desc-text" x-show="!$store.app.xboxInstallStatus.exists" x-html="$store.app.t('install_tool.desc') || 'The <strong>Xbox Content Installer</strong> tool is required.'"></p>
+                    <p class="update-msg" x-show="$store.app.xboxInstallStatus.exists" x-text="$store.app.t('install_tool.update_msg') || 'A new version of the Xbox Content Installer is available!'"></p>
 
-                    <div class="download-status" style="margin-top: 10px;" x-show="$store.app.xboxInstallDownloadState !== 'idle'">
-                        <span x-show="$store.app.xboxInstallDownloadState === 'downloading'" style="color: var(--nxe-brand-light); font-size: 1.2rem; font-weight: bold;" x-text="$store.app.t('install_tool.downloading')"></span>
-                        <span x-show="$store.app.xboxInstallDownloadState === 'success'" style="color: var(--nxe-btn-a); font-size: 1.2rem; font-weight: bold;" x-text="$store.app.t('install_tool.success')"></span>
-                        <span x-show="$store.app.xboxInstallDownloadState === 'error'" style="color: var(--nxe-alert-color); font-size: 1.2rem; font-weight: bold;" x-text="$store.app.t('install_tool.error')"></span>
+                    
+                    <div class="version-box" x-show="$store.app.xboxInstallStatus.exists">
+                        <div class="v-part">
+                            <span class="v-lbl" x-text="$store.app.t('install_tool.local') || 'Local:'"></span>
+                            <span class="v-val local" x-text="$store.app.xboxInstallStatus.localVer"></span>
+                        </div>
+                        <div class="v-line"></div>
+                        <div class="v-part">
+                            <span class="v-lbl" x-text="$store.app.t('install_tool.remote') || 'Remote:'"></span>
+                            <span class="v-val remote" x-text="$store.app.xboxInstallStatus.remoteVer"></span>
+                        </div>
                     </div>
 
-                    <div class="tool-footer-hint" x-show="$store.app.xboxInstallDownloadState === 'idle' || $store.app.xboxInstallDownloadState === 'error'">
-                        <span class="button-icon y">Y</span>
-                        <span x-text="$store.app.t('install_tool.download_btn')"></span>
+                    
+                    <div class="download-status" x-show="$store.app.xboxInstallDownloadState !== 'idle'">
+                        <span x-show="$store.app.xboxInstallDownloadState === 'downloading'" style="color: var(--nxe-brand-light); font-size: 1.2rem; font-weight: bold;" x-text="$store.app.t('install_tool.downloading') || 'Downloading & Installing...'"></span>
+                        <span x-show="$store.app.xboxInstallDownloadState === 'success'" style="color: var(--nxe-btn-a); font-size: 1.2rem; font-weight: bold;" x-text="$store.app.t('install_tool.success') || 'Successfully Installed!'"></span>
+                        <span x-show="$store.app.xboxInstallDownloadState === 'error'" style="color: var(--nxe-alert-color); font-size: 1.2rem; font-weight: bold;" x-text="$store.app.t('install_tool.error') || 'Download Failed.'"></span>
+                    </div>
+
+                    
+                    <div class="tool-actions-row" x-show="$store.app.xboxInstallDownloadState === 'idle' || $store.app.xboxInstallDownloadState === 'error'">
+                        <div class="tool-btn">
+                            <span class="button-icon y" style="background-color: #f2c40e; color: #000;">Y</span>
+                            <span x-text="!$store.app.xboxInstallStatus.exists ? ($store.app.t('install_tool.download_btn') || 'Download Tool') : ($store.app.t('install_tool.update_btn') || 'Update Tool')"></span>
+                        </div>
+                        <div class="tool-btn" x-show="$store.app.xboxInstallStatus.exists">
+                            <span class="button-icon b" style="background-color: #d32f2f; color: #fff;">B</span>
+                            <span x-text="$store.app.t('install_tool.skip_btn') || 'Skip Update'"></span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -118,7 +142,7 @@
             <span x-text="$store.app.t('content.export_save')"></span>
         </div>
     </footer>
-    <style>
+<style>
     html[dir="rtl"] #settings-content {
         direction: ltr !important;
     }
@@ -135,37 +159,102 @@
         align-items: center;
         border-radius: 10px;
     }
+
+    
     .nxe-tool-download-card {
-        background: linear-gradient(135deg, rgba(40,40,40,0.9), rgba(15,15,15,0.95));
-        border: 2px solid var(--nxe-brand-primary);
+        background: linear-gradient(145deg, #2a2a2a, #151515); 
+        border: 2px solid var(--nxe-brand-primary, #90c31d); 
         border-radius: 12px;
-        padding: 40px;
+        padding: 35px 40px;
         width: 80%;
-        max-width: 500px;
+        max-width: 550px;
         text-align: center;
-        box-shadow: 0 15px 35px rgba(0,0,0,0.8), inset 0 0 20px rgba(144, 195, 29, 0.2);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.8), inset 0 0 25px rgba(144, 195, 29, 0.1);
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 15px;
-    }
-    .nxe-tool-download-card img {
-        width: 80px; height: 80px;
-        filter: drop-shadow(0 0 15px var(--nxe-brand-primary));
-        margin-bottom: 10px;
-    }
-    .nxe-tool-download-card h2 {
-        color: #fff; margin: 0; font-size: 2.2rem; font-weight: 700; text-shadow: 0 2px 5px rgba(0,0,0,0.8);
-    }
-    .nxe-tool-download-card p {
-        color: var(--nxe-text-secondary); font-size: 1.1rem; line-height: 1.6; margin: 0;
-    }
-    .tool-footer-hint {
-        display: flex; align-items: center; gap: 12px; margin-top: 25px;
-        background: rgba(0,0,0,0.5); padding: 10px 25px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1);
-        color: #fff; font-size: 1.2rem; font-weight: bold;
     }
 
+    .nxe-tool-download-card h2 {
+        color: #ffffff;
+        margin: 0 0 20px 0;
+        font-size: 1.8rem;
+        font-weight: 700;
+        text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    }
+
+    .tool-icon-glow {
+        width: 85px;
+        height: 85px;
+        filter: drop-shadow(0 0 15px var(--nxe-brand-primary, #90c31d));
+        margin-bottom: 20px;
+        object-fit: contain;
+    }
+
+    .desc-text {
+        color: #cccccc;
+        font-size: 1.1rem;
+        line-height: 1.5;
+        margin: 0 0 15px 0;
+    }
+
+    .update-msg {
+        color: var(--nxe-brand-primary, #90c31d) !important;
+        font-weight: 700;
+        font-size: 1.2rem !important;
+        margin-bottom: 20px !important;
+    }
+
+    
+    .version-box {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        padding: 12px 25px;
+        border-radius: 8px;
+        width: 100%;
+        margin-bottom: 25px;
+    }
+
+    .v-part {
+        display: flex;
+        gap: 8px;
+        font-size: 1.1rem;
+    }
+
+    .v-lbl { color: #aaaaaa; }
+    .v-val.local { color: #ffffff; font-weight: bold; }
+    .v-val.remote { color: var(--nxe-brand-primary, #90c31d); font-weight: bold; }
+
+    
+    .v-line {
+        width: 1px;
+        height: 20px;
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    
+    .tool-actions-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 30px; 
+        margin-top: 10px;
+    }
+
+    .tool-btn {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #ffffff;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    
     .button-icon.rb {
         background: #ffffff !important;
         color: #000000 !important;
@@ -196,10 +285,34 @@
         text-align: left !important;
         direction: ltr  !important;
     }
+    
     html[dir="rtl"] #settings-content .nxe-settings-item {
         display: flex !important;
         align-items: center !important;
         gap: 15px !important;
+    }
+    
+    
+    
+    html[dir="rtl"] .nxe-tool-download-overlay {
+        direction: rtl !important;
+    }
+
+    
+    html[dir="rtl"] .v-val {
+        direction: ltr !important;
+        display: inline-block;
+    }
+
+    
+    html[dir="rtl"] .tool-btn {
+        direction: ltr !important; 
+    }
+
+    
+    html[dir="rtl"] .tool-btn span:not(.button-icon) {
+        direction: rtl !important;
+        margin-left: 8px; 
     }
     </style>
 </section>
