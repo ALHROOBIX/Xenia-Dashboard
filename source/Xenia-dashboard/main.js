@@ -1588,9 +1588,56 @@ ipcMain.handle('apply-optimized-settings', async (event, { titleID, gameConfigPa
         }
     });
     
+    
     ipcMain.handle('check-xbox-install-status', async () => {
-        const toolPath = getBinaryPath('xbox-install');
-        return { exists: fsSync.existsSync(toolPath) };
+        try {
+            const platform = require('os').platform();
+            const osFolder = platform === 'win32' ? 'win' : 'linux';
+            const toolPath = getBinaryPath('xbox-install');
+            const exists = fsSync.existsSync(toolPath);
+            
+            
+            const versionFile = path.join(CONFIG_DIR, 'assets', 'bin', osFolder, 'xbox-install-version.json');
+            let localData = null;
+            if (exists && fsSync.existsSync(versionFile)) {
+                try { localData = JSON.parse(await fs.readFile(versionFile, 'utf-8')); } catch (e) {}
+            }
+
+            
+            const repoUrl = 'https://api.github.com/repos/ALHROOBIX/Xbox-Content-Installer/releases/latest';
+            let remoteVer = '---';
+            let hasUpdate = false;
+            
+            try {
+                const { data: remoteRelease } = await axios.get(repoUrl, { headers: { 'User-Agent': 'Xenia-Dashboard' }, timeout: 5000 });
+                remoteVer = remoteRelease.tag_name.replace(/^v/i, '').trim();
+                
+                const localVer = localData && localData.tag_name ? localData.tag_name.replace(/^v/i, '').trim() : null;
+                
+                
+                if (exists && localVer && remoteVer) {
+                    const c = localVer.split('.').map(Number);
+                    const l = remoteVer.split('.').map(Number);
+                    for (let i = 0; i < Math.max(c.length, l.length); i++) {
+                        if ((l[i] || 0) > (c[i] || 0)) { hasUpdate = true; break; }
+                        if ((l[i] || 0) < (c[i] || 0)) { hasUpdate = false; break; }
+                    }
+                } else if (exists && !localVer) {
+                    hasUpdate = true; 
+                }
+            } catch (e) {
+                console.warn("[Xbox-Install] Remote check failed:", e.message);
+            }
+
+            return { 
+                exists: exists, 
+                hasUpdate: hasUpdate, 
+                localVer: localData && localData.tag_name ? localData.tag_name : '---', 
+                remoteVer: remoteVer 
+            };
+        } catch (e) {
+            return { exists: false, hasUpdate: false, localVer: '---', remoteVer: '---' };
+        }
     });
 
     
@@ -1653,6 +1700,10 @@ ipcMain.handle('apply-optimized-settings', async (event, { titleID, gameConfigPa
             const targetBinaryPath = path.join(finalTargetDir, binaryName);
             if (fsSync.existsSync(targetBinaryPath)) await fs.unlink(targetBinaryPath);
             await fs.copyFile(foundBinaryPath, targetBinaryPath);
+            
+            const versionFile = path.join(finalTargetDir, 'xbox-install-version.json');
+            const versionData = { tag_name: release.tag_name, install_date: new Date().toISOString() };
+            await fs.writeFile(versionFile, JSON.stringify(versionData, null, 2));
 
             
             if (!isWin) {

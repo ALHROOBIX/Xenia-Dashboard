@@ -650,7 +650,9 @@ document.addEventListener('alpine:init', () => {
             const app = Alpine.store('app');
             const status = await window.electronAPI.checkXboxInstallStatus();
             app.xboxInstallStatus = status;
-            if (!status.exists) {
+            
+            
+            if (!status.exists || status.hasUpdate) {
                 app.showXboxInstallNotify = true;
             } else {
                 app.showXboxInstallNotify = false;
@@ -5019,13 +5021,18 @@ document.addEventListener('alpine:init', () => {
         
         if (app.currentView === 'settings-content' && !app.isGuideOpen && !app.isKeyboardOpen) {
 
-            
             if (app.showXboxInstallNotify) {
                 e.preventDefault();
                 if (key === 'y' || key === 'Y') {
                     actions.downloadXboxInstallTool();
                 } else if (key === 'Escape' || key === 'Backspace' || key === 'b' || key === 'B') {
-                    actions.goBack();
+                    
+                    if (!app.xboxInstallStatus.exists) {
+                        actions.goBack();
+                    } else {
+                        app.showXboxInstallNotify = false;
+                        actions.playSound('back');
+                    }
                 }
                 return; 
             }
@@ -6101,12 +6108,17 @@ document.addEventListener('alpine:init', () => {
             
             if (app.currentView === 'settings-content' && !app.isGuideOpen && !app.isKeyboardOpen) {
                 
-                
                 if (app.showXboxInstallNotify) {
                     if (message.event === 'button_y' && message.value === 1) {
                         actions.downloadXboxInstallTool();
                     } else if (message.event === 'button_b' && message.value === 1) {
-                        actions.goBack();
+                        
+                        if (!app.xboxInstallStatus.exists) {
+                            actions.goBack();
+                        } else {
+                            app.showXboxInstallNotify = false;
+                            actions.playSound('back');
+                        }
                     }
                     return; 
                 }
