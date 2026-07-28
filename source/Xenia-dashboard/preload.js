@@ -113,6 +113,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     checkXboxInstallStatus: () => ipcRenderer.invoke('check-xbox-install-status'),
     downloadXboxInstall: () => ipcRenderer.invoke('download-xbox-install'),
     
+    checkThemeUpdate: (repoUrl, folderName) => ipcRenderer.invoke('check-theme-update', repoUrl, folderName),
+    downloadTheme: (repoUrl, folderName, assetName) => ipcRenderer.invoke('download-theme', repoUrl, folderName, assetName),
+    
     quitApp: () => ipcRenderer.invoke('quit-app')
 });
 

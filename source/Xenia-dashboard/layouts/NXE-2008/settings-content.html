@@ -35,8 +35,24 @@
             </nav>
                     
             <div class="nxe-settings-description config-editor-options" style="padding: 20px;">
-                <div x-show="$store.app.isContentLoading && !$store.app.showXboxInstallNotify" style="text-align: center; color: var(--nxe-brand-light); font-size: 1.2rem;">
-                    <span x-text="$store.app.t('generic.loading')"></span>
+                <div x-show="$store.app.isContentLoading && !$store.app.showXboxInstallNotify" style="text-align: center; margin-top: 20px;">
+                    
+                    
+                    <template x-if="$store.app.downloadStatuses.systemContent.status !== 'idle'">
+                        <div style="width: 70%; margin: 0 auto; background: var(--nxe-list-bg-bottom); border-radius: 10px; padding: 15px; border: 1px solid var(--nxe-brand-primary); box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
+                            <h3 style="color: #fff; margin: 0 0 10px 0; font-size: 1.1rem; letter-spacing: 1px;" x-text="$store.app.downloadStatuses.systemContent.status"></h3>
+                            <div style="width: 100%; background: #222; border-radius: 10px; height: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
+                                
+                                <div style="height: 100%; background: var(--nxe-brand-primary); transition: width 0.2s ease-out;" 
+                                     :style="{ width: $store.app.downloadStatuses.systemContent.percentage + '%' }"></div>
+                            </div>
+                        </div>
+                    </template>
+
+                    
+                    <template x-if="$store.app.downloadStatuses.systemContent.status === 'idle'">
+                        <span style="color: var(--nxe-brand-light); font-size: 1.2rem;" x-text="$store.app.t('generic.loading')"></span>
+                    </template>
                 </div>
 
                 <div x-show="!$store.app.isContentLoading && !$store.app.showXboxInstallNotify && $store.app.contentItems.length === 0" style="text-align: center; color: var(--nxe-text-secondary); margin-top: 20px;">

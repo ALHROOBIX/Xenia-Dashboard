@@ -814,6 +814,146 @@ function sendProgress(payload) {
 
 function registerIpcHandlers() {
 
+    
+    
+    
+
+    ipcMain.handle('check-theme-update', async (event, repo, folderName) => {
+        try {
+            const repoUrl = `https://api.github.com/repos/${repo}/releases/latest`;
+            const targetDir = path.join(SYSTEMS_DIR, folderName);
+            const versionFile = path.join(targetDir, 'version.json');
+            
+            
+            const { data: remoteRelease } = await axios.get(repoUrl, {
+                headers: { 'User-Agent': 'Xenia-Dashboard-Theme-Updater' },
+                timeout: 10000
+            });
+
+            const isInstalled = fsSync.existsSync(targetDir);
+            let localData = null;
+
+            if (isInstalled && fsSync.existsSync(versionFile)) {
+                try {
+                    localData = JSON.parse(await fs.readFile(versionFile, 'utf-8'));
+                } catch (e) { console.warn("Theme version file corrupted"); }
+            }
+
+            const remoteTag = remoteRelease.tag_name ? remoteRelease.tag_name.replace(/^v/i, '').trim() : '0.0.0';
+            const localTag = localData && localData.tag_name ? localData.tag_name.replace(/^v/i, '').trim() : null;
+
+            let status = 'not-installed';
+            if (!isInstalled) status = 'not-installed';
+            else if (!localTag) status = 'unknown-version';
+            else status = 'installed'; 
+
+            return { 
+                success: true, 
+                status: status, 
+                remoteVer: remoteTag, 
+                localVer: localTag || '---',
+                releaseDate: remoteRelease.published_at
+            };
+
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    });
+
+    ipcMain.handle('download-theme', async (event, repo, folderName, assetName) => {
+        try {
+            const repoUrl = `https://api.github.com/repos/${repo}/releases/latest`;
+            const { data: release } = await axios.get(repoUrl, {
+                headers: { 'User-Agent': 'Xenia-Dashboard-Theme-Updater' }
+            });
+
+            
+            let asset = release.assets.find(a => a.name.toLowerCase() === assetName.toLowerCase());
+            if (!asset) asset = release.assets.find(a => a.name.toLowerCase().endsWith('.zip'));
+            if (!asset) throw new Error(`Asset ${assetName} not found in the latest release.`);
+
+            const tempDir = path.join(CONFIG_DIR, 'temp_downloads');
+            const zipPath = path.join(tempDir, assetName);
+            const extractDir = path.join(tempDir, `${folderName}_extracted`);
+            const finalTargetDir = path.join(SYSTEMS_DIR, folderName);
+
+            
+            if (!fsSync.existsSync(tempDir)) await fs.mkdir(tempDir, { recursive: true });
+            if (fsSync.existsSync(extractDir)) await fs.rm(extractDir, { recursive: true, force: true });
+            await fs.mkdir(extractDir, { recursive: true });
+
+            sendProgress({ type: 'theme-download', status: 'Downloading...', percentage: 0 });
+
+            
+            const response = await axios({ url: asset.browser_download_url, method: 'GET', responseType: 'stream' });
+            const writer = fsSync.createWriteStream(zipPath);
+            const totalBytes = parseInt(response.headers['content-length'], 10);
+            let downloadedBytes = 0;
+
+            response.data.on('data', (chunk) => {
+                downloadedBytes += chunk.length;
+                const pct = Math.floor((downloadedBytes / totalBytes) * 100);
+                sendProgress({ type: 'theme-download', status: `Downloading... ${pct}%`, percentage: pct });
+            });
+
+            response.data.pipe(writer);
+            await new Promise((r, j) => { writer.on('finish', r); writer.on('error', j); });
+
+            
+            sendProgress({ type: 'theme-download', status: 'Extracting...', percentage: 100 });
+            await extractArchive(zipPath, extractDir);
+
+            
+            let sourceThemeDir = null;
+            async function findThemeCore(dir) {
+                const entries = await fs.readdir(dir, { withFileTypes: true });
+                const names = entries.map(e => e.name.toLowerCase());
+                
+                
+                if (names.includes('index.html') || names.includes('layouts') || names.includes('themes')) {
+                    return dir;
+                }
+                
+                for (const entry of entries) {
+                    if (entry.isDirectory()) {
+                        const found = await findThemeCore(path.join(dir, entry.name));
+                        if (found) return found;
+                    }
+                }
+                return null;
+            }
+
+            sourceThemeDir = await findThemeCore(extractDir);
+            if (!sourceThemeDir) {
+                sourceThemeDir = extractDir; 
+            }
+
+            sendProgress({ type: 'theme-download', status: 'Installing...', percentage: 100 });
+
+            
+            if (fsSync.existsSync(finalTargetDir)) {
+                await fs.rm(finalTargetDir, { recursive: true, force: true });
+            }
+            await fs.cp(sourceThemeDir, finalTargetDir, { recursive: true });
+
+            
+            const versionData = { tag_name: release.tag_name, install_date: new Date().toISOString() };
+            await fs.writeFile(path.join(finalTargetDir, 'version.json'), JSON.stringify(versionData, null, 2));
+
+            
+            sendProgress({ type: 'theme-download', status: 'Cleaning up...', percentage: 100 });
+            await fs.rm(extractDir, { recursive: true, force: true });
+            await fs.unlink(zipPath);
+
+            sendProgress({ type: 'theme-download', status: 'Success!', percentage: 100, step: 'done' });
+            return { success: true };
+
+        } catch (error) {
+            console.error('[Theme Download Error]', error);
+            return { success: false, error: error.message };
+        }
+    });
+
     ipcMain.handle('manage-system-content', async (event, { action, titleId, fileName, filePath, type, contentType }) => {
     const cliPath = getBinaryPath('xbox-install'); 
     const contentRoot = await getContentRootPath();
@@ -842,23 +982,72 @@ function registerIpcHandlers() {
     }
 
     
-    const runCLI = (args) => new Promise((resolve) => {
+    const runCLI = (args, isInstall = false) => new Promise((resolve) => {
         const child = spawn(cliPath, args);
         let output = '';
+        let lastPercentage = -1; 
+
+        const processData = (d) => {
+            output += d.toString();
+            
+            
+            if (isInstall) {
+                
+                const matches = [...output.matchAll(/\[(\d+)\/(\d+)\]/g)];
+                if (matches.length > 0) {
+                    const latestMatch = matches[matches.length - 1];
+                    const current = parseInt(latestMatch[1], 10);
+                    const total = parseInt(latestMatch[2], 10);
+                    
+                    if (total > 0) {
+                        const percentage = Math.floor((current / total) * 100);
+                        
+                        
+                        if (percentage !== lastPercentage) {
+                            lastPercentage = percentage;
+                            sendProgress({
+                                type: 'systemContent', 
+                                status: `Installing... ${percentage}%`,
+                                percentage: percentage,
+                                step: percentage === 100 ? 'done' : 'download'
+                            });
+                        }
+                    }
+                }
+            }
+        };
+
         
-        child.stdout.on('data', (d) => output += d.toString());
+        child.stdout.on('data', processData);
+        child.stderr.on('data', processData); 
         
         child.on('close', (code) => {
-            try {
-                const parsed = JSON.parse(output);
-                
-                
-                if (parsed.ok === false) {
-                    resolve({ success: false, error: parsed.message || "Operation failed in CLI." });
+            
+            if (isInstall) {
+                if (code === 0) {
+                    sendProgress({ type: 'systemContent', status: 'Success!', percentage: 100, step: 'done' });
+                    return resolve({ success: true, data: output });
                 } else {
-                    resolve({ success: true, data: parsed });
+                    return resolve({ success: false, error: output.trim() || "Installation failed." });
                 }
+            }
+
+            
+            try {
+                const jsonStart = output.indexOf('{');
+                if (jsonStart !== -1) {
+                    const parsed = JSON.parse(output.substring(jsonStart));
+                    if (parsed.ok === false) {
+                        return resolve({ success: false, error: parsed.message || "Operation failed in CLI." });
+                    }
+                    return resolve({ success: true, data: parsed });
+                }
+                
+                if (code === 0) return resolve({ success: true, data: output });
+                throw new Error("No JSON output detected.");
+                
             } catch (e) {
+                if (code === 0) return resolve({ success: true, data: output });
                 console.error("[xbox-install Output Error]", output);
                 resolve({ success: false, error: "Failed to parse tool output." });
             }
@@ -909,13 +1098,17 @@ function registerIpcHandlers() {
         }
         else if (action === 'install') {
             
+            const installProfileArgs = profileArgs.filter(arg => arg !== '--json');
+            const installGlobalArgs = globalArgs.filter(arg => arg !== '--json');
+
             let args;
-            if (contentType  === 'saves') {
-                args = ['install', ...profileArgs, filePath];
+            if (contentType === 'saves') {
+                args = ['install', ...installProfileArgs, filePath];
             } else { 
-                args = ['install', ...globalArgs, filePath];
+                args = ['install', ...installGlobalArgs, filePath];
             }
-            return await runCLI(args);
+            
+            return await runCLI(args, true); 
         }
         else if (action === 'uninstall') {
             

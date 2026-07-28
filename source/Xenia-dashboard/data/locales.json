@@ -334,6 +334,19 @@
       "update_now": "Update Now",
       "downloading": "Downloading Update...",
       "ask_later": "Ask Me Later"
+    },
+    "theme_store": {
+      "btn": "Theme Store",
+      "title": "Theme Store & Updater",
+      "local": "Local:",
+      "remote": "Remote:",
+      "download_update": "Download / Update",
+      "checking": "Checking...",
+      "install_now": "Install Now",
+      "update_available": "Update Available",
+      "installed": "Installed",
+      "error": "Error",
+      "connection_error": "Connection Error"
     }
   },
   "ar": {
@@ -690,6 +703,19 @@
       "update_now": "تحديث الآن",
       "downloading": "جاري تنزيل التحديث...",
       "ask_later": "اسألني لاحقًا"
+    },
+    "theme_store": {
+      "btn": "متجر الثيمات",
+      "title": "متجر وتحديث الثيمات",
+      "local": "محلي:",
+      "remote": "عن بعد:",
+      "download_update": "تحميل / تحديث",
+      "checking": "جارٍ التحقق...",
+      "install_now": "تثبيت الآن",
+      "update_available": "تحديث متاح",
+      "installed": "تم التثبيت",
+      "error": "خطأ",
+      "connection_error": "خطأ في الاتصال"
     }
   },
  "zh": {
@@ -1044,6 +1070,19 @@
       "update_now": "立即更新",
       "downloading": "正在下载更新...",
       "ask_later": "稍后提醒我"
+    },
+    "theme_store": {
+      "btn": "主题商店",
+      "title": "主题商店和更新",
+      "local": "本地：",
+      "remote": "远程：",
+      "download_update": "下载 / 更新",
+      "checking": "检查中...",
+      "install_now": "立即安装",
+      "update_available": "有可用更新",
+      "installed": "已安装",
+      "error": "错误",
+      "connection_error": "连接错误"
     }
   },
   
@@ -1400,6 +1439,19 @@
       "update_now": "今すぐ更新",
       "downloading": "更新をダウンロード中...",
       "ask_later": "後で通知する"
+    },
+    "theme_store": {
+      "btn": "テーマストア",
+      "title": "テーマストアと更新",
+      "local": "ローカル：",
+      "remote": "リモート：",
+      "download_update": "ダウンロード / 更新",
+      "checking": "確認中...",
+      "install_now": "今すぐインストール",
+      "update_available": "更新が利用可能です",
+      "installed": "インストール済み",
+      "error": "エラー",
+      "connection_error": "接続エラー"
     }
   },
 
@@ -1755,6 +1807,19 @@
       "update_now": "지금 업데이트",
       "downloading": "업데이트 다운로드 중...",
       "ask_later": "나중에 알림"
+    },
+    "theme_store": {
+      "btn": "테마 스토어",
+      "title": "테마 스토어 및 업데이트",
+      "local": "로컬:",
+      "remote": "원격:",
+      "download_update": "다운로드 / 업데이트",
+      "checking": "확인 중...",
+      "install_now": "지금 설치",
+      "update_available": "업데이트 가능",
+      "installed": "설치됨",
+      "error": "오류",
+      "connection_error": "연결 오류"
     }
   },
 
@@ -2110,6 +2175,19 @@
       "update_now": "Обновить сейчас",
       "downloading": "Загрузка обновления...",
       "ask_later": "Напомнить позже"
+    },
+    "theme_store": {
+      "btn": "МАГАЗИН ТЕМ",
+      "title": "МАГАЗИН ТЕМ И ОБНОВЛЕНИЯ",
+      "local": "локальный:",
+      "remote": "удаленный:",
+      "download_update": "загрузить / обновить",
+      "checking": "проверка...",
+      "install_now": "установить сейчас",
+      "update_available": "обновление доступно",
+      "installed": "установлено",
+      "error": "ошибка",
+      "connection_error": "ошибка соединения"
     }
   },
 
@@ -2465,6 +2543,19 @@
       "update_now": "Jetzt aktualisieren",
       "downloading": "Update wird heruntergeladen...",
       "ask_later": "Später erinnern"
+    },
+    "theme_store": {
+      "btn": "THEMENSTORE",
+      "title": "THEMEN- UND UPDATESTORE",
+      "local": "lokal:",
+      "remote": "remote:",
+      "download_update": "herunterladen / aktualisieren",
+      "checking": "überprüfen...",
+      "install_now": "jetzt installieren",
+      "update_available": "Update verfügbar",
+      "installed": "installiert",
+      "error": "Fehler",
+      "connection_error": "Verbindungsfehler"
     }
   },
 
@@ -2820,6 +2911,19 @@
       "update_now": "Atualizar Agora",
       "downloading": "Atualizando...",
       "ask_later": "Lembrar mais tarde"
+    },
+    "theme_store": {
+      "btn": "STORE DE TEMAS",
+      "title": "STORE DE TEMAS E UPDATES",
+      "local": "local:",
+      "remote": "remoto:",
+      "download_update": "baixar / atualizar",
+      "checking": "verificando...",
+      "install_now": "instalar agora",
+      "update_available": "Atualização Disponível",
+      "installed": "instalado",
+      "error": "Erro",
+      "connection_error": "Erro de Conexão"
     }
   },
 
@@ -3175,6 +3279,19 @@
       "update_now": "Actualizar Ahora",
       "downloading": "Actualizando...",
       "ask_later": "Recordar más tarde"
+    },
+    "theme_store": {
+      "btn": "TIENDA DE TEMAS",
+      "title": "TIENDA DE TEMAS Y ACTUALIZACIONES",
+      "local": "local:",
+      "remote": "remoto:",
+      "download_update": "descargar / actualizar",
+      "checking": "verificando...",
+      "install_now": "instalar ahora",
+      "update_available": "Actualización Disponible",
+      "installed": "instalado",
+      "error": "Error",
+      "connection_error": "Error de Conexión"
     }
   },
 
@@ -3530,6 +3647,19 @@
       "update_now": "Şimdi Güncelle",
       "downloading": "Güncelleniyor...",
       "ask_later": "Daha Sonra Hatırlat"
+    },
+    "theme_store": {
+      "btn": "TEMALAR",
+      "title": "TEMALAR VE GÜNCELLEMELER",
+      "local": "Yerel:",
+      "remote": "Uzak:",
+      "download_update": "İndir / Güncelle",
+      "checking": "Kontrol ediliyor...",
+      "install_now": "Şimdi Kur",
+      "update_available": "Güncelleme Mevcut",
+      "installed": "Yüklendi",
+      "error": "Hata",
+      "connection_error": "Bağlantı Hatası"
     }
   },
 
@@ -3885,6 +4015,19 @@
       "update_now": "Aggiorna Ora",
       "downloading": "Aggiornamento in corso...",
       "ask_later": "Ricordamelo Più Tardi"
+    },
+    "theme_store": {
+      "btn": "TEMI",
+      "title": "TEMI E AGGIORNAMENTI",
+      "local": "Locale:",
+      "remote": "Remoto:",
+      "download_update": "Scarica / Aggiorna",
+      "checking": "Controllo in corso...",
+      "install_now": "Installa Ora",
+      "update_available": "Aggiornamento Disponibile",
+      "installed": "Installato",
+      "error": "Errore",
+      "connection_error": "Errore di Connessione"
     }
   },
 
@@ -4240,6 +4383,19 @@
       "update_now": "Mettre à Jour Maintenant",
       "downloading": "Mise à jour en cours...",
       "ask_later": "Me le rappeler plus tard"
+    },
+    "theme_store": {
+      "btn": "THÉMES",
+      "title": "THÉMES ET MISE À JOUR DISPONIBLES",
+      "local": "Locale :",
+      "remote": "Réseau :",
+      "download_update": "Télécharger / Mettre à Jour",
+      "checking": "Vérification en cours...",
+      "install_now": "Installer Maintenant",
+      "update_available": "Mise à Jour Disponible",
+      "installed": "Installé",
+      "error": "Erreur",
+      "connection_error": "Erreur de Connexion"
     }
   }
 }

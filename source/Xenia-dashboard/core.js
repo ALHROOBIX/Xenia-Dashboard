@@ -94,7 +94,8 @@ document.addEventListener('alpine:init', () => {
             linux: { status: 'idle', percentage: 0, step: 'idle' },
             winNetplay: { status: 'idle', percentage: 0, step: 'idle' }, 
             patches: { status: 'idle', percentage: 0, step: 'idle' },
-            optimized: { status: 'idle', percentage: 0, step: 'idle' }
+            optimized: { status: 'idle', percentage: 0, step: 'idle' },
+            systemContent: { status: 'idle', percentage: 0, step: 'idle' }
         },
         focusedList: 'master', 
         masterMenu: [], masterIndex: 1, detailMenu: [], detailIndex: 0,        
@@ -368,7 +369,7 @@ document.addEventListener('alpine:init', () => {
         focusedFriendIndex: 0,
         appUpdateInfo: {
             status: 'idle', 
-            currentVer: '1.2.9',
+            currentVer: '1.3.0',
             remoteVer: '---',
             message: 'Press (Y) to check for updates',
             percentage: 0,
@@ -378,27 +379,100 @@ document.addEventListener('alpine:init', () => {
             releaseNotes: ''
 
         },
+        
+        themeStoreData: {
+            isOpen: false,
+            focusedIndex: 0,
+            downloadState: 'idle',
+            progressMsg: '',
+            progressPct: 0,
+            themes: [
+                { 
+                    id: 'nex-metro', name: 'NEX-Metro', 
+                    repo: '0xErrorVoid/Xenia-Dashboard-Metro-ui-Theme', 
+                    folder: 'NEX-Metro', asset: 'NEX-Metro.zip', 
+                    status: 'idle', localVer: '---', remoteVer: '---', btnText: 'Check', color: '#fff' 
+                },
+                { 
+                    id: 'blade-2005', name: 'Blade 2005', 
+                    repo: 'ALHROOBIX/Blades-2005-Theme-for-Xenia-Dashboard', 
+                    folder: 'Blade-2005', asset: 'Blade-2005.zip', 
+                    status: 'idle', localVer: '---', remoteVer: '---', btnText: 'Check', color: '#fff' 
+                }
+            ]
+        },
         parseMarkdown(text) {
             if (!text) return '';
-            let html = text
-                
-                .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-                .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-                .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-                
-                .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
-                .replace(/\*(.*?)\*/gim, '<em>$1</em>')
-                
-                .replace(/\[(.*?)\]\((.*?)\)/gim, "<span style='color: #3d29c0ae; cursor:pointer; text-decoration:underline;' onclick=\"window.electronAPI.openFileInDefaultApp('$2')\">$1</span>")
-                
-                .replace(/^\s*[\-\*]\s+(.*)$/gim, '<ul><li>$1</li></ul>')
-                
-                .replace(/<\/ul>\n<ul>/gim, '')
-                
-                .replace(/^---/gim, '<hr class="nxe-md-hr">');
 
             
-            return `<div style="white-space: pre-wrap; font-family: inherit;">${html}</div>`;
+            let html = text.replace(/\r\n/g, '\n').replace(/\n{3,}/g, '\n\n');
+
+            
+            const codeBlocks = [];
+            html = html.replace(/```([\s\S]*?)```/g, (match, code) => {
+                codeBlocks.push(code);
+                return `__CODE_BLOCK_${codeBlocks.length - 1}__`;
+            });
+
+            html = html
+                
+                .replace(/^###### (.*$)/gim, '<h6 style="margin: 10px 0 5px 0;">$1</h6>')
+                .replace(/^##### (.*$)/gim, '<h5 style="margin: 10px 0 5px 0;">$1</h5>')
+                .replace(/^#### (.*$)/gim, '<h4 style="margin: 10px 0 5px 0;">$1</h4>')
+                .replace(/^### (.*$)/gim, '<h3 style="margin: 12px 0 5px 0; font-size: 1.1rem; ">$1</h3>')
+                .replace(/^## (.*$)/gim, '<h2 style="margin: 15px 0 5px 0; font-size: 1.2rem;  border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">$1</h2>')
+                .replace(/^# (.*$)/gim, '<h1 style="margin: 15px 0 8px 0; font-size: 1.4rem; ">$1</h1>')
+
+                
+                .replace(/^---/gim, '<hr class="nxe-md-hr" style="border: 0; border-top: 1px solid rgba(255,255,255,0.15); margin: 15px 0;">')
+
+                
+                .replace(/^\> (.*$)/gim, '<blockquote style="border-left: 4px solid #3a82e5; margin: 10px 0; padding: 5px 15px; background: rgba(58, 130, 229, 0.1); border-radius: 0 4px 4px 0; color: #ddd;">$1</blockquote>')
+
+                
+                .replace(/^\s*[\-\*\+]\s+(.*)$/gim, '<ul style="padding-inline-start: 25px; margin: 5px 0;"><li>$1</li></ul>')
+                .replace(/^\s*\d+\.\s+(.*)$/gim, '<ol style="padding-inline-start: 25px; margin: 5px 0;"><li>$1</li></ol>')
+                
+                .replace(/<\/ul>\n*<ul[^>]*>/gim, '')
+                .replace(/<\/ol>\n*<ol[^>]*>/gim, '')
+
+                
+                .replace(/!\[(.*?)\]\((.*?)\)/gim, "<img alt='$1' src='$2' style='max-width: 100%; border-radius: 8px; margin: 10px 0; box-shadow: 0 4px 10px rgba(0,0,0,0.5);' />")
+
+                
+                .replace(/\[(.*?)\]\((.*?)\)/gim, "<span style='color: #3a82e5; cursor:pointer; text-decoration:underline; font-weight: 500;' onclick=\"window.electronAPI.openFileInDefaultApp('$2')\">$1</span>")
+
+                
+                .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
+                .replace(/__(.*?)__/gim, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/gim, '<em>$1</em>')
+                .replace(/_(.*?)_/gim, '<em>$1</em>')
+                .replace(/~~(.*?)~~/gim, '<del style="color: #888;">$1</del>')
+
+                
+                .replace(/`(.*?)`/gim, '<code style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-family: Consolas, monospace; color: #f2c40e; font-size: 0.9em;">$1</code>');
+
+            
+            
+            html = html.replace(/(<\/?(?:h1|h2|h3|h4|h5|h6|ul|ol|li|blockquote|hr)[^>]*>)\s*\n/gi, '$1');
+            html = html.replace(/\n\s*(<(?:h1|h2|h3|h4|h5|h6|ul|ol|li|blockquote|hr)[^>]*>)/gi, '$1');
+
+            
+            html = html.replace(/\n/g, '<br>');
+
+            
+            codeBlocks.forEach((code, index) => {
+                const cleanCode = code.replace(/</g, '&lt;').replace(/>/g, '&gt;').trim();
+                const preBlock = `
+                    <pre style="background: #111; padding: 12px; border-radius: 8px; overflow-x: auto; border: 1px solid #333; margin: 12px 0; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);">
+                        <code style="font-family: Consolas, monospace; color: #a5d6ff; font-size: 0.9rem; white-space: pre;">${cleanCode}</code>
+                    </pre>
+                `.trim();
+                html = html.replace(`__CODE_BLOCK_${index}__`, preBlock);
+            });
+
+            
+            return `<div style="font-family: inherit; line-height: 1.6;">${html}</div>`;
         },
 
         
@@ -412,6 +486,7 @@ document.addEventListener('alpine:init', () => {
         focusedContentItemIndex: 0,
         contentPanelFocus: 'menu', 
         isContentLoading: false,
+        isInstallingContent: false,
         xboxInstallStatus: { exists: true },
         showXboxInstallNotify: false,
         xboxInstallDownloadState: 'idle',
@@ -448,6 +523,87 @@ document.addEventListener('alpine:init', () => {
 
     
     Alpine.store('actions', {
+
+        
+        
+        
+        async openThemeStore() {
+            const app = Alpine.store('app');
+            app.themeStoreData.isOpen = true;
+            app.themeStoreData.focusedIndex = 0;
+            this.playSound('panelUnfold');
+            await this.checkAllThemeUpdates();
+        },
+
+        closeThemeStore() {
+            const app = Alpine.store('app');
+            if (app.themeStoreData.downloadState === 'downloading') return; 
+            app.themeStoreData.isOpen = false;
+            this.playSound('back');
+        },
+
+        async checkAllThemeUpdates() {
+            const app = Alpine.store('app');
+            for (let t of app.themeStoreData.themes) {
+                
+                t.btnText = app.t('theme_store.checking') || 'Checking...';
+                t.color = '#fff';
+                
+                try {
+                    const res = await window.electronAPI.checkThemeUpdate(t.repo, t.folder);
+                    if (res.success) {
+                        t.localVer = res.localVer;
+                        t.remoteVer = res.remoteVer;
+                        
+                        if (res.status === 'not-installed') {
+                            t.status = 'not-installed';
+                            t.btnText = app.t('theme_store.install_now') || 'Install Now';
+                            t.color = '#3a82e5'; 
+                        } 
+                        else if (isNewerVersion(t.localVer, t.remoteVer)) {
+                            t.status = 'update-available';
+                            t.btnText = app.t('theme_store.update_available') || 'Update Available';
+                            t.color = '#59c853'; 
+                        } 
+                        else {
+                            t.status = 'up-to-date';
+                            
+                            t.btnText = app.t('theme_store.installed') || 'Installed'; 
+                            t.color = '#888'; 
+                        }
+                    } else {
+                        t.btnText = app.t('theme_store.error') || 'Error';
+                        t.color = '#ff6b6b';
+                    }
+                } catch (e) {
+                    t.btnText = app.t('theme_store.connection_error') || 'Connection Error';
+                    t.color = '#ff6b6b';
+                }
+            }
+        },
+
+        async downloadSelectedTheme() {
+            const app = Alpine.store('app');
+            const t = app.themeStoreData.themes[app.themeStoreData.focusedIndex];
+            
+            if (!t || app.themeStoreData.downloadState === 'downloading') return;
+
+            this.playSound('select');
+            app.themeStoreData.downloadState = 'downloading';
+            
+            const res = await window.electronAPI.downloadTheme(t.repo, t.folder, t.asset);
+            
+            if (res.success) {
+                this.playSound('channelUp');
+                await this.checkAllThemeUpdates();
+                
+                
+                await this.scanForThemes(true); 
+            } else {
+                alert("Download failed: " + res.error);
+            }
+            app.themeStoreData.downloadState = 'idle';
+        },
 
         
         async autoCheckAppUpdate() {
@@ -594,24 +750,43 @@ document.addEventListener('alpine:init', () => {
             const app = Alpine.store('app');
             app.isContentLoading = true;
 
+            
+            app.isInstallingContent = true;
+            
+            
+            document.body.style.pointerEvents = 'none';
+
+            
+            app.downloadStatuses.systemContent = { status: 'Preparing...', percentage: 0, step: 'download' };
+
             try {
-                
                 const activeCat = app.contentCategories[app.focusedContentCategoryIndex].id;
                 const result = await window.electronAPI.manageSystemContent({
                     action: 'install',
                     filePath: filePath,
-                    contentType: activeCat   
+                    contentType: activeCat
                 });
+                
                 if (result.success) {
                     this.playSound('channelUp');
-                    await this.loadSystemContent(); 
+                    app.downloadStatuses.systemContent = { status: 'Success!', percentage: 100, step: 'done' };
+                    
+                    setTimeout(() => { this.loadSystemContent(); }, 1500);
                 } else {
+                    app.downloadStatuses.systemContent = { status: 'Error!', percentage: 0, step: 'error' };
                     alert("Install failed: " + result.error);
-                    app.isContentLoading = false;
                 }
             } catch (e) {
+                app.downloadStatuses.systemContent = { status: 'Error!', percentage: 0, step: 'error' };
                 alert("Error during install.");
-                app.isContentLoading = false;
+            } finally {
+                
+                setTimeout(() => {
+                    app.isContentLoading = false;
+                    app.isInstallingContent = false; 
+                    document.body.style.pointerEvents = ''; 
+                    app.downloadStatuses.systemContent.status = 'idle';
+                }, 1500);
             }
         },
 
@@ -3340,9 +3515,11 @@ document.addEventListener('alpine:init', () => {
             }
             isScanning = false; 
         },
-        async scanForThemes() {
+        async scanForThemes(force = false) {
             const app = Alpine.store('app');
-            if (app.themesList.length > 0) return;
+            
+            if (!force && app.themesList.length > 0) return;
+            
             const result = await window.electronAPI.scanForThemes();
             if (result.success) {
                 app.themesList = result.themes.map(themeObj => ({ 
@@ -4495,6 +4672,11 @@ document.addEventListener('alpine:init', () => {
         const actions = Alpine.store('actions');
         const app = Alpine.store('app');
 
+        if (app.isInstallingContent) {
+            e.preventDefault();
+            return;
+        }
+
         if (app.showX360tidNotify) {
             e.preventDefault();
             if (key === 'y' || key === 'Y') {
@@ -4514,6 +4696,24 @@ document.addEventListener('alpine:init', () => {
                 actions.playSound('back');
             }
             return; 
+        }
+
+        
+        if (app.themeStoreData.isOpen) {
+            e.preventDefault(); 
+            
+            if (key === 'ArrowUp') {
+                app.themeStoreData.focusedIndex = Math.max(0, app.themeStoreData.focusedIndex - 1);
+                actions.playSound('focus');
+            } else if (key === 'ArrowDown') {
+                app.themeStoreData.focusedIndex = Math.min(app.themeStoreData.themes.length - 1, app.themeStoreData.focusedIndex + 1);
+                actions.playSound('focus');
+            } else if (key === 'Enter') {
+                actions.downloadSelectedTheme();
+            } else if (key === 'Escape' || key === 'Backspace' || key === 'b' || key === 'B') {
+                actions.closeThemeStore();
+            }
+            return;
         }
         
         
@@ -4983,6 +5183,7 @@ document.addEventListener('alpine:init', () => {
 
         
         if (key === 'y' || key === 'Y') {
+            if (app.currentView === 'settings-system') { actions.openThemeStore(); e.preventDefault(); return; }
             if (app.currentView === 'settings-display') { actions.resetDisplaySettings(); e.preventDefault(); return; }
             if (app.currentView === 'settings-colors') { actions.deleteFocusedTheme(); e.preventDefault(); return; }
             if (app.currentView === 'game-library') { actions.deleteFocusedGame(); e.preventDefault(); return; }
@@ -5268,6 +5469,11 @@ document.addEventListener('alpine:init', () => {
                 app.appUpdateInfo.message = `Downloading: ${data.percentage}%`;
                 return;
             }
+            if (data.type === 'theme-download') {
+                app.themeStoreData.progressMsg = data.status;
+                app.themeStoreData.progressPct = data.percentage;
+                return;
+            }
             
             
             if (data.type && app.downloadStatuses && app.downloadStatuses[data.type]) {
@@ -5350,6 +5556,10 @@ document.addEventListener('alpine:init', () => {
             const actions = Alpine.store('actions');
             const app = Alpine.store('app');
 
+            if (app.isInstallingContent) {
+                return;
+            }
+
             
             if (message.event === 'dpad_x' && message.value === 0) {
                 if (keyRepeatTimers.x.delay) clearTimeout(keyRepeatTimers.x.delay);
@@ -5377,6 +5587,25 @@ document.addEventListener('alpine:init', () => {
                 } else if (message.event === 'button_b' && message.value === 1) {
                     app.showAppUpdateNotify = false;
                     actions.playSound('back');
+                }
+                return; 
+            }
+
+            if (app.themeStoreData.isOpen && !app.isKeyboardOpen) {
+                if (message.event === 'dpad_y') {
+                    if (message.value === -1 && app.themeStoreData.focusedIndex > 0) { 
+                        app.themeStoreData.focusedIndex--;
+                        actions.playSound('focus');
+                    } else if (message.value === 1 && app.themeStoreData.focusedIndex < app.themeStoreData.themes.length - 1) { 
+                        app.themeStoreData.focusedIndex++;
+                        actions.playSound('focus');
+                    }
+                } 
+                else if (message.event === 'button_a' && message.value === 1) {
+                    actions.downloadSelectedTheme();
+                } 
+                else if (message.event === 'button_b' && message.value === 1) {
+                    actions.closeThemeStore();
                 }
                 return; 
             }
@@ -6118,6 +6347,9 @@ document.addEventListener('alpine:init', () => {
                     }
                     else if (app.currentView === 'settings-display') {
                         actions.resetDisplaySettings();
+                    }
+                    else if (app.currentView === 'settings-system') {
+                        actions.openThemeStore();
                     }
                     else if (app.currentView === 'settings-colors') {
                         actions.deleteFocusedTheme();

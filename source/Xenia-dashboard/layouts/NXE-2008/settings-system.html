@@ -52,6 +52,10 @@
             <span class="button-icon b">B</span> 
             <span x-text="$store.app.t('generic.back')">Back</span>
         </div>
+        <div class="footer-button" id="btn-y" @click.prevent="$store.actions.openThemeStore()">
+            <span class="button-icon y" style="background-color: #f2c40e; color: #000;">Y</span> 
+            <span x-text="$store.app.t('theme_store.btn') || 'Theme Store'"></span>
+        </div>
     </footer>
     
     <footer class="nxe-footer-right">
@@ -73,4 +77,172 @@
             </div>
         </div>
         </footer>
+
+
+<div class="theme-store-overlay" 
+     x-show="$store.app.themeStoreData.isOpen" 
+     style="display: none;">
+    
+    <div class="theme-store-modal">
+        <h2 class="theme-store-header" x-text="$store.app.t('theme_store.title') || 'Theme Store & Updater'"></h2>
+        
+        <div class="theme-list-container">
+            <template x-for="(theme, index) in $store.app.themeStoreData.themes" :key="theme.id">
+                <div class="theme-store-item" 
+                     :class="{ 'focused': $store.app.themeStoreData.focusedIndex === index }">
+                    
+                    <div>
+                        <h3 class="theme-item-title" x-text="theme.name"></h3>
+                        <p class="theme-item-versions">
+                            <span x-text="($store.app.t('theme_store.local') || 'Local:') + ' ' + theme.localVer"></span> | 
+                            <span x-text="($store.app.t('theme_store.remote') || 'Remote:') + ' ' + theme.remoteVer"></span>
+                        </p>
+                    </div>
+                    
+                    <div class="theme-status-badge" 
+                         :style="'color: ' + theme.color" 
+                         x-text="theme.btnText">
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        
+        <div class="theme-progress-wrapper" x-show="$store.app.themeStoreData.downloadState === 'downloading'">
+            <p class="theme-progress-text" x-text="$store.app.themeStoreData.progressMsg"></p>
+            <div class="theme-progress-track">
+                <div class="theme-progress-fill" 
+                     :style="'width: ' + $store.app.themeStoreData.progressPct + '%'"></div>
+            </div>
+        </div>
+
+        
+        <div class="theme-store-footer">
+            <div class="footer-button">
+                <span class="button-icon a">A</span> 
+                <span x-text="$store.app.t('theme_store.download_update') || 'Download / Update'"></span>
+            </div>
+            <div class="footer-button">
+                <span class="button-icon b">B</span> 
+                <span x-text="$store.app.t('generic.close') || 'Close'"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    
+
+.theme-store-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    
+    backdrop-filter: blur(5px);
+}
+
+.theme-store-modal {
+    background: var(--nxe-list-bg-top);
+    padding: 40px;
+    border-radius: 12px;
+    width: 60%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.theme-store-header {
+    margin-top: 0;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 10px;
+    color: var(--nxe-text-primary);
+}
+
+.theme-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.theme-store-item {
+    padding: 15px 20px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.4);
+    color: var(--nxe-text-secondary);
+}
+
+
+.theme-store-item.focused {
+    background: var(--nxe-brand-primary);
+    color: #ffffff;
+    transform: scale(1.02);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.theme-item-title {
+    margin: 0;
+    font-size: 1.2rem;
+    color: inherit;
+}
+
+.theme-item-versions {
+    margin: 5px 0 0 0;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.theme-status-badge {
+    font-weight: bold;
+    padding: 6px 12px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.3);
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+}
+
+
+.theme-progress-wrapper {
+    margin-top: 30px;
+}
+
+.theme-progress-text {
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: var(--nxe-brand-light);
+}
+
+.theme-progress-track {
+    width: 100%;
+    background: #222;
+    border-radius: 10px;
+    height: 12px;
+    overflow: hidden;
+    border: 1px solid #444;
+}
+
+.theme-progress-fill {
+    height: 100%;
+    background: var(--nxe-brand-primary);
+    transition: width 0.3s ease;
+}
+
+.theme-store-footer {
+    margin-top: 30px;
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+}
+</style>
 </section>
