@@ -93,8 +93,8 @@
                              style="cursor: pointer;">
                             
                             <div style="display: flex; flex-direction: column; max-width: 75%;">
-                                <strong style="font-size: 1.2rem; color: var(--nxe-text-primary);" x-text="item.display_name || item.file_name"></strong>
-                                <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--nxe-brand-primary); margin-top: 4px;">
+                                <strong style="font-size: 1.2rem; color: #ffffff;" x-text="item.display_name || item.file_name"></strong>
+                                <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #ffffff; margin-top: 4px;">
                                     <img :src="item.iconUrl || 'assets/icons/placeholder.png'" style="width: 20px; height: 20px; border-radius: 4px; object-fit: cover;" alt="Game Icon">
                                     
                                     <span x-text="item.game_name + ' | ' + $store.app.t('content.title_id_label') + ': ' + item.title_id"></span>
@@ -103,7 +103,7 @@
 
                             <div style="display: flex; align-items: center; gap: 10px;">
                                 <span x-show="item.disabled" style="background: var(--nxe-alert-color); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold;" x-text="$store.app.t('content.disabled')"></span>
-                                <span x-show="!item.disabled" style="background: var(--nxe-brand-dark); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold;" x-text="$store.app.t('content.active')"></span>
+                                <span x-show="!item.disabled" style="color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold;" x-text="$store.app.t('content.active')"></span>
                             </div>
                         </div>
                     </template>

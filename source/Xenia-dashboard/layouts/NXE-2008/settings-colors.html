@@ -5,12 +5,13 @@
         
         <div class="nxe-settings-container">
             
+            
             <nav class="nxe-settings-menu" id="colors-menu-list">
                 <template x-for="(preset, index) in $store.app.colorPresets" :key="preset.id">
                     <div 
                         class="nxe-settings-item"
                         :id="'color-item-' + index"
-                        :class="{'focused': $store.app.focusedIndex === index && $store.app.focusedCollection === 'colorPresets'}"
+                        :class="{'focused': $store.app.focusedIndex === index && $store.app.colorSettingsFocus === 'presets'}"
                         @click.prevent="$store.actions.saveThemeSelection(index)"
                         @mouseenter="$store.actions.previewTheme(index)" 
                     >
@@ -28,6 +29,7 @@
             </nav>
             
             <div class="nxe-settings-description config-editor-options">
+                
                 
                 <template x-if="$store.app.colorPresets[$store.app.focusedIndex]?.id !== 'custom'">
                     <div>
@@ -52,55 +54,74 @@
                     </div>
                 </template>
 
-                <template x-if="$store.app.colorPresets[$store.app.focusedIndex].id === 'custom'">
-                    <div class="config-options-wrapper" style="padding-bottom: 20px;">
-                        <h3 x-text="$store.app.t('colors.full_custom')">Full Customization</h3>
-                        <p style="margin-bottom: 15px;" x-text="$store.app.t('colors.custom_desc')">Control every aspect of the interface colors.</p>
+                
+                <template x-if="$store.app.colorPresets[$store.app.focusedIndex]?.id === 'custom'">
+                    <div class="config-options-wrapper" style="padding-bottom: 20px;" :class="{'panel-focused': $store.app.colorSettingsFocus === 'custom'}">
                         
-                        <h4 style="margin: 15px 0 5px 0; color: var(--nxe-text-primary); border-bottom: 1px solid rgba(255,255,255,0.1);" x-text="$store.app.t('colors.brand_colors')">Brand Colors</h4>
                         
-                        <div class="config-option"><label x-text="$store.app.t('colors_labels.primary')"></label><input type="color" class="nxe-config-input" style="height: 35px; padding: 0;" x-model="$store.app.customColors.primary" @input="$store.actions.updateCustomColor('primary', $event.target.value)"></div>
-                        <div class="config-option"><label x-text="$store.app.t('colors_labels.light')"></label><input type="color" class="nxe-config-input" style="height: 35px; padding: 0;" x-model="$store.app.customColors.light" @input="$store.actions.updateCustomColor('light', $event.target.value)"></div>
-                        <div class="config-option"><label x-text="$store.app.t('colors_labels.dark')"></label><input type="color" class="nxe-config-input" style="height: 35px; padding: 0;" x-model="$store.app.customColors.dark" @input="$store.actions.updateCustomColor('dark', $event.target.value)"></div>
-                        
-                        <h4 style="margin: 20px 0 5px 0; color: var(--nxe-text-primary); border-bottom: 1px solid rgba(255,255,255,0.1);" x-text="$store.app.t('colors.text_colors')">Text Colors</h4>
-                        <div class="config-option"><label x-text="$store.app.t('colors_labels.text_main')"></label><input type="color" class="nxe-config-input" style="height: 35px; padding: 0;" x-model="$store.app.customColors.text" @input="$store.actions.updateCustomColor('text', $event.target.value)"></div>
-                        <div class="config-option"><label x-text="$store.app.t('colors_labels.text_sec')"></label><input type="color" class="nxe-config-input" style="height: 35px; padding: 0;" x-model="$store.app.customColors.textSec" @input="$store.actions.updateCustomColor('textSec', $event.target.value)"></div>
-
-                        <h4 style="margin: 20px 0 5px 0; color: var(--nxe-text-primary); border-bottom: 1px solid rgba(255,255,255,0.1);" x-text="$store.app.t('colors.global_bg')">Global Background</h4>
-                        <div class="config-option"><label x-text="$store.app.t('colors_labels.bg_top')"></label><input type="color" class="nxe-config-input" style="height: 35px; padding: 0;" x-model="$store.app.customColors.bgTop" @input="$store.actions.updateCustomColor('bgTop', $event.target.value)"></div>
-                        <div class="config-option"><label x-text="$store.app.t('colors_labels.bg_bottom')"></label><input type="color" class="nxe-config-input" style="height: 35px; padding: 0;" x-model="$store.app.customColors.bgBottom" @input="$store.actions.updateCustomColor('bgBottom', $event.target.value)"></div>
-
-                        <h4 style="margin: 20px 0 5px 0; color: var(--nxe-text-primary); border-bottom: 1px solid rgba(255,255,255,0.1);" x-text="$store.app.t('colors.menu_list')">Menu List</h4>
-                        <div class="config-option"><label x-text="$store.app.t('colors_labels.list_top')"></label><input type="color" class="nxe-config-input" style="height: 35px; padding: 0;" x-model="$store.app.customColors.listBgTop" @input="$store.actions.updateCustomColor('listBgTop', $event.target.value)"></div>
-                        <div class="config-option"><label x-text="$store.app.t('colors_labels.list_bottom')"></label><input type="color" class="nxe-config-input" style="height: 35px; padding: 0;" x-model="$store.app.customColors.listBgBottom" @input="$store.actions.updateCustomColor('listBgBottom', $event.target.value)"></div>
-
-                        <h4 style="margin: 20px 0 5px 0; color: var(--nxe-text-primary); border-bottom: 1px solid rgba(255,255,255,0.1);" x-text="$store.app.t('colors.ui_elements')">UI Elements</h4>
-                        <div class="config-option"><label x-text="$store.app.t('colors_labels.panel_base')"></label><input type="color" class="nxe-config-input" style="height: 35px; padding: 0;" x-model="$store.app.customColors.panel" @input="$store.actions.updateCustomColor('panel', $event.target.value)"></div>
-                        <div class="config-option"><label x-text="$store.app.t('colors_labels.alert')"></label><input type="color" class="nxe-config-input" style="height: 35px; padding: 0;" x-model="$store.app.customColors.alert" @input="$store.actions.updateCustomColor('alert', $event.target.value)"></div>
-
-                        <h4 style="margin: 20px 0 5px 0; color: var(--nxe-text-primary); border-bottom: 1px solid rgba(255,255,255,0.1);" x-text="$store.app.t('colors.controller')">Controller Buttons</h4>
-                        <div class="config-option"><label x-text="$store.app.t('colors_labels.btn_a')"></label><input type="color" class="nxe-config-input" style="height: 35px; padding: 0;" x-model="$store.app.customColors.btnA" @input="$store.actions.updateCustomColor('btnA', $event.target.value)"></div>
-                        <div class="config-option"><label x-text="$store.app.t('colors_labels.btn_b')"></label><input type="color" class="nxe-config-input" style="height: 35px; padding: 0;" x-model="$store.app.customColors.btnB" @input="$store.actions.updateCustomColor('btnB', $event.target.value)"></div>
-                        <div class="config-option"><label x-text="$store.app.t('colors_labels.btn_x')"></label><input type="color" class="nxe-config-input" style="height: 35px; padding: 0;" x-model="$store.app.customColors.btnX" @input="$store.actions.updateCustomColor('btnX', $event.target.value)"></div>
-                        <div class="config-option"><label x-text="$store.app.t('colors_labels.btn_y')"></label><input type="color" class="nxe-config-input" style="height: 35px; padding: 0;" x-model="$store.app.customColors.btnY" @input="$store.actions.updateCustomColor('btnY', $event.target.value)"></div>
-
-                        <div style="margin-top: 30px; padding-top: 15px; border-top: 2px solid var(--nxe-brand-primary);">
-                            <h4 style="margin: 0 0 10px 0; color: var(--nxe-text-primary);" x-text="$store.app.t('colors.save_theme')">Save Theme</h4>
-                            <div style="display: flex; gap: 10px;">
-                               <input type="text" 
-                                    class="nxe-config-input" 
-                                    style="text-align: left; flex-grow: 1;" 
-                                    :placeholder="$store.app.t('colors.theme_name')" 
-                                    x-model="$store.app.newThemeName" 
-                                    @keydown.stop 
-                                    @click.stop 
-                                    @mousedown.stop>
-                                <button @click="$store.actions.saveNewCustomPreset()" style="background: linear-gradient(to bottom, var(--nxe-brand-light), var(--nxe-brand-primary)); border: 1px solid var(--nxe-brand-dark); color: white; font-weight: bold; padding: 0 20px; border-radius: 4px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3);" x-text="$store.app.t('generic.save')">Save</button>
-                            </div>
-                            
-                            <p style="font-size: 0.85rem; opacity: 0.6; margin-top: 10px;" x-text="$store.app.t('colors.press_save')">Press (X) or (Space) to save.</p>
+                        <h3 style="margin-bottom: 5px;" x-text="$store.app.t('colors.full_custom')">Full Customization</h3>
+                        <div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05);">
+                            <p style="margin: 0; font-size: 0.85rem; color: #ccc;">
+                                <b style="color:var(--nxe-brand-light)">◀ D-Pad ▶</b> <span x-text="$store.app.t('colors.custom_desc') || 'Adjust shade (Light/Dark)'"></span>
+                            </p>
+                            <p style="margin: 5px 0 0 0; font-size: 0.85rem; color: #ccc;">
+                                <b style="color:var(--nxe-brand-light)" x-text="$store.app.t('colors.lb_rb')">LB / RB</b>
+                                <span x-text="$store.app.t('colors.jump_family')">Jump to next color family</span>
+                            </p>
                         </div>
+                        
+                        
+                        <template x-for="(item, index) in $store.app.customColorProps" :key="index">
+                            <div>
+                                
+                                <template x-if="!item.isButton">
+                                    <div>
+                                        
+                                        <template x-if="index === 0"><h4 style="margin: 15px 0 5px 0; color: var(--nxe-text-primary); border-bottom: 1px solid rgba(255,255,255,0.1);" x-text="$store.app.t('colors.brand_colors') || 'Brand Colors'"></h4></template>
+                                        <template x-if="index === 3"><h4 style="margin: 20px 0 5px 0; color: var(--nxe-text-primary); border-bottom: 1px solid rgba(255,255,255,0.1);" x-text="$store.app.t('colors.text_colors') || 'Text Colors'"></h4></template>
+                                        <template x-if="index === 5"><h4 style="margin: 20px 0 5px 0; color: var(--nxe-text-primary); border-bottom: 1px solid rgba(255,255,255,0.1);" x-text="$store.app.t('colors.global_bg') || 'Global Background'"></h4></template>
+                                        <template x-if="index === 7"><h4 style="margin: 20px 0 5px 0; color: var(--nxe-text-primary); border-bottom: 1px solid rgba(255,255,255,0.1);" x-text="$store.app.t('colors.menu_list') || 'Menu List'"></h4></template>
+                                        <template x-if="index === 9"><h4 style="margin: 20px 0 5px 0; color: var(--nxe-text-primary); border-bottom: 1px solid rgba(255,255,255,0.1);" x-text="$store.app.t('colors.ui_elements') || 'UI Elements'"></h4></template>
+                                        <template x-if="index === 11"><h4 style="margin: 20px 0 5px 0; color: var(--nxe-text-primary); border-bottom: 1px solid rgba(255,255,255,0.1);" x-text="$store.app.t('colors.controller') || 'Controller Buttons'"></h4></template>
+                                        <template x-if="index === 15"><div style="margin-top: 30px; padding-top: 15px; border-top: 2px solid var(--nxe-brand-primary);"><h4 style="margin: 0 0 10px 0; color: var(--nxe-text-primary);" x-text="$store.app.t('colors.save_theme') || 'Theme Name'"></h4></div></template>
+
+                                        
+                                        <div class="config-option" 
+                                             :id="'custom-color-item-' + index"
+                                             :class="{'focused': $store.app.colorSettingsFocus === 'custom' && $store.app.customColorIndex === index}"
+                                             @click="$store.app.colorSettingsFocus = 'custom'; $store.app.customColorIndex = index; if (item.isText) $store.actions.promptCustomThemeName();"
+                                             style="position: relative; display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; border-radius: 6px; margin-bottom: 4px; cursor: pointer;">
+                                            
+                                            <label x-text="$store.app.t(item.label)" style="margin: 0; font-weight: 500; flex-shrink: 1; max-width: 50%; pointer-events: none;"></label>
+
+                                            
+                                            <template x-if="!item.isText">
+                                                <div :style="{
+                                                    'width': '60px',
+                                                    'height': '34px',
+                                                    'border-radius': '6px',
+                                                    'transition': 'all 0.2s ease',
+                                                    'background-color': $store.app.customColors[item.id] || '#ffffff',
+                                                    'border': ($store.app.colorSettingsFocus === 'custom' && $store.app.customColorIndex === index) ? '2px solid var(--nxe-brand-light)' : '2px solid rgba(255,255,255,0.2)',
+                                                    'box-shadow': ($store.app.colorSettingsFocus === 'custom' && $store.app.customColorIndex === index) ? '0 0 12px rgba(255,255,255,0.4), inset 0 2px 4px rgba(0,0,0,0.2)' : '0 4px 6px rgba(0,0,0,0.3), inset 0 2px 4px rgba(0,0,0,0.2)',
+                                                    'transform': ($store.app.colorSettingsFocus === 'custom' && $store.app.customColorIndex === index) ? 'scale(1.05)' : 'scale(1)'
+                                                }"></div>
+                                            </template>
+
+                                            
+                                            <template x-if="item.isText">
+                                                <div style="background: #1a1a1a; padding: 6px 15px; border-radius: 6px; width: 180px; text-align: left; border: 2px solid rgba(255,255,255,0.1); color: #fff; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-family: monospace;"
+                                                     :style="$store.app.colorSettingsFocus === 'custom' && $store.app.customColorIndex === index ? 'border-color: var(--nxe-brand-light); background: #000;' : ''"
+                                                     x-text="$store.app.newThemeName || '...' ">
+                                                </div>
+                                            </template>
+
+                                        </div>
+                                    </div>
+                                </template>
+
+                            </div>
+                        </template>
 
                     </div>
                 </template>
@@ -110,30 +131,65 @@
     </div>
 
     <footer class="nxe-footer-left">
-        <div class="footer-button"><span class="button-icon a">A</span> <span x-text="$store.app.t('generic.apply')">Apply</span></div>
+        <div class="footer-button"><span class="button-icon a">A</span> <span x-text="$store.app.t('generic.select')">Select</span></div>
         <div class="footer-button" @click.prevent="$store.actions.goBack()"><span class="button-icon b">B</span> <span x-text="$store.app.t('generic.back')">Back</span></div>
-        <template x-if="$store.app.colorPresets[$store.app.focusedIndex] && $store.app.colorPresets[$store.app.focusedIndex].id.startsWith('user-')">
+        <template x-if="$store.app.colorPresets[$store.app.focusedIndex] && $store.app.colorPresets[$store.app.focusedIndex].id.startsWith('user-') && $store.app.colorSettingsFocus === 'presets'">
             <div class="footer-button" style="animation: fadeIn 0.3s ease;"><span class="button-icon y">Y</span> <span x-text="$store.app.t('generic.delete')">Delete</span></div>
         </template>
+        <template x-if="$store.app.colorPresets[$store.app.focusedIndex]?.id === 'custom'">
+        <div class="footer-button" @click.prevent="$store.actions.saveCustomTheme()">
+            <span class="button-icon x">X</span>
+            <span x-text="$store.app.t('generic.save')">Save</span>
+        </div>
+    </template>
     </footer>
     
     <footer class="nxe-footer-right">
-        <div class="footer-guide-button" @click="$store.actions.toggleGuide()">
-            <div class="scene-3d">
-                <div class="guide-icon">
-                    <img src="assets/icons/xbox-25912.png" alt="Xbox Guide">
-                </div>
-                
-            <div class="ground-surface">
-                <div class="icon-ground-shadow"></div>
-                <div class="ripple-wave"></div>
-                <div class="ripple-wave"></div>
-                <div class="ripple-wave"></div>
-                <div class="ripple-wave"></div>
-                <div class="ripple-wave"></div>
-            </div>
+        
+    </footer>
 
+    
+    <div class="keyboard-overlay" :class="{'open': $store.app.isKeyboardOpen}" x-show="$store.app.isKeyboardOpen" x-transition.opacity x-cloak>
+        <div class="xbox-kb-wrapper">
+            <div class="kb-top-label" x-text="$store.app.t('colors.theme_name') || 'Enter Theme Name'"></div>
+            <div class="xbox-kb-input-row">
+                <input type="text" class="xbox-kb-input" :value="$store.app.newThemeName" readonly>
+                <div class="input-cursor" id="kb-cursor-indicator"></div>
+            </div>
+            <div class="xbox-kb-main-body">
+                <div class="kb-col side-col left">
+                    <div class="side-btn" @click="$store.actions.moveTextCursor(-1)"><div class="btn-icon-visual lb-shape">◀ LB</div><span class="btn-label" x-text="$store.app.t('generic.left') || 'Left'"></span></div>
+                    <div class="side-btn" :class="{'active-state': $store.app.isSymbols}" @click="$store.actions.handleKeyboardSpecial('SYMBOLS')"><div class="btn-icon-visual lt-shape">LT</div><span class="btn-label" x-text="$store.app.t('generic.symbols') || 'Symbols'"></span></div>
+                    <div class="side-btn" :class="{'active-state': $store.app.isCaps}" @click="$store.actions.handleKeyboardSpecial('CAPS')"><div class="btn-icon-visual stick-shape">L3</div><span class="btn-label" x-text="$store.app.t('generic.caps') || 'Caps'"></span></div>
+                </div>
+                <div class="kb-col center-col">
+                    <div class="keys-grid-tight">
+                        <template x-for="(row, rIndex) in $store.app.currentKeys" :key="rIndex">
+                            <div class="keys-row-tight">
+                                <template x-for="(key, cIndex) in row" :key="cIndex">
+                                    <div class="xbox-key-tight" :class="{'focused': $store.app.keyboardRow === rIndex && $store.app.keyboardCol === cIndex}" @click="$store.app.keyboardRow = rIndex; $store.app.keyboardCol = cIndex; $store.actions.pressKeyboardKey()">
+                                        <span x-text="key"></span>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                    <div class="bottom-actions-row">
+                        <div class="wide-action-btn" @click="$store.actions.handleKeyboardSpecial('BACKSPACE')"><div class="circle-icon blue">X</div><span x-text="$store.app.t('generic.backspace') || 'Backspace'"></span></div>
+                        <div class="wide-action-btn" @click="$store.actions.handleKeyboardSpecial('SPACE')"><div class="circle-icon yellow">Y</div><span x-text="$store.app.t('generic.space') || 'Space'"></span></div>
+                    </div>
+                </div>
+                <div class="kb-col side-col right">
+                    <div class="side-btn" @click="$store.actions.moveTextCursor(1)"><div class="btn-icon-visual rb-shape">RB ▶</div><span class="btn-label" x-text="$store.app.t('generic.right') || 'Right'"></span></div>
+                    <div class="side-btn" :class="{'active-state': $store.app.isAccents}" @click="$store.actions.handleKeyboardSpecial('ACCENTS')"><div class="btn-icon-visual rt-shape">RT</div><span class="btn-label" x-text="$store.app.t('generic.accents') || 'Accents'"></span></div>
+                    <div class="done-btn-container" @click="$store.actions.handleKeyboardSpecial('DONE')"><div class="play-icon-circle">▶</div><span x-text="$store.app.t('generic.done') || 'Done'"></span></div>
+                </div>
+            </div>
+            <div class="kb-black-footer">
+                <div class="footer-item"><div class="circle-icon green-small">A</div> <span x-text="$store.app.t('generic.select') || 'Select'"></span></div>
+                <div class="footer-item" @click="$store.app.isKeyboardOpen = false; $store.actions.playSound('back');"><div class="circle-icon red-small">B</div> <span x-text="$store.app.t('generic.cancel') || 'Cancel'"></span></div>
             </div>
         </div>
-        </footer>
+    </div>
+
 </section>

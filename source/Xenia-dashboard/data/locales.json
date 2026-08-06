@@ -62,7 +62,9 @@
       "change_avatar": "Change Profile",
       "play": "Play",
       "select": "Select",
-      "menu": "Menu"
+      "menu": "Menu",
+      "default_bg": "Default Background",
+      "change_bg": "Change Background"
     },
     "profile": {
       "switch_user": "Switch User",
@@ -178,6 +180,8 @@
       "active": "Active",
       "full_custom": "Full Customization",
       "custom_desc": "Control every aspect of the interface colors.",
+      "lb_rb": "LB / RB",
+      "jump_family": "Jump to next color family",
       "brand_colors": "Brand Colors",
       "text_colors": "Text Colors",
       "global_bg": "Global Background",
@@ -214,8 +218,6 @@
       "wall_bg_desc": "Select a custom image (JPG, PNG) or animated GIF to replace the default background overlay.",
       "wall_stage": "Background Stage",
       "wall_stage_desc": "Change the underlying stage environment to give depth to your dashboard.",
-      "wall_flourish": "Background Flourish",
-      "wall_flourish_desc": "Change the artistic swirl/overlay graphic. Supports transparent PNGs.",
       "current": "Current Selection"
     },
     "patches": {
@@ -243,7 +245,6 @@
       "tag_eur": "EUR",
       "tag_usa": "USA",
       "deep_scan": "Deep Scan (Fix ID)",
-      "scanning": "Scanning...",
       "art_manager": "Art Manager",
       "description": "Description",
       "publisher": "Publisher",
@@ -259,7 +260,11 @@
       "zar_scan": "Scan ZAR Title ID",
       "loading": "Loading...",
       "rename": "Rename",
-      "apply_optimized_settings": "Apply Optimized Settings"
+      "select_disc": "Select Disc",
+      "discs": "Discs",
+      "apply_optimized_settings": "Apply Optimized Settings",
+      "scanning": "Scanning Library...",
+      "scanning_desc": "Please wait while we process your games safely."
       
     },
     "art": {
@@ -437,7 +442,9 @@
       "change_avatar": "تغيير الملف الشخصي",
       "play": "لعب",
       "select": "تحديد",
-      "menu": "القائمة"
+      "menu": "القائمة",
+      "default_bg": "الخلفية الافتراضية",
+      "change_bg": "تغيير الخلفية"
     },
     "profile": {
       "switch_user": "تبديل المستخدم",
@@ -554,6 +561,8 @@
       "active": "نشط",
       "full_custom": "تخصيص كامل",
       "custom_desc": "تحكم في كل جانب من جوانب ألوان الواجهة.",
+      "lb_rb": "LB / RB",
+      "jump_family": "انتقل إلى مجموعة الألوان التالية",
       "brand_colors": "ألوان العلامة التجارية",
       "text_colors": "ألوان النصوص",
       "global_bg": "الخلفية العامة",
@@ -590,8 +599,6 @@
       "wall_bg_desc": "اختر صورة مخصصة (JPG, PNG) أو GIF متحرك لاستبدال الخلفية الافتراضية.",
       "wall_stage": "أرضية المسرح",
       "wall_stage_desc": "تغيير بيئة المسرح السفلية لإعطاء عمق للداشبورد.",
-      "wall_flourish": "الزخارف الفنية",
-      "wall_flourish_desc": "تغيير الرسومات الفنية والتموجات. يدعم صور PNG الشفافة.",
       "current": "الاختيار الحالي"
     },
     "patches": {
@@ -619,7 +626,6 @@
       "tag_eur": "أوروبي",
       "tag_usa": "أمريكي",
       "deep_scan": "فحص عميق (إصلاح المعرف)",
-      "scanning": "جاري الفحص...",
       "art_manager": "مدير الصور",
       "description": "الوصف",
       "publisher": "الناشر",
@@ -635,7 +641,11 @@
       "zar_scan": "فحص معرف ZAR",
       "loading": "جاري التحميل...",
       "rename": "إعادة تسمية",
-      "apply_optimized_settings": "تطبيق الإعدادات المحسنة"
+      "select_disc": "اختر القرص",
+      "discs": "الأقراص",
+      "apply_optimized_settings": "تطبيق الإعدادات المحسنة",
+      "scanning": "جاري فحص المكتبة...",
+      "scanning_desc": "يرجى الانتظار أثناء معالجة ألعابك بأمان."
     },
     "art": {
       "loading": "جاري البحث في SteamGridDB...",
@@ -812,7 +822,9 @@
       "change_avatar": "更改个人资料",
       "play": "游玩",
       "select": "选择",
-      "menu": "菜单"
+      "menu": "菜单",
+      "default_bg": "默认背景",
+      "change_bg": "更改背景"
     },
     "profile": {
       "switch_user": "切换用户",
@@ -928,6 +940,8 @@
       "active": "活跃",
       "full_custom": "完全自定义",
       "custom_desc": "控制界面颜色的每个方面。",
+      "lb_rb": "LB / RB",
+      "jump_family": "跳转到下一个调色板",
       "brand_colors": "品牌颜色",
       "text_colors": "文本颜色",
       "global_bg": "全局背景",
@@ -964,8 +978,6 @@
       "wall_bg_desc": "选择自定义图片（JPG、PNG）或动画 GIF 替换默认背景。",
       "wall_stage": "舞台地板",
       "wall_stage_desc": "更改底层舞台环境，为仪表板增加深度。",
-      "wall_flourish": "艺术装饰",
-      "wall_flourish_desc": "更改艺术图形和漩涡。支持透明 PNG 图片。",
       "current": "当前选择"
     },
     "patches": {
@@ -992,7 +1004,6 @@
       "tag_eur": "欧版",
       "tag_usa": "美版",
       "deep_scan": "深度扫描（修复 ID）",
-      "scanning": "扫描中...",
       "art_manager": "图片管理器",
       "description": "描述",
       "publisher": "发行商",
@@ -1008,7 +1019,11 @@
       "zar_scan": "扫描 ZAR ID",
       "loading": "加载中...",
       "rename": "重命名",
-      "apply_optimized_settings": "应用优化设置"
+      "select_disc": "选择光盘",
+      "discs": "光盘",
+      "apply_optimized_settings": "应用优化设置",
+      "scanning": "正在扫描库...",
+      "scanning_desc": "请耐心等待，正在安全处理您的游戏。"
     },
     "art": {
       "loading": "正在从 SteamGridDB 搜索...",
@@ -1186,7 +1201,9 @@
       "change_avatar": "プロフィールを変更",
       "play": "プレイ",
       "select": "選択",
-      "menu": "メニュー"
+      "menu": "メニュー",
+      "default_bg": "デフォルトの背景",
+      "change_bg": "背景を変更"
     },
     "profile": {
       "switch_user": "ユーザーを切り替え",
@@ -1303,6 +1320,8 @@
       "active": "アクティブ",
       "full_custom": "完全カスタマイズ",
       "custom_desc": "インターフェースカラーのすべての側面を制御します。",
+      "lb_rb": "LB / RB",
+      "jump_family": "次のテーマにジャンプ",
       "brand_colors": "ブランドカラー",
       "text_colors": "テキストカラー",
       "global_bg": "グローバル背景",
@@ -1339,8 +1358,6 @@
       "wall_bg_desc": "デフォルトの背景を置き換えるカスタム画像（JPG、PNG）またはアニメーションGIFを選択します。",
       "wall_stage": "ステージ床",
       "wall_stage_desc": "ダッシュボードに奥行きを与えるために、基盤となるステージ環境を変更します。",
-      "wall_flourish": "アート装飾",
-      "wall_flourish_desc": "芸術的なグラフィックや渦を変更します。透明PNGをサポートします。",
       "current": "現在の選択"
     },
     "patches": {
@@ -1367,7 +1384,6 @@
       "tag_eur": "欧州版",
       "tag_usa": "米国版",
       "deep_scan": "詳細スキャン（ID修正）",
-      "scanning": "スキャン中...",
       "art_manager": "画像マネージャー",
       "description": "説明",
       "publisher": "発売元",
@@ -1383,7 +1399,11 @@
       "zar_scan": "ZAR IDをスキャン",
       "loading": "読み込み中...",
       "rename": "名前を変更",
-      "apply_optimized_settings": "最適化設定を適用"
+      "select_disc": "ディスクを選択",
+      "discs": "ディスク",
+      "apply_optimized_settings": "最適化設定を適用",
+      "scanning": "ライブラリをスキャン中...",
+      "scanning_desc": "ライブラリを安全に処理していますので、しばらくお待ちください。"
     },
     "art": {
       "loading": "SteamGridDBから検索中...",
@@ -1561,7 +1581,9 @@
       "change_avatar": "프로필 변경",
       "play": "실행",
       "select": "선택",
-      "menu": "메뉴"
+      "menu": "메뉴",
+      "default_bg": "기본 배경",
+      "change_bg": "배경 변경"
     },
     "profile": {
       "switch_user": "사용자 전환",
@@ -1677,6 +1699,8 @@
       "active": "활성",
       "full_custom": "완전 사용자 정의",
       "custom_desc": "인터페이스 색상의 모든 측면을 제어합니다.",
+      "lb_rb": "LB / RB",
+      "jump_family": "다음 테마로 점프",
       "brand_colors": "브랜드 색상",
       "text_colors": "텍스트 색상",
       "global_bg": "전체 배경",
@@ -1713,8 +1737,6 @@
       "wall_bg_desc": "기본 배경 오버레이를 대체할 사용자 정의 이미지 (JPG, PNG) 또는 애니메이션 GIF를 선택합니다.",
       "wall_stage": "배경 무대",
       "wall_stage_desc": "대시보드에 깊이를 주기 위해 기본 무대 환경을 변경합니다.",
-      "wall_flourish": "배경 장식",
-      "wall_flourish_desc": "예술적인 소용돌이/오버레이 그래픽을 변경합니다. 투명 PNG를 지원합니다.",
       "current": "현재 선택"
     },
     "patches": {
@@ -1741,7 +1763,6 @@
       "tag_eur": "유럽",
       "tag_usa": "미국",
       "deep_scan": "깊은 스캔 (ID 수정)",
-      "scanning": "스캔 중...",
       "art_manager": "아트 관리자",
       "description": "설명",
       "publisher": "퍼블리셔",
@@ -1757,7 +1778,11 @@
       "zar_scan": "ZAR 타이틀 ID 스캔",
       "loading": "로딩 중...",
       "rename": "이름 변경",
-      "apply_optimized_settings": "최적화된 설정 적용"
+      "select_disc": "디스크 선택",
+      "discs": "디스크",
+      "apply_optimized_settings": "최적화된 설정 적용",
+      "scanning": "라이브러리 스캔 중...",
+      "scanning_desc": "라이브러리를 안전하게 처리하고 있으므로 잠시 기다려 주세요."
     },
     "art": {
       "loading": "SteamGridDB에서 가져오는 중...",
@@ -1935,7 +1960,9 @@
       "change_avatar": "Изменить профиль",
       "play": "Играть",
       "select": "Выбрать",
-      "menu": "Меню"
+      "menu": "Меню",
+      "default_bg": "Фон по умолчанию",
+      "change_bg": "Изменить фон"
     },
     "profile": {
       "switch_user": "Сменить пользователя",
@@ -2051,6 +2078,8 @@
       "active": "Активный",
       "full_custom": "Полная настройка",
       "custom_desc": "Контролируйте все аспекты цветов интерфейса.",
+      "lb_rb": "LB / RB",
+      "jump_family": "Перейти к следующей теме",
       "brand_colors": "Брендовые цвета",
       "text_colors": "Цвета текста",
       "global_bg": "Глобальный фон",
@@ -2087,8 +2116,6 @@
       "wall_bg_desc": "Выберите пользовательское изображение (JPG, PNG) или анимированный GIF для замены фона по умолчанию.",
       "wall_stage": "Фоновая сцена",
       "wall_stage_desc": "Изменить фоновую среду сцены, чтобы придать глубину вашей панели управления.",
-      "wall_flourish": "Фоновое украшение",
-      "wall_flourish_desc": "Изменить художественную графику/вихрь. Поддерживает прозрачные PNG.",
       "current": "Текущий выбор"
     },
     "patches": {
@@ -2115,7 +2142,6 @@
       "tag_eur": "ЕВРОПЕЙСКАЯ",
       "tag_usa": "АМЕРИКАНСКАЯ",
       "deep_scan": "Глубокое сканирование (исправление ID)",
-      "scanning": "Сканирование...",
       "art_manager": "Менеджер изображений",
       "description": "Описание",
       "publisher": "Издатель",
@@ -2131,7 +2157,11 @@
       "zar_scan": "Сканировать ZAR ID",
       "loading": "Загрузка...",
       "rename": "Переименовать",
-      "apply_optimized_settings": "Применить оптимизированные настройки"
+      "select_disc": "Выбрать диск",
+      "discs": "Диски",
+      "apply_optimized_settings": "Применить оптимизированные настройки",
+      "scanning": "Сканирование библиотеки...",
+      "scanning_desc": "Пожалуйста, подождите, пока мы безопасно обрабатываем вашу библиотеку."
     },
     "art": {
       "loading": "Поиск в SteamGridDB...",
@@ -2309,7 +2339,9 @@
       "change_avatar": "Profil ändern",
       "play": "Spielen",
       "select": "Auswählen",
-      "menu": "Menü"
+      "menu": "Menü",
+      "default_bg": "Standardbild",
+      "change_bg": "Hintergrundbild ändern"
     },
     "profile": {
       "switch_user": "Benutzer wechseln",
@@ -2425,6 +2457,8 @@
       "active": "Aktiv",
       "full_custom": "Vollständige Anpassung",
       "custom_desc": "Steuern Sie jeden Aspekt der Oberflächenfarben.",
+      "lb_rb": "LB / RB",
+      "jump_family": "Zur nächsten Farbe springen",
       "brand_colors": "Markenfarben",
       "text_colors": "Textfarben",
       "global_bg": "Globaler Hintergrund",
@@ -2461,8 +2495,6 @@
       "wall_bg_desc": "Wählen Sie ein benutzerdefiniertes Bild (JPG, PNG) oder animiertes GIF, um die Standard-Hintergrundüberlagerung zu ersetzen.",
       "wall_stage": "Hintergrundbühne",
       "wall_stage_desc": "Ändern Sie die zugrunde liegende Bühnenumgebung, um Ihrem Dashboard Tiefe zu verleihen.",
-      "wall_flourish": "Hintergrundverzierung",
-      "wall_flourish_desc": "Ändern Sie die künstlerische Wirbel-/Überlagerungsgrafik. Unterstützt transparente PNGs.",
       "current": "Aktuelle Auswahl"
     },
     "patches": {
@@ -2489,7 +2521,6 @@
       "tag_eur": "EUR",
       "tag_usa": "USA",
       "deep_scan": "Tiefenscan (ID-Fix)",
-      "scanning": "Scannen...",
       "art_manager": "Art-Manager",
       "description": "Beschreibung",
       "publisher": "Herausgeber",
@@ -2505,7 +2536,11 @@
       "zar_scan": "ZAR-Titel-ID scannen",
       "loading": "Laden...",
       "rename": "Umbenennen",
-      "apply_optimized_settings": "Optimierte Einstellungen anwenden"
+      "select_disc": "Disc auswählen",
+      "discs": "Discs",
+      "apply_optimized_settings": "Optimierte Einstellungen anwenden",
+      "scanning": "Bibliothek wird gescannt...",
+      "scanning_desc": "Bitte warten Sie, während wir Ihre Bibliothek sicher verarbeiten."
     },
     "art": {
       "loading": "Wird von SteamGridDB abgerufen...",
@@ -2683,7 +2718,9 @@
       "change_avatar": "Alterar Perfil",
       "play": "Jogar",
       "select": "Selecionar",
-      "menu": "Menu"
+      "menu": "Menu",
+      "default_bg": "Plano de Fundo Padrão",
+      "change_bg": "Alterar Plano de Fundo"
     },
     "profile": {
       "switch_user": "Trocar Usuário",
@@ -2799,6 +2836,8 @@
       "active": "Ativo",
       "full_custom": "Personalização Completa",
       "custom_desc": "Controle todos os aspectos das cores da interface.",
+      "lb_rb": "LB / RB",
+      "jump_family": "Pular para a próxima cor",
       "brand_colors": "Cores da Marca",
       "text_colors": "Cores do Texto",
       "global_bg": "Plano de Fundo Global",
@@ -2835,8 +2874,6 @@
       "wall_bg_desc": "Selecione uma imagem personalizada (JPG, PNG) ou GIF animado para substituir a sobreposição de fundo padrão.",
       "wall_stage": "Cenário de Fundo",
       "wall_stage_desc": "Altere o ambiente do palco subjacente para dar profundidade ao seu painel.",
-      "wall_flourish": "Ornamento de Fundo",
-      "wall_flourish_desc": "Altere o gráfico de redemoinho/sobreposição artística. Suporta PNGs transparentes.",
       "current": "Seleção Atual"
     },
     "patches": {
@@ -2863,7 +2900,6 @@
       "tag_eur": "EUR",
       "tag_usa": "EUA",
       "deep_scan": "Varredura Profunda (Corrigir ID)",
-      "scanning": "Escaneando...",
       "art_manager": "Gerenciador de Arte",
       "description": "Descrição",
       "publisher": "Publicadora",
@@ -2879,7 +2915,11 @@
       "zar_scan": "Escanear ID ZAR",
       "loading": "Carregando...",
       "rename": "Renomear",
-      "apply_optimized_settings": "Aplicar Configurações Otimizadas"
+      "select_disc": "Selecionar Disco",
+      "discs": "Discos",
+      "apply_optimized_settings": "Aplicar Configurações Otimizadas",
+      "scanning": "Biblioteca está sendo varrida...",
+      "scanning_desc": "Por favor, aguarde enquanto processamos sua biblioteca."
     },
     "art": {
       "loading": "Buscando do SteamGridDB...",
@@ -3057,7 +3097,9 @@
       "change_avatar": "Cambiar Perfil",
       "play": "Jugar",
       "select": "Seleccionar",
-      "menu": "Menú"
+      "menu": "Menú",
+      "default_bg": "Fondo Predeterminado",
+      "change_bg": "Cambiar Fondo"
     },
     "profile": {
       "switch_user": "Cambiar Usuario",
@@ -3173,6 +3215,8 @@
       "active": "Activo",
       "full_custom": "Personalización Completa",
       "custom_desc": "Controlar todos los aspectos de colores de interfaz.",
+      "lb_rb": "LB / RB",
+      "jump_family": "Pular para a próxima cor",
       "brand_colors": "Colores de Marca",
       "text_colors": "Colores de Texto",
       "global_bg": "Fondo Global",
@@ -3209,8 +3253,6 @@
       "wall_bg_desc": "Seleccionar imagen personalizada (JPG, PNG) o GIF animado para reemplazar superposición de fondo predeterminada.",
       "wall_stage": "Escenario de Fondo",
       "wall_stage_desc": "Cambiar entorno de escenario subyacente para dar profundidad a su panel.",
-      "wall_flourish": "Adorno de Fondo",
-      "wall_flourish_desc": "Cambiar gráfico artístico de remolino/superposición. Soporta PNGs transparentes.",
       "current": "Selección Actual"
     },
     "patches": {
@@ -3237,7 +3279,6 @@
       "tag_eur": "EUR",
       "tag_usa": "USA",
       "deep_scan": "Escaneo Profundo (Corregir ID)",
-      "scanning": "Escaneando...",
       "art_manager": "Gestor de Arte",
       "description": "Descripción",
       "publisher": "Editor",
@@ -3253,7 +3294,11 @@
       "zar_scan": "Escanear ID ZAR",
       "loading": "Cargando...",
       "rename": "Renombrar",
-      "apply_optimized_settings": "Aplicar Configuraciones Optimizadas"
+      "select_disc": "Seleccionar Disco",
+      "discs": "Discos",
+      "apply_optimized_settings": "Aplicar Configuraciones Optimizadas",
+      "scanning": "Biblioteca está siendo varrida...",
+      "scanning_desc": "Por favor, espere mientras procesamos su biblioteca."
     },
     "art": {
       "loading": "Obteniendo de SteamGridDB...",
@@ -3431,7 +3476,9 @@
       "change_avatar": "Profili Değiştir",
       "play": "Oyna",
       "select": "Seç",
-      "menu": "Menü"
+      "menu": "Menü",
+      "default_bg": "Varsayılan Arka Plan",
+      "change_bg": "Arka Planı Değiştir"
     },
     "profile": {
       "switch_user": "Kullanıcı Değiştir",
@@ -3547,6 +3594,8 @@
       "active": "Aktif",
       "full_custom": "Tam Özelleştirme",
       "custom_desc": "Arayüz renklerinin her yönünü kontrol edin.",
+      "lb_rb": "LB / RB",
+      "jump_family": "Bir sonraki renge atla",
       "brand_colors": "Marka Renkleri",
       "text_colors": "Metin Renkleri",
       "global_bg": "Genel Arka Plan",
@@ -3583,8 +3632,6 @@
       "wall_bg_desc": "Varsayılan arka plan kaplamasını değiştirmek için özel bir resim (JPG, PNG) veya animasyonlu GIF seçin.",
       "wall_stage": "Arka Plan Sahnesi",
       "wall_stage_desc": "Panelinize derinlik katmak için altındaki sahne ortamını değiştirin.",
-      "wall_flourish": "Arka Plan Süslemesi",
-      "wall_flourish_desc": "Sanatsal girdap/kaplama grafiğini değiştirin. Şeffaf PNG'leri destekler.",
       "current": "Mevcut Seçim"
     },
     "patches": {
@@ -3611,7 +3658,6 @@
       "tag_eur": "AVR",
       "tag_usa": "ABD",
       "deep_scan": "Derin Tarama (ID Düzelt)",
-      "scanning": "Taranıyor...",
       "art_manager": "Resim Yöneticisi",
       "description": "Açıklama",
       "publisher": "Yayıncı",
@@ -3627,7 +3673,11 @@
       "zar_scan": "ZAR Kimliğini Tara",
       "loading": "Yükleniyor...",
       "rename": "Yeniden Adlandır",
-      "apply_optimized_settings": "Optimize Edilmiş Ayarları Uygula"
+      "select_disc": "Diski Seç",
+      "discs": "Disklar",
+      "apply_optimized_settings": "Optimize Edilmiş Ayarları Uygula",
+      "scanning": "Kütüphane taranıyor...",
+      "scanning_desc": "Lütfen kütüphanenizi işlerken bekleyin."
     },
     "art": {
       "loading": "SteamGridDB'den alınıyor...",
@@ -3805,7 +3855,9 @@
       "change_avatar": "Cambia Profilo",
       "play": "Gioca",
       "select": "Seleziona",
-      "menu": "Menu"
+      "menu": "Menu",
+      "default_bg": "Sfondo Predefinito",
+      "change_bg": "Cambia Sfondo"
     },
     "profile": {
       "switch_user": "Cambia Utente",
@@ -3921,6 +3973,8 @@
       "active": "Attivo",
       "full_custom": "Personalizzazione Completa",
       "custom_desc": "Controlla ogni aspetto dei colori dell'interfaccia.",
+      "lb_rb": "LB / RB",
+      "jump_family": "Salta al prossimo colore",
       "brand_colors": "Colori Marchio",
       "text_colors": "Colori Testo",
       "global_bg": "Sfondo Globale",
@@ -3957,8 +4011,6 @@
       "wall_bg_desc": "Seleziona un'immagine personalizzata (JPG, PNG) o GIF animata per sostituire la sovrapposizione di sfondo predefinita.",
       "wall_stage": "Scenario Sfondo",
       "wall_stage_desc": "Cambia l'ambiente scenico sottostante per dare profondità alla tua dashboard.",
-      "wall_flourish": "Decorazione Sfondo",
-      "wall_flourish_desc": "Cambia la grafica artistica a vortice/sovrapposizione. Supporta PNG trasparenti.",
       "current": "Selezione Corrente"
     },
     "patches": {
@@ -3985,7 +4037,6 @@
       "tag_eur": "EUR",
       "tag_usa": "USA",
       "deep_scan": "Scansione Profonda (Correggi ID)",
-      "scanning": "Scansione in corso...",
       "art_manager": "Gestore Immagini",
       "description": "Descrizione",
       "publisher": "Editore",
@@ -4001,7 +4052,11 @@
       "zar_scan": "Scansiona ID ZAR",
       "loading": "Caricamento in corso...",
       "rename": "Rinomina",
-      "apply_optimized_settings": "Applica Impostazioni Ottimizzate"
+      "select_disc": "Seleziona Disco",
+      "discs": "Dischi",
+      "apply_optimized_settings": "Applica Impostazioni Ottimizzate",
+      "scanning": "Scansione Libreria in corso...",
+      "scanning_desc": "Attendere mentre la libreria viene elaborata."
     },
     "art": {
       "loading": "Recupero da SteamGridDB...",
@@ -4179,7 +4234,9 @@
       "change_avatar": "Changer de Profil",
       "play": "Jouer",
       "select": "Sélectionner",
-      "menu": "Menu"
+      "menu": "Menu",
+      "default_bg": "Fond d'Écran par Défaut",
+      "change_bg": "Changer le Fond d'Écran"
     },
     "profile": {
       "switch_user": "Changer d'Utilisateur",
@@ -4295,6 +4352,8 @@
       "active": "Actif",
       "full_custom": "Personnalisation Complète",
       "custom_desc": "Contrôler tous les aspects des couleurs de l'interface.",
+      "lb_rb": "LB / RB",
+      "jump_family": "Saut au prochain couleur",
       "brand_colors": "Couleurs de la Marque",
       "text_colors": "Couleurs du Texte",
       "global_bg": "Arrière-plan Global",
@@ -4331,8 +4390,6 @@
       "wall_bg_desc": "Sélectionner une image personnalisée (JPG, PNG) ou GIF animé pour remplacer la superposition d'arrière-plan par défaut.",
       "wall_stage": "Scène d'Arrière-plan",
       "wall_stage_desc": "Changer l'environnement de scène sous-jacent pour donner de la profondeur à votre tableau de bord.",
-      "wall_flourish": "Ornement d'Arrière-plan",
-      "wall_flourish_desc": "Changer le graphique artistique tourbillonnant/superposé. Prend en charge les PNG transparents.",
       "current": "Sélection Actuelle"
     },
     "patches": {
@@ -4359,7 +4416,6 @@
       "tag_eur": "EUR",
       "tag_usa": "USA",
       "deep_scan": "Analyse Approfondie (Corriger l'ID)",
-      "scanning": "Analyse en cours...",
       "art_manager": "Gestionnaire d'Artworks",
       "description": "Description",
       "publisher": "Éditeur",
@@ -4375,7 +4431,11 @@
       "zar_scan": "Analyser l'ID ZAR",
       "loading": "Chargement en cours...",
       "rename": "Renommer",
-      "apply_optimized_settings": "Appliquer les Paramètres Optimisés"
+      "select_disc": "Sélectionner le Disque",
+      "discs": "Disques",
+      "apply_optimized_settings": "Appliquer les Paramètres Optimisés",
+      "scanning": "Analyse de la bibliothèque en cours...",
+      "scanning_desc": "Attendre pendant que la bibliothèque est traitée."
     },
     "art": {
       "loading": "Récupération depuis SteamGridDB...",

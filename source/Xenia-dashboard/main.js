@@ -14,6 +14,8 @@ app.commandLine.appendSwitch('force-device-scale-factor', '1');
 app.commandLine.appendSwitch('ignore-gpu-blacklist');
 app.commandLine.appendSwitch('enable-gpu-rasterization');
 app.commandLine.appendSwitch('enable-oop-rasterization');
+app.commandLine.appendSwitch('js-flags', '--expose-gc'); 
+app.commandLine.appendSwitch('enable-low-res-tiling');
 
 let store;
 let mainWindow;
@@ -486,6 +488,16 @@ function createWindow() {
         isAppFocused = false;
         console.log('[Window] Lost focus - Gamepad input suspended.');
         mainWindow.webContents.send('window-blur');
+
+        
+        try {
+            if (session && session.defaultSession) {
+                session.defaultSession.clearCache();
+                console.log('[Memory] Chromium Cache cleared safely.');
+            }
+        } catch (e) {
+            console.error('[Memory] Error clearing cache:', e);
+        }
     });
 
     mainWindow.on('focus', () => {
@@ -2729,8 +2741,40 @@ ipcMain.handle('scanForGames', async () => {
             }
         }
         
+        
+        
+        
+        const groupedGamesMap = {};
+        const finalGameList = [];
+
+        for (const game of gameList) {
+            
+            if (game.titleID && !game.isArcade && !game.isGOD && !game.isGameInstall) {
+                const tid = game.titleID.toUpperCase();
+                
+                if (!groupedGamesMap[tid]) {
+                    
+                    game.discs = [{ path: game.path, fileName: game.fileName }];
+                    groupedGamesMap[tid] = game;
+                    finalGameList.push(game);
+                } else {
+                    
+                    groupedGamesMap[tid].discs.push({ path: game.path, fileName: game.fileName });
+                    
+                    
+                    groupedGamesMap[tid].discs.sort((a, b) => a.fileName.localeCompare(b.fileName));
+                }
+            } else {
+                
+                game.discs = [{ path: game.path, fileName: game.fileName }];
+                finalGameList.push(game);
+            }
+        }
+
         if (cacheUpdated) await saveCache(newCache);
-        return { success: true, games: gameList };
+        
+        
+        return { success: true, games: finalGameList };
 
     } catch (error) {
         console.error('[Scanner] Arcade scan failed:', error);

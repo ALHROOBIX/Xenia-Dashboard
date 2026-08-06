@@ -1,56 +1,59 @@
 
 document.addEventListener('alpine:init', () => {
     
-    let isScanning = false;
-    
     let keyRepeatTimers = {
         x: { delay: null, interval: null },
         y: { delay: null, interval: null }
     };
 
-    
+        
     const DEFAULT_PRESETS = [
         { 
             id: 'xbox-classic', name: 'NXE Classic', 
             colors: { 
-                primary: '#90c31d', light: '#d0e4a1', dark: '#61920c', 
-                bgTop: '#5f5f5f', bgBottom: '#3a3a3a', 
-                listBgTop: '#2d3235', listBgBottom: '#202326', 
-                text: '#ffffff', textSec: '#cccccc',
-                panel: '#000000', alert: '#ff6b6b',
+                primary: '#9BCB3C', light: '#D4ECA0', dark: '#6F9C0F', 
+                bgTop: '#edeeee', bgBottom: '#edeeee', 
+                listBgTop: '#e6e6e6', listBgBottom: '#e6e6e6', 
+                text: '#FFFFFF', textSec: '#FFFFFF',
+                panel: '#c5c5c5', alert: '#FF5252',
                 btnA: '#59c853', btnB: '#e5443a', btnX: '#3a82e5', btnY: '#f2c40e'
             }
         },
+        
         { 
-            id: 'blades-orange', name: 'Blades Orange', 
+            id: 'obsidian-gold', name: 'Obsidian Gold', 
             colors: { 
-                primary: '#ff8c00', light: '#ffb347', dark: '#b36200', 
-                bgTop: '#4a3b2a', bgBottom: '#291e12', 
-                listBgTop: '#3d2e1e', listBgBottom: '#1f160d', 
-                text: '#ffffff', textSec: '#d6c2b0',
-                panel: '#1f160d', alert: '#ff4444',
+                primary: '#D4AF37', light: '#F3E5AB', dark: '#998100', 
+                bgTop: '#1C1C1E', bgBottom: '#0A0A0B', 
+                listBgTop: '#242426', listBgBottom: '#111112', 
+                text: '#FFFFFF', textSec: '#A9A9B0',
+                panel: '#050505', alert: '#FF3B30',
                 btnA: '#59c853', btnB: '#e5443a', btnX: '#3a82e5', btnY: '#f2c40e'
             } 
         },
+        
+        
         { 
-            id: 'kinect-purple', name: 'Kinect Purple', 
+            id: 'cyber-neon', name: 'Cyber Neon', 
             colors: { 
-                primary: '#9b59b6', light: '#d2b4de', dark: '#71368a', 
-                bgTop: '#3e2745', bgBottom: '#1f1024', 
-                listBgTop: '#2e1a33', listBgBottom: '#150b17', 
-                text: '#ffffff', textSec: '#dcc6e0',
-                panel: '#150b17', alert: '#ff6b6b',
+                primary: '#00F0FF', light: '#80FAFF', dark: '#008C99', 
+                bgTop: '#0D0B1A', bgBottom: '#04030A', 
+                listBgTop: '#17132D', listBgBottom: '#0A0818', 
+                text: '#FFFFFF', textSec: '#8B94B3',
+                panel: '#020105', alert: '#FF0055',
                 btnA: '#59c853', btnB: '#e5443a', btnX: '#3a82e5', btnY: '#f2c40e'
             } 
         },
+
+        
         { 
-            id: 'midnight-blue', name: 'Midnight Blue', 
+            id: 'emerald-matrix', name: 'Emerald Matrix', 
             colors: { 
-                primary: '#3498db', light: '#85c1e9', dark: '#2980b9', 
-                bgTop: '#212f3d', bgBottom: '#17202a', 
-                listBgTop: '#1a2530', listBgBottom: '#0d1317', 
-                text: '#ffffff', textSec: '#abc8e0',
-                panel: '#0d1317', alert: '#ff6b6b',
+                primary: '#00FF41', light: '#85FF9E', dark: '#008F11', 
+                bgTop: '#0B120C', bgBottom: '#030604', 
+                listBgTop: '#111D13', listBgBottom: '#060B07', 
+                text: '#E0F8E3', textSec: '#718C75',
+                panel: '#000000', alert: '#FF3333',
                 btnA: '#59c853', btnB: '#e5443a', btnX: '#3a82e5', btnY: '#f2c40e'
             } 
         }
@@ -155,12 +158,53 @@ document.addEventListener('alpine:init', () => {
         },
         newThemeName: '', 
 
+        colorSettingsFocus: 'presets', 
+        customColorIndex: 0,
+        
+        
+        colorPalette: (function() {
+            const colors = [];
+            
+            const baseHex = ['#ffffff', '#e0e0e0', '#cccccc', '#888888', '#5f5f5f', '#3a3a3a', '#2d3235', '#202326', '#111111', '#000000', '#ff0000', '#ff4444', '#ff6b6b', '#ff8888', '#da3633', '#b31d28', '#6e1818', '#ff8c00', '#ffb347', '#ffcc88', '#d29922', '#9e6a03', '#ffff00', '#f2c40e', '#ffe066', '#fff0b3', '#90c31d', '#59c853', '#00ff00', '#aaffaa', '#238636', '#61920c', '#00ffff', '#3498db', '#3a82e5', '#2188ff', '#85c1e9', '#0078f2', '#2980b9', '#ff00ff', '#9b59b6', '#d2b4de', '#8957e5', '#71368a', '#3e2745', '#1f1024', '#2e1a33', '#150b17', '#212f3d', '#17202a', '#1a2530', '#0d1317'];
+            colors.push(...baseHex);
+            
+            
+            for (let h = 0; h <= 350; h += 10) { 
+                for (let s = 100; s >= 20; s -= 20) { 
+                    for (let l = 95; l >= 10; l -= 5) { 
+                        colors.push(`hsl(${h}, ${s}%, ${l}%)`);
+                    }
+                }
+            }
+            return colors;
+        })(),
+        
+        customColorProps: [
+            { id: 'primary', label: 'colors_labels.primary' },
+            { id: 'light', label: 'colors_labels.light' },
+            { id: 'dark', label: 'colors_labels.dark' },
+            { id: 'text', label: 'colors_labels.text_main' },
+            { id: 'textSec', label: 'colors_labels.text_sec' },
+            { id: 'bgTop', label: 'colors_labels.bg_top' },
+            { id: 'bgBottom', label: 'colors_labels.bg_bottom' },
+            { id: 'listBgTop', label: 'colors_labels.list_top' },
+            { id: 'listBgBottom', label: 'colors_labels.list_bottom' },
+            { id: 'panel', label: 'colors_labels.panel_base' },
+            { id: 'alert', label: 'colors_labels.alert' },
+            { id: 'btnA', label: 'colors_labels.btn_a' },
+            { id: 'btnB', label: 'colors_labels.btn_b' },
+            { id: 'btnX', label: 'colors_labels.btn_x' },
+            { id: 'btnY', label: 'colors_labels.btn_y' },
+            { id: 'themeName', label: 'colors.theme_name', isText: true },
+            { id: 'saveBtn', label: 'generic.save', isButton: true }
+        ],
+
         displaySettings: {
             wallpaperPath: null, wallpaperName: 'Default',
             stagePath: null, stageName: 'Default',
             flourishPath: null, flourishName: 'Default'
         },
-        displayItems: ['wallpaper', 'stage', 'flourish'], 
+        displayItems: ['wallpaper', 'stage'],
 
         coreSettingsItems: [
             { id: 'config-file', name: 'xenia canary config', icon: 'assets/icons/xenia canary.png', view: 'settings-config' },
@@ -222,6 +266,7 @@ document.addEventListener('alpine:init', () => {
         xeniaConfigError: null, configFocusedPanel: 'categories', currentConfigOptions: [], configOptionIndex: 0,
         patchSaveStatus: 'idle',
         isLbPressed: false,
+        bladeBackgrounds: {},
 
 
         librarySearch: '', 
@@ -369,7 +414,7 @@ document.addEventListener('alpine:init', () => {
         focusedFriendIndex: 0,
         appUpdateInfo: {
             status: 'idle', 
-            currentVer: '1.3.0',
+            currentVer: '1.3.1',
             remoteVer: '---',
             message: 'Press (Y) to check for updates',
             percentage: 0,
@@ -490,6 +535,15 @@ document.addEventListener('alpine:init', () => {
         xboxInstallStatus: { exists: true },
         showXboxInstallNotify: false,
         xboxInstallDownloadState: 'idle',
+
+        
+        isDiscSelectorOpen: false,
+        discSelectorGame: null,
+        discSelectorIndex: 0,
+        
+        gamesList: [],
+        filteredLibraryGames: [],
+        isScanningGames: false,
         
     });
 
@@ -523,6 +577,50 @@ document.addEventListener('alpine:init', () => {
 
     
     Alpine.store('actions', {
+
+        
+        cycleCustomColor(direction, isJump = false) {
+            const app = Alpine.store('app');
+            const prop = app.customColorProps[app.customColorIndex];
+            
+            if (!prop || prop.isText || prop.isButton) return; 
+            
+            const key = prop.id;
+            const currentColor = (app.customColors[key] || '#ffffff').toLowerCase();
+            const palette = app.colorPalette;
+            
+            let idx = palette.indexOf(currentColor);
+            if (idx === -1) idx = 0; 
+            
+            if (isJump) {
+                
+                idx += (direction > 0 ? 90 : -90);
+            } else {
+                idx += direction;
+            }
+            
+            
+            if (idx < 0) {
+                idx = (palette.length - 1) - (Math.abs(idx) % palette.length);
+            } else if (idx >= palette.length) {
+                idx = idx % palette.length;
+            }
+            
+            this.updateCustomColor(key, palette[idx]);
+            this.playSound('focus');
+        },
+
+        
+        promptCustomThemeName() {
+            const app = Alpine.store('app');
+            app.keyboardMode = 'custom_theme_name';
+            app.searchCursorPos = app.newThemeName.length;
+            app.keyboardRow = 0;
+            app.keyboardCol = 0;
+            app.isKeyboardOpen = true;
+            this.playSound('select');
+            setTimeout(() => this.updateCursorVisuals(), 50);
+        },
 
         
         
@@ -2985,9 +3083,15 @@ document.addEventListener('alpine:init', () => {
         },
         async loadGameLibraryData() {
             const app = Alpine.store('app');
-            app.gamesList = [];
+            
+            
+            if (app.isScanningGames) {
+                console.log("[Scanner] Scan already in progress, skipping duplicate request.");
+                return; 
+            }
+            
             try {
-                await this.scanForGames(true); 
+                await this.scanForGames(true);
             } catch (e) {
                 console.error("Error loading game library data:", e);
             }
@@ -3136,8 +3240,20 @@ document.addEventListener('alpine:init', () => {
                 app.masterMenu = result.data.masterMenu;
                 
                 
-                this.applyThemeIconsToMenus();
                 
+                const savedBladeBgs = await window.electronAPI.get('bladeBackgrounds');
+                if (savedBladeBgs) {
+                    const validBgs = {};
+                    for (let key in savedBladeBgs) {
+                        const exists = await window.electronAPI.checkPathExists(savedBladeBgs[key]);
+                        if (exists) validBgs[key] = savedBladeBgs[key];
+                    }
+                    app.bladeBackgrounds = validBgs;
+                } else {
+                    app.bladeBackgrounds = {};
+                }
+
+                this.applyThemeIconsToMenus();
                 this.updateDetailMenu(); 
             } else {
                 app.currentViewHTML = `<h1 style="color:red;">Failed to load dashboard-data.json</h1>`;
@@ -3269,6 +3385,51 @@ document.addEventListener('alpine:init', () => {
                 this.loadView(item.view); 
             }
         },
+        async toggleBladeBackground() {
+            const app = Alpine.store('app');
+            
+            if (app.focusedList !== 'detail') return;
+
+            const currentItem = app.detailMenu[app.detailIndex];
+            if (!currentItem || currentItem.isGame || currentItem.isGameIcon) return; 
+
+            
+            
+            const themeData = app.themesList.find(t => t.name === app.currentTheme);
+            if (themeData && themeData.type === 'external') {
+                return; 
+            }
+
+            if (!app.bladeBackgrounds) app.bladeBackgrounds = {};
+
+            if (app.bladeBackgrounds[currentItem.id]) {
+                
+                this.playSound('back');
+                delete app.bladeBackgrounds[currentItem.id];
+                
+                
+                
+                const plainObj = JSON.parse(JSON.stringify(app.bladeBackgrounds));
+                app.bladeBackgrounds = plainObj; 
+                
+                
+                await window.electronAPI.set('bladeBackgrounds', plainObj);
+            } else {
+                
+                const filePath = await window.electronAPI.openImageFile();
+                if (filePath) {
+                    this.playSound('select');
+                    app.bladeBackgrounds[currentItem.id] = filePath;
+                    
+                    
+                    const plainObj = JSON.parse(JSON.stringify(app.bladeBackgrounds));
+                    app.bladeBackgrounds = plainObj; 
+                    
+                    
+                    await window.electronAPI.set('bladeBackgrounds', plainObj);
+                }
+            }
+        },
         async launchGame(game) {
             const app = Alpine.store('app');
             const xeniaPath = app.settings.xeniaPath;
@@ -3278,7 +3439,7 @@ document.addEventListener('alpine:init', () => {
                 return; 
             }
             
-            if (!xeniaPath || xeniaPath.startsWith('Click "Select"') || xeniaPath.startsWith('[Not Found]')) {
+            if (!xeniaPath || xeniaPath.startsWith('Click') || xeniaPath.startsWith('[Not Found]')) {
                 console.error("Launch failed: Xenia path is not set.");
                 this.loadView('settings-core'); 
                 return;
@@ -3287,14 +3448,76 @@ document.addEventListener('alpine:init', () => {
             console.log(`Launching game: ${game.name} (ID: ${game.titleID})`);
             
             try {
-                
-                
                 const result = await window.electronAPI.launchGame(xeniaPath, game.path, game.titleID);
-                
                 if (!result.success) console.error("Failed to launch game:", result.error);
             } catch (e) { 
                 console.error("Error during game launch IPC:", e); 
             }
+        },
+
+        
+        async _executeLaunch(gamePath, titleID) {
+            const app = Alpine.store('app');
+            const xeniaPath = app.settings.xeniaPath;
+
+            if (!xeniaPath || xeniaPath.startsWith('Click') || xeniaPath.startsWith('[Not Found]')) {
+                alert("Please set Xenia Path in settings first!");
+                this.loadView('settings-core');
+                return;
+            }
+
+            this.playSound('select');
+            try {
+                const result = await window.electronAPI.launchGame(xeniaPath, gamePath, titleID);
+                if (!result.success) console.error("Failed to launch game:", result.error);
+            } catch (e) {
+                console.error("Error during game launch IPC:", e);
+            }
+        },
+
+        
+        launchSelectedDisc() {
+            const app = Alpine.store('app');
+            const game = app.discSelectorGame;
+            const disc = game.discs[app.discSelectorIndex];
+
+            if (disc) {
+                app.isDiscSelectorOpen = false; 
+                
+                
+                const discGameObj = {
+                    ...game,
+                    path: disc.path,
+                    fileName: disc.fileName,
+                    
+                    name: disc.fileName.replace(/\.(iso|zar|xex)$/i, ''), 
+                    discs: [disc] 
+                };
+                
+                
+                this.sendGameToTray(discGameObj);
+            }
+        },
+        sendGameToTray(gameItem) {
+            const app = Alpine.store('app');
+            app.gameSelectionAnimating = true;
+            app.selectedGame = gameItem;
+            app.selectedIndexForAnimation = app.focusedIndex; 
+            this.playSound('select');
+            
+            setTimeout(() => {
+                this.goBack(); 
+                setTimeout(() => {
+                    const appStore = Alpine.store('app');
+                    const actions = Alpine.store('actions');
+                    appStore.masterIndex = 1; 
+                    actions.updateDetailMenu();
+                    appStore.detailIndex = 0; 
+                    appStore.focusedList = 'detail';
+                    appStore.gameSelectionAnimating = false;
+                    appStore.selectedIndexForAnimation = -1;
+                }, 850);
+            }, 600);
         },
         async loadUserConfig() {
             const app = Alpine.store('app');
@@ -3491,31 +3714,31 @@ document.addEventListener('alpine:init', () => {
         },
         async scanForGames(forceScan = false) {
             const app = Alpine.store('app');
-            if (isScanning && !forceScan) return; 
             
-            isScanning = true; 
+            
+            if (app.isScanningGames) return; 
+
+            app.isScanningGames = true; 
+            
             try {
                 const result = await window.electronAPI.scanForGames();
                 if (result.success) {
-                    app.gamesList = result.games; 
-                    
-                    
+                    app.gamesList = result.games;
                     
                     
                     if (app.librarySearch && app.librarySearch.trim() !== '') {
-                        
-                        this.filterLibrary(); 
+                        this.filterLibrary();
                     } else {
-                        
                         app.filteredLibraryGames = result.games;
                     }
-                    
                 }
                 this.updateGameDetails();
             } catch (e) {
                 console.error("Failed to scan games:", e);
+            } finally {
+                
+                app.isScanningGames = false; 
             }
-            isScanning = false; 
         },
         async scanForThemes(force = false) {
             const app = Alpine.store('app');
@@ -3626,7 +3849,7 @@ document.addEventListener('alpine:init', () => {
 
             if (app.navThrottle) return;
                 app.navThrottle = true;
-                setTimeout(() => { app.navThrottle = false; }, 150); 
+                setTimeout(() => { app.navThrottle = false; }, 100);
                 
 
                 if (app.currentView === 'achievements') {
@@ -3645,11 +3868,10 @@ document.addEventListener('alpine:init', () => {
                 return;
             }
             
-            
             if (app.focusedCollection === 'displayItems') {
                 let newIndex = app.focusedIndex + direction;
                 if (newIndex < 0) newIndex = 0;
-                if (newIndex > 2) newIndex = 2;
+                if (newIndex > 1) newIndex = 1; 
                 if (newIndex !== app.focusedIndex) {
                     app.focusedIndex = newIndex;
                     this.playSound('focus');
@@ -3678,13 +3900,16 @@ document.addEventListener('alpine:init', () => {
                     app.libraryMemoryIndex = newIndex; 
                     
                     
-                    this.updateGameDetails(); 
-
-                    
+                    if (this.detailsDebounce) clearTimeout(this.detailsDebounce);
                     if (this.compatDebounce) clearTimeout(this.compatDebounce);
                     
+                    
+                    this.detailsDebounce = setTimeout(() => {
+                        this.updateGameDetails();
+                    }, 150);
+
+                    
                     this.compatDebounce = setTimeout(() => {
-                        
                         const game = app.filteredLibraryGames[newIndex];
                         if (game) this.fetchCompatibilityForGame(game);
                     }, 300);
@@ -3974,7 +4199,6 @@ document.addEventListener('alpine:init', () => {
                 this.playSound('select');
                 if (app.focusedIndex === 0) this.changeWallpaper();
                 else if (app.focusedIndex === 1) this.changeStage();
-                else if (app.focusedIndex === 2) this.changeFlourish();
                 return;
             }
 
@@ -4003,24 +4227,18 @@ document.addEventListener('alpine:init', () => {
                 case 'filteredLibraryGames': 
                 case 'gamesList':
                     if (item && item.path && !app.gameSelectionAnimating) {
-                        app.gameSelectionAnimating = true;
-                        app.selectedGame = item;
-                        app.selectedIndexForAnimation = app.focusedIndex;
-                        this.playSound('select');
                         
-                        setTimeout(() => {
-                            this.goBack(); 
-                            setTimeout(() => {
-                                const app = Alpine.store('app');
-                                const actions = Alpine.store('actions');
-                                app.masterIndex = 1; 
-                                actions.updateDetailMenu();
-                                app.detailIndex = 0; 
-                                app.focusedList = 'detail';
-                                app.gameSelectionAnimating = false;
-                                app.selectedIndexForAnimation = -1;
-                            }, 850);
-                        }, 600);
+                        
+                        if (item.discs && item.discs.length > 1) {
+                            this.playSound('panelUnfold');
+                            app.discSelectorGame = item;
+                            app.discSelectorIndex = 0;
+                            app.isDiscSelectorOpen = true; 
+                            return; 
+                        }
+                        
+                        
+                        this.sendGameToTray(item);
                     }
                     break;
 
@@ -4269,6 +4487,7 @@ document.addEventListener('alpine:init', () => {
                 else if (app.keyboardMode === 'create_profile' || app.keyboardMode === 'rename_profile') targetVar = 'newProfileName';
                 else if (app.keyboardMode === 'add_friend_xuid') targetVar = 'friendInputXuid';
                 else if (app.keyboardMode === 'add_friend_name' || app.keyboardMode === 'edit_friend_name') targetVar = 'friendInputName'; 
+                else if (app.keyboardMode === 'custom_theme_name') targetVar = 'newThemeName';
                 
                 const currentText = app[targetVar] || "";
 
@@ -4336,6 +4555,7 @@ document.addEventListener('alpine:init', () => {
                 else if (app.keyboardMode === 'create_profile' || app.keyboardMode === 'rename_profile') targetVar = 'newProfileName';
                 else if (app.keyboardMode === 'add_friend_xuid') targetVar = 'friendInputXuid';
                 else if (app.keyboardMode === 'add_friend_name' || app.keyboardMode === 'edit_friend_name') targetVar = 'friendInputName'; 
+                else if (app.keyboardMode === 'custom_theme_name') targetVar = 'newThemeName';
 
                 const currentText = app[targetVar] || "";
                 
@@ -4375,6 +4595,7 @@ document.addEventListener('alpine:init', () => {
                 else if (app.keyboardMode === 'create_profile' || app.keyboardMode === 'rename_profile') targetVar = 'newProfileName';
                 else if (app.keyboardMode === 'add_friend_xuid') targetVar = 'friendInputXuid';
                 else if (app.keyboardMode === 'add_friend_name' || app.keyboardMode === 'edit_friend_name') targetVar = 'friendInputName'; 
+                else if (app.keyboardMode === 'custom_theme_name') targetVar = 'newThemeName';
                     app.searchCursorPos = (app[targetVar] || "").length;
                     
                     setTimeout(() => this.updateCursorVisuals(), 50);
@@ -4415,6 +4636,7 @@ document.addEventListener('alpine:init', () => {
                 else if (app.keyboardMode === 'create_profile' || app.keyboardMode === 'rename_profile') targetVar = 'newProfileName';
                 else if (app.keyboardMode === 'add_friend_xuid') targetVar = 'friendInputXuid';
                 else if (app.keyboardMode === 'add_friend_name' || app.keyboardMode === 'edit_friend_name') targetVar = 'friendInputName'; 
+                else if (app.keyboardMode === 'custom_theme_name') targetVar = 'newThemeName';
 
                 const currentText = app[targetVar] || "";
                 const pos = app.searchCursorPos;
@@ -4441,6 +4663,7 @@ document.addEventListener('alpine:init', () => {
                 else if (app.keyboardMode === 'create_profile' || app.keyboardMode === 'rename_profile') targetVar = 'newProfileName';
                 else if (app.keyboardMode === 'add_friend_xuid') targetVar = 'friendInputXuid';
                 else if (app.keyboardMode === 'add_friend_name' || app.keyboardMode === 'edit_friend_name') targetVar = 'friendInputName'; 
+                else if (app.keyboardMode === 'custom_theme_name') targetVar = 'newThemeName';
 
                 const currentText = app[targetVar] || "";
                 const pos = app.searchCursorPos;
@@ -4475,6 +4698,9 @@ document.addEventListener('alpine:init', () => {
                         this.submitProfileRename();
                     } else if (app.keyboardMode === 'rename') {
                         this.submitRename();
+                    }
+                    else if (app.keyboardMode === 'custom_theme_name') {
+
                     }
                     app.isKeyboardOpen = false;
                     app.isCreatingProfile = false;
@@ -4689,6 +4915,24 @@ document.addEventListener('alpine:init', () => {
             }
             return;
         }
+        
+        
+        
+        if (app.isDiscSelectorOpen) {
+            e.preventDefault(); 
+            
+            if (key === 'ArrowUp') {
+                if (app.discSelectorIndex > 0) { app.discSelectorIndex--; actions.playSound('focus'); }
+            } else if (key === 'ArrowDown') {
+                if (app.discSelectorIndex < app.discSelectorGame.discs.length - 1) { app.discSelectorIndex++; actions.playSound('focus'); }
+            } else if (key === 'Enter') {
+                actions.launchSelectedDisc();
+            } else if (key === 'Escape' || key === 'Backspace' || key === 'b' || key === 'B') {
+                app.isDiscSelectorOpen = false;
+                actions.playSound('back');
+            }
+            return; 
+        }
         if (app.showAppUpdateNotify) {
             e.preventDefault();
             if (key === 'y' || key === 'Y') {
@@ -4755,6 +4999,7 @@ document.addEventListener('alpine:init', () => {
             if (key === 'Escape') actions.toggleGuide();
             return;
         }
+        
         
 
         if (key === 'p' || key === 'P') {
@@ -4976,6 +5221,7 @@ document.addEventListener('alpine:init', () => {
                 else if (app.keyboardMode === 'create_profile' || app.keyboardMode === 'rename_profile') targetVar = 'newProfileName';
                 else if (app.keyboardMode === 'add_friend_xuid') targetVar = 'friendInputXuid';
                 else if (app.keyboardMode === 'add_friend_name' || app.keyboardMode === 'edit_friend_name') targetVar = 'friendInputName'; 
+                else if (app.keyboardMode === 'custom_theme_name') targetVar = 'newThemeName';
                 const currentText = app[targetVar] || "";
                 const pos = app.searchCursorPos;
 
@@ -5164,6 +5410,91 @@ document.addEventListener('alpine:init', () => {
             if (key === 'ArrowUp') { actions.moveFocus(-1); return; }
             if (key === 'ArrowDown') { actions.moveFocus(1); return; }
         }
+
+        
+        
+        
+        if (app.currentView === 'settings-colors') {
+            e.preventDefault(); 
+            
+            if (app.colorSettingsFocus === 'presets') {
+                if (key === 'ArrowUp' || key === 'ArrowDown') {
+                    const dir = key === 'ArrowDown' ? 1 : -1;
+                    actions.moveFocus(dir); 
+                    actions.previewTheme(app.focusedIndex);
+                }
+                else if (key === 'ArrowRight') {
+                    if (app.colorPresets[app.focusedIndex].id === 'custom') {
+                        app.colorSettingsFocus = 'custom';
+                        app.customColorIndex = 0;
+                        actions.playSound('focus');
+                    }
+                }
+                else if (key === 'Enter') {
+                    if (app.colorPresets[app.focusedIndex].id === 'custom') {
+                        app.colorSettingsFocus = 'custom';
+                        app.customColorIndex = 0;
+                        actions.playSound('focus');
+                    } else {
+                        actions.saveThemeSelection(app.focusedIndex);
+                    }
+                }
+                else if (key === 'y' || key === 'Y' || key === 'Delete') {
+                    actions.deleteFocusedTheme();
+                }
+                else if (key === 'Escape' || key === 'Backspace' || key === 'b' || key === 'B') {
+                    actions.goBack();
+                }
+            } 
+            
+                else if (app.colorSettingsFocus === 'custom') {
+                    
+                    
+                    if (key === 'q' || key === 'Q') {
+                        actions.cycleCustomColor(-1, true);
+                    }
+                    else if (key === 'e' || key === 'E') {
+                        actions.cycleCustomColor(1, true);
+                    }
+                    
+
+                    else if (key === 'ArrowUp' || key === 'ArrowDown') {
+                        const dir = key === 'ArrowDown' ? 1 : -1;
+                        app.customColorIndex += dir;
+                        if (app.customColorIndex < 0) app.customColorIndex = app.customColorProps.length - 1;
+                        if (app.customColorIndex >= app.customColorProps.length) app.customColorIndex = 0;
+                        actions.playSound('focus');
+                        actions.scrollToFocusedElement('custom-color-item-' + app.customColorIndex);
+                    }
+                    else if (key === 'ArrowLeft' || key === 'ArrowRight') {
+                        const dir = key === 'ArrowRight' ? 1 : -1;
+                        if (dir === -1 && (app.customColorProps[app.customColorIndex].isText || app.customColorProps[app.customColorIndex].isButton)) {
+                             app.colorSettingsFocus = 'presets';
+                             actions.playSound('back');
+                        } else {
+                             actions.cycleCustomColor(dir);
+                        }
+                    }
+                    else if (key === 'Enter') {
+                        const prop = app.customColorProps[app.customColorIndex];
+                        if (prop.isText) {
+                            actions.promptCustomThemeName();
+                        } else if (prop.isButton) {
+                            actions.saveNewCustomPreset();
+                            app.colorSettingsFocus = 'presets';
+                        }
+                    }
+                    else if (key === 'x' || key === 'X') {
+                        actions.saveNewCustomPreset();
+                        app.colorSettingsFocus = 'presets';
+                    }
+                    else if (key === 'Escape' || key === 'Backspace' || key === 'b' || key === 'B') {
+                        app.colorSettingsFocus = 'presets';
+                        actions.playSound('back');
+                    }
+                }
+            return; 
+        }
         
         
         
@@ -5192,20 +5523,11 @@ document.addEventListener('alpine:init', () => {
         if (key === 'y' || key === 'Y') {
             if (app.currentView === 'settings-system') { actions.openThemeStore(); e.preventDefault(); return; }
             if (app.currentView === 'settings-display') { actions.resetDisplaySettings(); e.preventDefault(); return; }
-            if (app.currentView === 'settings-colors') { actions.deleteFocusedTheme(); e.preventDefault(); return; }
             if (app.currentView === 'game-library') { actions.deleteFocusedGame(); e.preventDefault(); return; }
 
             if (app.currentView === 'settings-core') {
                 if (app.focusedIndex === 6) { actions.checkXeniaUpdates('win', 'standard'); actions.checkXeniaUpdates('win', 'netplay'); actions.playSound('select'); e.preventDefault(); return; }
                 if (app.focusedIndex === 7) { actions.checkXeniaUpdates('linux'); actions.playSound('select'); e.preventDefault(); return; }
-            }
-        }
-        
-        if (key === 'Delete' || key === 'Backspace') {
-            if (app.currentView === 'settings-colors' && key === 'Delete') {
-                actions.deleteFocusedTheme();
-                e.preventDefault();
-                return;
             }
         }
 
@@ -5224,12 +5546,15 @@ document.addEventListener('alpine:init', () => {
                 actions.downloadXenia('win', 'netplay');
                 return;
             }
+
             
-            
-            if (app.currentView === 'settings-colors' && app.colorPresets[app.focusedIndex].id === 'custom') {
-                e.preventDefault();
-                actions.saveNewCustomPreset();
-                return;
+            if (app.currentView === 'dashboard' && app.focusedList === 'detail') {
+                const currentItem = app.detailMenu[app.detailIndex];
+                if (currentItem && !currentItem.isGame && !currentItem.isGameIcon) {
+                    actions.toggleBladeBackground();
+                    e.preventDefault();
+                    return;
+                }
             }
             
             
@@ -5255,17 +5580,6 @@ document.addEventListener('alpine:init', () => {
         
         
         
-
-        if (app.focusedCollection === 'colorPresets') {
-             switch (key) {
-                case 'ArrowUp': actions.moveFocus(-1); actions.previewTheme(app.focusedIndex); break;
-                case 'ArrowDown': actions.moveFocus(1); actions.previewTheme(app.focusedIndex); break;
-                case 'Enter': actions.saveThemeSelection(app.focusedIndex); break;
-                case 'Escape': case 'Backspace': actions.goBack(); break;
-            }
-            return;
-        }
-
         if (app.currentView === 'dashboard') {
                 if (app.focusedList === 'master') {
                     switch (key) {
@@ -5510,7 +5824,7 @@ document.addEventListener('alpine:init', () => {
         });
 
         const REPEAT_DELAY = 400;
-        const REPEAT_INTERVAL = 150;
+        const REPEAT_INTERVAL = 100; 
 
         const getMoveAction = (axis, value) => {
             const actions = Alpine.store('actions');
@@ -5531,17 +5845,15 @@ document.addEventListener('alpine:init', () => {
                         else if (app.currentView === 'game-library') actions.moveFocus(-1);
                         else if (app.currentView === 'settings-config' && app.configFocusedPanel === 'options') { app.configFocusedPanel = 'categories'; actions.playSound('back'); }
                     }
-                } else if (axis === 'y') {
+                }  else if (axis === 'y') {
                     if (value === 1) { 
-                        if (app.focusedCollection === 'colorPresets') { actions.moveFocus(1); actions.previewTheme(app.focusedIndex); }
-                        else if (app.focusedList === 'master') actions.moveMaster(1);
+                        if (app.focusedList === 'master') actions.moveMaster(1);
                         else if (app.focusedList === 'detail') { app.focusedList = 'master'; actions.moveMaster(1); } 
                         else if (app.currentView === 'settings-config') app.configFocusedPanel === 'categories' ? actions.moveConfigCategory(1) : actions.moveConfigOption(1);
                         
                         else if (app.focusedCollection) actions.moveFocus(1);
                     } else if (value === -1) { 
-                        if (app.focusedCollection === 'colorPresets') { actions.moveFocus(-1); actions.previewTheme(app.focusedIndex); }
-                        else if (app.focusedList === 'master') actions.moveMaster(-1);
+                        if (app.focusedList === 'master') actions.moveMaster(-1);
                         else if (app.focusedList === 'detail') { app.focusedList = 'master'; actions.moveMaster(-1); }
                         else if (app.currentView === 'settings-config') app.configFocusedPanel === 'categories' ? actions.moveConfigCategory(-1) : actions.moveConfigOption(-1);
                         
@@ -5566,6 +5878,7 @@ document.addEventListener('alpine:init', () => {
             if (app.isInstallingContent) {
                 return;
             }
+
 
             
             if (message.event === 'dpad_x' && message.value === 0) {
@@ -6062,10 +6375,37 @@ document.addEventListener('alpine:init', () => {
                 
                 return; 
             }
+
             
             
             
-            if (app.isPatchSelectorOpen) {
+            if (app.isDiscSelectorOpen && !app.isKeyboardOpen) {
+                
+                if (message.event === 'dpad_y') {
+                    if (message.value === -1 && app.discSelectorIndex > 0) { 
+                        app.discSelectorIndex--;
+                        actions.playSound('focus');
+                    } else if (message.value === 1 && app.discSelectorIndex < app.discSelectorGame.discs.length - 1) { 
+                        app.discSelectorIndex++;
+                        actions.playSound('focus');
+                    }
+                } 
+                
+                else if (message.event === 'button_a' && message.value === 1) {
+                    actions.launchSelectedDisc();
+                } 
+                
+                else if ((message.event === 'button_b' || message.event === 'button_x') && message.value === 1) {
+                    app.isDiscSelectorOpen = false;
+                    actions.playSound('back');
+                }
+                
+                return; 
+            }
+            
+            
+            
+            if (app.isPatchSelectorOpen && !app.isKeyboardOpen) {
                 
                 if (message.event === 'dpad_y') {
                     if (message.value === -1 && app.patchSelectorIndex > 0) { 
@@ -6268,6 +6608,124 @@ document.addEventListener('alpine:init', () => {
                 
                 return; 
             }
+
+            
+            
+            
+            if (app.currentView === 'settings-colors') {
+                
+                if (app.colorSettingsFocus === 'presets') {
+                    if (message.event === 'dpad_y' && message.value !== 0) {
+                        actions.moveFocus(message.value); 
+                        actions.previewTheme(app.focusedIndex);
+                    }
+                    else if (message.event === 'left_stick_y' && Math.abs(message.value) > 0.5) {
+                        if (!app.stick_lock_colors) {
+                            actions.moveFocus(message.value > 0 ? 1 : -1);
+                            actions.previewTheme(app.focusedIndex);
+                            app.stick_lock_colors = true;
+                            setTimeout(() => app.stick_lock_colors = false, 150);
+                        }
+                    }
+                    else if ((message.event === 'dpad_x' && message.value === 1) || (message.event === 'left_stick_x' && message.value > 0.5)) {
+                        if (app.colorPresets[app.focusedIndex].id === 'custom') {
+                            if (!app.stick_lock_colors) {
+                                app.colorSettingsFocus = 'custom';
+                                app.customColorIndex = 0;
+                                actions.playSound('focus');
+                                app.stick_lock_colors = true;
+                                setTimeout(() => app.stick_lock_colors = false, 150);
+                            }
+                        }
+                    }
+                    else if (message.event === 'button_a' && message.value === 1) {
+                        if (app.colorPresets[app.focusedIndex].id === 'custom') {
+                            app.colorSettingsFocus = 'custom';
+                            app.customColorIndex = 0;
+                            actions.playSound('focus');
+                        } else {
+                            actions.saveThemeSelection(app.focusedIndex);
+                        }
+                    }
+                    else if (message.event === 'button_y' && message.value === 1) {
+                        actions.deleteFocusedTheme();
+                    }
+                    else if (message.event === 'button_b' && message.value === 1) {
+                        actions.goBack();
+                    }
+                } 
+                
+                else if (app.colorSettingsFocus === 'custom') {
+                    
+                    
+                    if (message.event === 'button_left_bumper' && message.value === 1) {
+                        actions.cycleCustomColor(-1, true);
+                    }
+                    else if (message.event === 'button_right_bumper' && message.value === 1) {
+                        actions.cycleCustomColor(1, true);
+                    }
+                    
+
+                    else if (message.event === 'dpad_y' && message.value !== 0) {
+                        app.customColorIndex += message.value;
+                        if (app.customColorIndex < 0) app.customColorIndex = app.customColorProps.length - 1;
+                        if (app.customColorIndex >= app.customColorProps.length) app.customColorIndex = 0;
+                        actions.playSound('focus');
+                        actions.scrollToFocusedElement('custom-color-item-' + app.customColorIndex);
+                    }
+                    else if (message.event === 'left_stick_y' && Math.abs(message.value) > 0.5) {
+                        if (!app.stick_lock_colors) {
+                            app.customColorIndex += (message.value > 0 ? 1 : -1);
+                            if (app.customColorIndex < 0) app.customColorIndex = app.customColorProps.length - 1;
+                            if (app.customColorIndex >= app.customColorProps.length) app.customColorIndex = 0;
+                            actions.playSound('focus');
+                            actions.scrollToFocusedElement('custom-color-item-' + app.customColorIndex);
+                            app.stick_lock_colors = true;
+                            setTimeout(() => app.stick_lock_colors = false, 150);
+                        }
+                    }
+                    else if (message.event === 'dpad_x' && message.value !== 0) {
+                        const dir = message.value;
+                        if (dir === -1 && (app.customColorProps[app.customColorIndex].isText || app.customColorProps[app.customColorIndex].isButton)) {
+                             app.colorSettingsFocus = 'presets';
+                             actions.playSound('back');
+                        } else {
+                             actions.cycleCustomColor(dir);
+                        }
+                    }
+                    else if (message.event === 'left_stick_x' && Math.abs(message.value) > 0.5) {
+                        if (!app.stick_lock_colors) {
+                            const dir = message.value > 0 ? 1 : -1;
+                            if (dir === -1 && (app.customColorProps[app.customColorIndex].isText || app.customColorProps[app.customColorIndex].isButton)) {
+                                 app.colorSettingsFocus = 'presets';
+                                 actions.playSound('back');
+                            } else {
+                                 actions.cycleCustomColor(dir);
+                            }
+                            app.stick_lock_colors = true;
+                            setTimeout(() => app.stick_lock_colors = false, 150);
+                        }
+                    }
+                    else if (message.event === 'button_a' && message.value === 1) {
+                        const prop = app.customColorProps[app.customColorIndex];
+                        if (prop.isText) {
+                            actions.promptCustomThemeName();
+                        } else if (prop.isButton) {
+                            actions.saveNewCustomPreset();
+                            app.colorSettingsFocus = 'presets';
+                        }
+                    }
+                    else if (message.event === 'button_x' && message.value === 1) {
+                        actions.saveNewCustomPreset();
+                        app.colorSettingsFocus = 'presets';
+                    }
+                    else if (message.event === 'button_b' && message.value === 1) {
+                        app.colorSettingsFocus = 'presets';
+                        actions.playSound('back');
+                    }
+                }
+                return; 
+            }
             
             
             
@@ -6319,9 +6777,13 @@ document.addEventListener('alpine:init', () => {
                         actions.downloadXenia('win', 'netplay');
                         return;
                     }
-                    
-                    if (app.currentView === 'settings-colors' && app.colorPresets[app.focusedIndex].id === 'custom') {
-                        actions.saveNewCustomPreset();
+
+                    if (app.currentView === 'dashboard' && app.focusedList === 'detail') {
+                        const currentItem = app.detailMenu[app.detailIndex];
+                        if (currentItem && !currentItem.isGame && !currentItem.isGameIcon) {
+                            actions.toggleBladeBackground();
+                            return;
+                        }
                     }
 
                     
@@ -6362,9 +6824,6 @@ document.addEventListener('alpine:init', () => {
                     }
                     else if (app.currentView === 'settings-system') {
                         actions.openThemeStore();
-                    }
-                    else if (app.currentView === 'settings-colors') {
-                        actions.deleteFocusedTheme();
                     }
                     else if (app.currentView === 'game-library') {
                         actions.deleteFocusedGame();

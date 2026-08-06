@@ -27,17 +27,6 @@
                     <img class="nxe-settings-icon" src="assets/icons/layers.png" alt="">
                     <span x-text="$store.app.t('display.wall_stage')">Background Stage</span>
                 </div>
-
-                <div 
-                    class="nxe-settings-item"
-                    id="display-item-2"
-                    :class="{'focused': $store.app.focusedIndex === 2}"
-                    @click.prevent="$store.actions.selectFocusedItem()"
-                >
-                    <img class="nxe-settings-icon" src="assets/icons/art.png" alt=""> 
-                    <span x-text="$store.app.t('display.wall_flourish')">Background Flourish</span>
-                </div>
-
             </nav>
             
             <div class="nxe-settings-description">
@@ -64,20 +53,7 @@
                         <p style="color: var(--nxe-green-light); font-weight: bold; word-break: break-all;" 
                            x-text="$store.app.displaySettings.stageName === 'Default' ? $store.app.t('generic.default') : $store.app.displaySettings.stageName"></p>
                     </div>
-                </template>
-
-                <template x-if="$store.app.focusedIndex === 2">
-                    <div>
-                        <h3 x-text="$store.app.t('display.wall_flourish')">Customize Flourish</h3>
-                        <p x-text="$store.app.t('display.wall_flourish_desc')"></p>
-                        
-                        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 15px 0;">
-                        <p style="font-size: 0.9rem; color: #ccc;" x-text="$store.app.t('display.current') + ':'">Current Selection:</p>
-                        <p style="color: var(--nxe-green-light); font-weight: bold; word-break: break-all;" 
-                           x-text="$store.app.displaySettings.flourishName === 'Default' ? $store.app.t('generic.default') : $store.app.displaySettings.flourishName"></p>
-                    </div>
-                </template>
-                
+                </template>   
             </div>
             
         </div>

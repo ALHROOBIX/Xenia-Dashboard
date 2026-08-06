@@ -118,7 +118,7 @@
                             <span x-text="$store.app.t('core_config.linuxLaunchMethod')">Path to your 'proton' executable</span> (e.g., in .steam/steam/...).
                         </p>
                         <p 
-                            style="color: #888; font-size: 1rem;"
+                            style="color: #ffffff; font-size: 1rem;"
                             x-show="$store.app.settings.linuxLaunchMethod !== 'proton'"
                         >
                             <span x-text="$store.app.t('core_config.nonlinuxLaunchMethod')">(This setting is only required if 'Linux Launch Method' is set to 'Proton').</span>
@@ -154,11 +154,11 @@
                             <div style="flex: 1; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
                                 <h4 style="margin: 0 0 10px 0; color: var(--nxe-brand-primary);">Standard Canary</h4>
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.85rem;">
-                                    <span style="color: #888;" x-text="$store.app.t('core_config.installed') + ':'">Installed:</span>
+                                    <span style="color: #ffffff;" x-text="$store.app.t('core_config.installed') + ':'">Installed:</span>
                                     <span style="color: white; font-weight: bold;" x-text="$store.app.xeniaUpdateInfo.win.localVer"></span>
                                 </div>
                                 <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
-                                    <span style="color: #888;" x-text="$store.app.t('core_config.latest') + ':'">Latest:</span>
+                                    <span style="color: #ffffff;" x-text="$store.app.t('core_config.latest') + ':'">Latest:</span>
                                     <span style="color: var(--nxe-green-light); font-weight: bold;" x-text="$store.app.xeniaUpdateInfo.win.remoteVer"></span>
                                 </div>
                                 
@@ -178,11 +178,11 @@
                             <div style="flex: 1; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
                                 <h4 style="margin: 0 0 10px 0; color: var(--nxe-brand-light);">Netplay Version</h4>
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.85rem;">
-                                    <span style="color: #888;" x-text="$store.app.t('core_config.installed') + ':'">Installed:</span>
+                                    <span style="color: #ffffff;" x-text="$store.app.t('core_config.installed') + ':'">Installed:</span>
                                     <span style="color: white; font-weight: bold;" x-text="$store.app.xeniaUpdateInfo.winNetplay.localVer"></span>
                                 </div>
                                 <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
-                                    <span style="color: #888;" x-text="$store.app.t('core_config.latest') + ':'">Latest:</span>
+                                    <span style="color: #ffffff;" x-text="$store.app.t('core_config.latest') + ':'">Latest:</span>
                                     <span style="color: var(--nxe-green-light); font-weight: bold;" x-text="$store.app.xeniaUpdateInfo.winNetplay.remoteVer"></span>
                                 </div>
                                 
@@ -218,11 +218,11 @@
                         
                         <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
                             <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                <span style="color: #888;" x-text="$store.app.t('core_config.installed') + ':'">Installed:</span>
+                                <span style="color: #ffffff;" x-text="$store.app.t('core_config.installed') + ':'">Installed:</span>
                                 <span style="color: white; font-weight: bold;" x-text="$store.app.xeniaUpdateInfo.linux.localVer + ' (' + $store.app.xeniaUpdateInfo.linux.localDate + ')'"></span>
                             </div>
                             <div style="display: flex; justify-content: space-between;">
-                                <span style="color: #888;" x-text="$store.app.t('core_config.latest') + ':'">Latest:</span>
+                                <span style="color: #ffffff;" x-text="$store.app.t('core_config.latest') + ':'">Latest:</span>
                                 <span style="color: var(--nxe-green-light); font-weight: bold;" x-text="$store.app.xeniaUpdateInfo.linux.remoteVer + ' (' + $store.app.xeniaUpdateInfo.linux.remoteDate + ')'"></span>
                             </div>
                         </div>
@@ -308,7 +308,7 @@
                         <p x-text="$store.app.t('core_config.open_dashboard_desc')"></p>
                         
                         <div style="margin-top: 20px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 5px;">
-                            <p style="font-size: 0.9rem; color: #aaa; margin: 0;">
+                            <p style="font-size: 0.9rem; color: #ffffff; margin: 0;">
                                 <span style="color: #fff;" x-text="$store.app.t('core_config.dashboard_tip')"></span>
                             </p>
                         </div>
@@ -369,11 +369,11 @@
                         
                         <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
                             <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                <span style="color: #888;" x-text="$store.app.t('core_config.current_version')">Current Version:</span>
+                                <span style="color: #ffffff;" x-text="$store.app.t('core_config.current_version')">Current Version:</span>
                                 <span style="color: white; font-weight: bold;" x-text="$store.app.appUpdateInfo.currentVer"></span>
                             </div>
                             <div style="display: flex; justify-content: space-between;">
-                                <span style="color: #888;" x-text="$store.app.t('core_config.latest_version')">Latest Version:</span>
+                                <span style="color: #ffffff;" x-text="$store.app.t('core_config.latest_version')">Latest Version:</span>
                                 <span style="color: var(--nxe-green-light); font-weight: bold;" x-text="$store.app.appUpdateInfo.remoteVer"></span>
                             </div>
                         </div>
