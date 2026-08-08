@@ -165,7 +165,241 @@
     </div>
 </div>
 
+<div class="disc-selector-overlay" x-show="$store.app.isDiscSelectorOpen" x-transition.opacity style="display: none;">
+    <div class="disc-selector-box">
+        <div class="disc-selector-header">
+            <h3 x-text="$store.app.t('library.select_disc') || 'Select Disc'">Select Disc</h3>
+            <span x-text="$store.app.discSelectorGame?.discs?.length + ' Discs'"></span>
+        </div>
+        
+        <div class="disc-selector-list custom-scrollbar">
+            <template x-for="(disc, index) in $store.app.discSelectorGame?.discs" :key="index">
+                <div 
+                    class="disc-file-item" 
+                    :class="{'focused': $store.app.discSelectorIndex === index}"
+                    @click="$store.app.discSelectorIndex = index; $store.actions.launchSelectedDisc()"
+                >
+                    <span class="file-name" x-text="disc.fileName"></span>
+                </div>
+            </template>
+        </div>
+
+        <div class="disc-selector-footer">
+            <div><span class="btn-icon a">A</span> <span x-text="$store.app.t('generic.select') || 'Launch'">Launch</span></div>
+            <div><span class="btn-icon b">B</span> <span x-text="$store.app.t('generic.cancel') || 'Cancel'">Cancel</span></div>
+        </div>
+    </div>
+</div>
+
 <style>
+    
+    .disc-selector-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px);
+        z-index: 10000; 
+        display: flex; align-items: center; justify-content: center;
+    }
+
+    .disc-selector-box {
+        min-width: 550px; max-width: 800px; 
+        background: linear-gradient(145deg, #f8f8f8, #d8d8d8);
+        border: 2px solid #ffffff;
+        border-radius: 16px; 
+        box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+        overflow: hidden; display: flex; flex-direction: column;
+        transform: scale(0.95); animation: discPopIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    
+    @keyframes discPopIn { to { transform: scale(1); } }
+
+    .disc-selector-header {
+        background: linear-gradient(to right, rgba(255,255,255,0.8), rgba(220,220,220,0.5));
+        padding: 20px 25px; 
+        border-bottom: 1px solid #bbbbbb;
+        display: flex; justify-content: space-between; align-items: center;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    .disc-selector-header h3 { 
+        margin: 0; 
+        color: #000000; 
+        font-size: 22px; 
+        font-weight: 900; 
+        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
+        letter-spacing: 1px; 
+    }
+
+    .disc-selector-header span { 
+        color: var(--nxe-brand-dark, #4a7c09); 
+        font-size: 14px; 
+        font-weight: 900; 
+        text-transform: uppercase; 
+        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+    
+    .disc-selector-list { 
+        padding: 15px; 
+        max-height: 350px; 
+        overflow-y: auto; 
+        background: rgba(0,0,0,0.02);
+    }
+    
+    .disc-file-item {
+        padding: 18px 20px; margin-bottom: 8px; border-radius: 8px;
+        display: flex; align-items: center; gap: 15px;
+        color: #444444; 
+        font-weight: 700;
+        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
+        background: rgba(0,0,0,0.05);
+        border: 2px solid transparent; 
+        cursor: pointer; transition: all 0.15s ease-out;
+        position: relative;
+    }
+    
+    
+    .disc-file-item.focused {
+        position: relative;
+        overflow: hidden; 
+        
+        
+        background: linear-gradient(
+            180deg, 
+            color-mix(in srgb, var(--nxe-brand-light), white 15%) 0%,   
+            var(--nxe-brand-primary) 48%,                                
+            var(--nxe-brand-dark) 50%,                                   
+            color-mix(in srgb, var(--nxe-brand-primary), black 10%) 100% 
+        ) !important;
+        
+        color: #ffffff !important; 
+        font-weight: 800 !important; 
+        transform: scale(1.02);
+        border-color: #ffffff !important;
+        
+        
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3), 0 0 15px var(--nxe-brand-light) !important;
+        text-shadow: 1px 1px 0 rgba(0,0,0,0.8) !important; 
+        z-index: 10;
+    }
+
+    
+    .disc-file-item.focused::before {
+        content: '';
+        display: block !important;
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 48%; 
+        background: linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.05) 100%);
+        border-radius: 6px 6px 0 0;
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    
+    .disc-file-item.focused::after {
+        content: '';
+        display: block !important;
+        position: absolute;
+        top: 0;
+        left: -150%;
+        width: 70%;
+        height: 100%;
+        
+        
+        background: linear-gradient(
+            to right, 
+            rgba(255, 255, 255, 0) 0%, 
+            rgba(255, 255, 255, 0.15) 30%, 
+            rgba(255, 255, 255, 0.5) 50%, 
+            rgba(255, 255, 255, 0.15) 70%, 
+            rgba(255, 255, 255, 0) 100%
+        );
+        
+        transform: skewX(-25deg);
+        z-index: 2;
+        pointer-events: none;
+        
+        
+        animation: nxe2008ShineSweep 8s ease-in-out infinite !important;
+    }
+
+    
+    .disc-file-item.focused .file-icon {
+        opacity: 1 !important;
+        filter: brightness(0) invert(1) drop-shadow(0 2px 4px rgba(0,0,0,0.5)) !important;
+        text-shadow: none !important;
+    }
+
+    
+    html[dir="rtl"] .disc-file-item.focused::after {
+        transform: skewX(25deg);
+        animation: nxe2008ShineSweep_RTL 8s ease-in-out infinite !important;
+    }
+    
+    
+    .disc-file-item.focused .file-name,
+    .disc-file-item.focused .file-icon {
+        position: relative;
+        z-index: 3;
+    }
+    
+    .file-icon { 
+        font-size: 20px; 
+        opacity: 0.7; 
+        transition: opacity 0.3s; 
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 26px;
+        height: 26px;
+        line-height: 1; 
+        transform-origin: center center;
+    }
+    
+    
+    .disc-file-item.focused .file-icon.disc-spin { 
+        opacity: 1 !important; 
+        filter: brightness(0) invert(1) drop-shadow(0 2px 4px rgba(0,0,0,0.5)) !important;
+        text-shadow: none !important;
+    }
+
+    .disc-file-item .file-name { 
+        flex: 1; 
+        font-size: 16px; 
+        white-space: nowrap; 
+        overflow: hidden; 
+        text-overflow: ellipsis; 
+    }
+
+    .disc-selector-footer {
+        padding: 15px 25px; 
+        background: linear-gradient(180deg, #e8e8e8 0%, #cccccc 100%);
+        border-top: 1px solid #ffffff;
+        display: flex; gap: 30px;
+        justify-content: flex-end; 
+        box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+    }
+
+    .disc-selector-footer div { 
+        display: flex; align-items: center; gap: 8px; 
+        font-size: 14px; 
+        color: #222222; 
+        font-weight: 800; 
+        text-shadow: 0 1px 0 rgba(255,255,255,0.7);
+    }
+    
+    @keyframes nxe2008ShineSweep {
+        0%   { left: -100%; opacity: 0; }
+        15%  { opacity: 1; }
+        50%  { left: 150%; opacity: 0; }
+        100% { left: 150%; opacity: 0; }
+    }
+
+    @keyframes nxe2008ShineSweep_RTL {
+        0%   { right: -100%; left: auto; opacity: 0; }
+        15%  { opacity: 1; }
+        50%  { right: 150%; left: auto; opacity: 0; }
+        100% { right: 150%; left: auto; opacity: 0; }
+    }
     
     .shutdown-crt {
         position: fixed;
@@ -390,6 +624,7 @@
         </div>
     </div>
 </div>
+
     <style>
         :root {
             text-shadow:

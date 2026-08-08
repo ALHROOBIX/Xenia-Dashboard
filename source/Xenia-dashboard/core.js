@@ -414,7 +414,7 @@ document.addEventListener('alpine:init', () => {
         focusedFriendIndex: 0,
         appUpdateInfo: {
             status: 'idle', 
-            currentVer: '1.3.1',
+            currentVer: '1.3.2',
             remoteVer: '---',
             message: 'Press (Y) to check for updates',
             percentage: 0,
@@ -3475,7 +3475,6 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
-        
         launchSelectedDisc() {
             const app = Alpine.store('app');
             const game = app.discSelectorGame;
@@ -3484,18 +3483,21 @@ document.addEventListener('alpine:init', () => {
             if (disc) {
                 app.isDiscSelectorOpen = false; 
                 
-                
                 const discGameObj = {
                     ...game,
                     path: disc.path,
                     fileName: disc.fileName,
-                    
                     name: disc.fileName.replace(/\.(iso|zar|xex)$/i, ''), 
                     discs: [disc] 
                 };
                 
                 
-                this.sendGameToTray(discGameObj);
+                if (app.currentView === 'game-library') {
+                    this.sendGameToTray(discGameObj);
+                } else {
+                    
+                    this.launchGame(discGameObj);
+                }
             }
         },
         sendGameToTray(gameItem) {
@@ -4456,9 +4458,23 @@ document.addEventListener('alpine:init', () => {
                         return; 
                     }
                 }
+                
                 else if (currentTab === 'games') {
                     const game = app.gamesList[app.guideMenuIndex];
-                    if(game) {
+                    if (game) {
+                        
+                        if (game.discs && game.discs.length > 1) {
+                            this.playSound('panelUnfold');
+                            app.discSelectorGame = game;
+                            app.discSelectorIndex = 0;
+                            
+                            
+                            app.isGuideOpen = false;
+                            app.isDiscSelectorOpen = true; 
+                            return;
+                        }
+                        
+                        
                         this.launchGame(game);
                         app.isGuideOpen = false;
                     }
