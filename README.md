@@ -1,3 +1,11 @@
+<div align="center">
+
+ English | [العربية](README.ar.md)
+
+</div>
+
+---
+
 <img title="logo" src="icon.png" alt="" align="left" width="100" height="100" style="margin-right: 15px;" data-align="center">
 
 ---
