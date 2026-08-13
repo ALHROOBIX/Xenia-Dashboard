@@ -1,7 +1,11 @@
 <div align="center">
 
 [![English](https://img.shields.io/badge/Language-English-blue?style=for-the-badge)](README.md)
+
+<div dir="rtl" align="right">
 [![العربية](https://img.shields.io/badge/اللغة-العربية-green?style=for-the-badge)](README.ar.md)
+
+</div>
 
 </div>
 
