@@ -8,6 +8,7 @@ const axios = require('axios');
 const { exec, spawn } = require('child_process');
 const sevenBin = require('7zip-bin');
 const Seven = require('node-7z');
+const crypto = require('crypto');
 
 
 app.commandLine.appendSwitch('force-device-scale-factor', '1');
@@ -59,6 +60,9 @@ const CACHE_FILE = path.join(CACHE_DIR, 'db.json');
 const ACHIEVEMENTS_DIR = path.join(CONFIG_DIR, 'achievements');
 const ACHIEVEMENTS_CACHE_FILE = path.join(CONFIG_DIR, 'data', 'achievement.json');
 const SYSTEMS_DIR = path.join(CONFIG_DIR, 'systems');
+const CUSTOM_BG_PF_DIR = path.join(CONFIG_DIR, 'Custom-BG-PF');
+const CUSTOM_BG_DIR = path.join(CUSTOM_BG_PF_DIR, 'Background');
+const CUSTOM_PF_DIR = path.join(CUSTOM_BG_PF_DIR, 'Profile');
 
 
 
@@ -66,6 +70,7 @@ const SYSTEMS_DIR = path.join(CONFIG_DIR, 'systems');
 const GAMES_DIR = path.join(CONFIG_DIR, 'Games'); 
 const iconPath = path.join(__dirname, 'assets', 'icons', 'icon.png');
 const appIcon = nativeImage.createFromPath(iconPath); 
+
 
 
 
@@ -357,6 +362,9 @@ async function ensureCacheDirs() {
         
         if (!fsSync.existsSync(ACHIEVEMENTS_DIR)) fsSync.mkdirSync(ACHIEVEMENTS_DIR, { recursive: true });
         if (!fsSync.existsSync(SYSTEMS_DIR)) fsSync.mkdirSync(SYSTEMS_DIR, { recursive: true });
+        if (!fsSync.existsSync(CUSTOM_BG_PF_DIR)) fsSync.mkdirSync(CUSTOM_BG_PF_DIR, { recursive: true });
+        if (!fsSync.existsSync(CUSTOM_BG_DIR)) fsSync.mkdirSync(CUSTOM_BG_DIR, { recursive: true });
+        if (!fsSync.existsSync(CUSTOM_PF_DIR)) fsSync.mkdirSync(CUSTOM_PF_DIR, { recursive: true });
 
         
         
@@ -826,10 +834,61 @@ function sendProgress(payload) {
 
 function registerIpcHandlers() {
 
-    
-    
-    
+    ipcMain.handle('get-gallery-images', async (event, type) => {
+        try {
+            const targetDir = type === 'profile' ? CUSTOM_PF_DIR : CUSTOM_BG_DIR;
+            if (!fsSync.existsSync(targetDir)) return { success: true, images: [] };
 
+            const files = await fsSync.promises.readdir(targetDir);
+            const imageFiles = files.filter(file => {
+                const ext = path.extname(file).toLowerCase();
+                return ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp'].includes(ext);
+            });
+
+            const imageUrls = imageFiles.map(file => {
+                const fullPath = path.join(targetDir, file);
+                return {
+                    name: file,
+                    path: fullPath, 
+                    
+                    url: `app-thumb:///${fullPath.replace(/\\/g, '/')}`
+                };
+            });
+
+            return { success: true, images: imageUrls };
+        } catch (e) {
+            console.error("[Gallery Error]", e);
+            return { success: false, error: e.message };
+        }
+    });
+    ipcMain.handle('delete-gallery-image', async (event, filePath) => {
+        try {
+            if (!fsSync.existsSync(filePath)) {
+                return { success: false, error: "File not found." };
+            }
+
+            
+            
+            const stat = fsSync.statSync(filePath);
+            const hash = crypto.createHash('md5').update(filePath + stat.mtimeMs).digest('hex');
+            const ext = path.extname(filePath).toLowerCase();
+            const THUMB_DIR = path.join(CONFIG_DIR, 'data', 'thumbnails');
+            const thumbPath = path.join(THUMB_DIR, `${hash}${ext === '.gif' ? '.gif' : '.jpg'}`);
+
+            
+            if (fsSync.existsSync(thumbPath)) {
+                await fs.unlink(thumbPath); 
+            }
+
+            
+            await fs.unlink(filePath); 
+
+            return { success: true };
+        } catch (e) {
+            console.error("[Delete Gallery Image Error]", e);
+            return { success: false, error: e.message };
+        }
+    });
     ipcMain.handle('check-theme-update', async (event, repo, folderName) => {
         try {
             const repoUrl = `https://api.github.com/repos/${repo}/releases/latest`;
@@ -4108,8 +4167,6 @@ async function autoCleanupArt() {
         console.log(`[Debug] Config saved to: ${path.join(CONFIG_DIR, 'nxe-user-config.json')}`);
         console.log(`[Debug] Cache saved to: ${CACHE_DIR}`);
 
-
-        
         
         session.defaultSession.protocol.registerFileProtocol('app-art', (req, callback) => {
             try {
@@ -4202,6 +4259,55 @@ async function autoCleanupArt() {
                 console.error(`[Core Protocol] File not found: ${finalPath}`);
                 callback({ error: -6 });
             } catch (e) {
+                callback({ error: -2 });
+            }
+        });
+        
+        session.defaultSession.protocol.registerFileProtocol('app-thumb', (req, callback) => {
+            try {
+                let rawUrl = req.url.replace('app-thumb://', '');
+                let decodedPath = decodeURIComponent(rawUrl).split('?')[0];
+                
+                if (process.platform === 'win32' && decodedPath.startsWith('/') && /^\/[a-zA-Z]:/.test(decodedPath)) {
+                    decodedPath = decodedPath.substring(1);
+                }
+                const finalPath = path.normalize(decodedPath);
+
+                if (!fsSync.existsSync(finalPath)) return callback({ error: -6 });
+
+                
+                const THUMB_DIR = path.join(CONFIG_DIR, 'data', 'thumbnails');
+                if (!fsSync.existsSync(THUMB_DIR)) fsSync.mkdirSync(THUMB_DIR, { recursive: true });
+
+                
+                const stat = fsSync.statSync(finalPath);
+                const hash = crypto.createHash('md5').update(finalPath + stat.mtimeMs).digest('hex');
+                const ext = path.extname(finalPath).toLowerCase();
+                const thumbPath = path.join(THUMB_DIR, `${hash}${ext === '.gif' ? '.gif' : '.jpg'}`);
+
+                
+                if (fsSync.existsSync(thumbPath)) {
+                    return callback({ path: thumbPath });
+                }
+
+                
+                if (ext === '.gif') {
+                    return callback({ path: finalPath });
+                }
+
+                
+                const image = nativeImage.createFromPath(finalPath);
+                const size = image.getSize();
+                
+                if (size.width > 300 || size.height > 300) {
+                    const thumb = image.resize({ width: 300, quality: 'good' });
+                    fsSync.writeFileSync(thumbPath, thumb.toJPEG(80));
+                    return callback({ path: thumbPath });
+                } else {
+                    return callback({ path: finalPath });
+                }
+            } catch (e) {
+                console.error('[Thumb Protocol] Error:', e);
                 callback({ error: -2 });
             }
         });

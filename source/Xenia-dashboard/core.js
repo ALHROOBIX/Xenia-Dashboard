@@ -414,7 +414,7 @@ document.addEventListener('alpine:init', () => {
         focusedFriendIndex: 0,
         appUpdateInfo: {
             status: 'idle', 
-            currentVer: '1.3.2',
+            currentVer: '1.3.4',
             remoteVer: '---',
             message: 'Press (Y) to check for updates',
             percentage: 0,
@@ -545,6 +545,12 @@ document.addEventListener('alpine:init', () => {
         filteredLibraryGames: [],
         isScanningGames: false,
         
+        isGalleryOpen: false,
+        galleryType: 'profile', 
+        galleryImages: [],
+        galleryIndex: 0,
+        galleryLoading: false,
+        
     });
 
     
@@ -577,6 +583,153 @@ document.addEventListener('alpine:init', () => {
 
     
     Alpine.store('actions', {
+
+        async openGallery(type) {
+            const app = Alpine.store('app');
+            
+            
+            if (app.isKeyboardOpen || app.isProfileSelectorOpen) {
+                app.isProfileSelectorOpen = false;
+            }
+
+            this.playSound('panelUnfold');
+            app.galleryType = type;
+            app.galleryLoading = true;
+            app.isGalleryOpen = true;
+            app.galleryIndex = 0;
+
+            const folderType = type === 'profile' ? 'profile' : 'background';
+            const result = await window.electronAPI.getGalleryImages(folderType);
+            
+            if (result.success) {
+                
+                const browseText = app.t('gallery.browse') || 'Browse Device...';
+                
+                app.galleryImages = [{ id: 'browse', url: 'assets/icons/open-folder.png', name: browseText }, ...result.images];
+            }
+            app.galleryLoading = false;
+        },
+        async deleteGalleryImage() {
+            const app = Alpine.store('app');
+            const selected = app.galleryImages[app.galleryIndex];
+            
+            
+            if (!selected || selected.id === 'browse') return;
+
+            if (confirm(`${app.t('generic.delete')} "${selected.name}"?`)) {
+                this.playSound('back'); 
+                
+                const result = await window.electronAPI.deleteGalleryImage(selected.path);
+                
+                if (result.success) {
+                    
+                    app.galleryImages.splice(app.galleryIndex, 1);
+                    
+                    
+                    if (app.galleryIndex >= app.galleryImages.length) {
+                        app.galleryIndex = Math.max(0, app.galleryImages.length - 1);
+                    }
+                } else {
+                    alert(`Failed to delete: ${result.error}`);
+                }
+            }
+        },
+
+        
+        moveGalleryGrid(rowDir, colDir) {
+            const app = Alpine.store('app');
+            const images = app.galleryImages;
+            if (images.length === 0) return;
+
+            const gridContainer = document.querySelector('.gallery-grid-container');
+            let cols = 1;
+            if (gridContainer) {
+                const computedStyle = window.getComputedStyle(gridContainer);
+                cols = computedStyle.gridTemplateColumns.split(' ').length;
+            }
+
+            let newIndex = app.galleryIndex;
+            if (colDir !== 0) newIndex += colDir;
+            else if (rowDir !== 0) {
+                const target = app.galleryIndex + (rowDir * cols);
+                if (target >= 0 && target < images.length) newIndex = target;
+                else return; 
+            }
+
+            if (newIndex < 0) newIndex = 0;
+            if (newIndex >= images.length) newIndex = images.length - 1;
+
+            if (newIndex !== app.galleryIndex) {
+                app.galleryIndex = newIndex;
+                this.playSound('focus');
+                
+                
+                setTimeout(() => {
+                    const el = document.getElementById('gallery-item-' + newIndex);
+                    if (el) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                }, 10);
+            }
+        },
+
+        async selectGalleryImage() {
+            const app = Alpine.store('app');
+            const selected = app.galleryImages[app.galleryIndex];
+            if (!selected) return;
+
+            let filePath = selected.path;
+
+            
+            if (selected.id === 'browse') {
+                filePath = await window.electronAPI.openImageFile();
+                if (!filePath) return; 
+            }
+
+            this.playSound('select');
+            
+            
+            if (app.galleryType === 'profile') {
+                const targetProfile = app.profilesList[app.focusedProfileIndex];
+                if (targetProfile) {
+                    await window.electronAPI.set(`customAvatar_slot_${targetProfile.slot}`, filePath);
+                    await this.refreshProfileData();
+                    app.isProfileSelectorOpen = true; 
+                }
+            } 
+            else if (app.galleryType === 'wallpaper') {
+                await this._saveDisplaySetting('userWallpaper', 'wallpaperPath', filePath);
+                app.displaySettings.wallpaperPath = filePath;
+                app.displaySettings.wallpaperName = filePath.split(/[\\/]/).pop();
+                this.applyDisplaySettings();
+            }
+            else if (app.galleryType === 'stage') {
+                await this._saveDisplaySetting('userStage', 'stagePath', filePath);
+                app.displaySettings.stagePath = filePath;
+                app.displaySettings.stageName = filePath.split(/[\\/]/).pop();
+                this.applyDisplaySettings();
+            }
+            else if (app.galleryType === 'flourish') {
+                await this._saveDisplaySetting('userFlourish', 'flourishPath', filePath);
+                app.displaySettings.flourishPath = filePath;
+                app.displaySettings.flourishName = filePath.split(/[\\/]/).pop();
+                this.applyDisplaySettings();
+            }
+            
+            else if (app.galleryType === 'bladeBg') {
+                const currentItem = app.detailMenu[app.detailIndex];
+                if (currentItem) {
+                    app.bladeBackgrounds[currentItem.id] = filePath;
+                    
+                    
+                    const plainObj = JSON.parse(JSON.stringify(app.bladeBackgrounds));
+                    app.bladeBackgrounds = plainObj; 
+                    
+                    
+                    await window.electronAPI.set('bladeBackgrounds', plainObj);
+                }
+            }
+
+            app.isGalleryOpen = false; 
+        },
 
         
         cycleCustomColor(direction, isJump = false) {
@@ -2387,23 +2540,8 @@ document.addEventListener('alpine:init', () => {
         },
 
         async changeFocusedProfileAvatar() {
-            const app = Alpine.store('app');
-            const targetProfile = app.profilesList[app.focusedProfileIndex];
-            if (!targetProfile) return;
-
-            this.playSound('select');
-
             
-            const filePath = await window.electronAPI.openImageFile();
-            
-            if (filePath) {
-                
-                await window.electronAPI.set(`customAvatar_slot_${targetProfile.slot}`, filePath);
-                
-                
-                await this.refreshProfileData();
-                this.playSound('select');
-            }
+            this.openGallery('profile');
         },
 
         async updateDatabase() {
@@ -2955,37 +3093,16 @@ document.addEventListener('alpine:init', () => {
         },
 
         async changeWallpaper() {
-            const app = Alpine.store('app');
-            const filePath = await window.electronAPI.openImageFile();
-            if (filePath) {
-                await this._saveDisplaySetting('userWallpaper', 'wallpaperPath', filePath);
-                app.displaySettings.wallpaperPath = filePath;
-                app.displaySettings.wallpaperName = filePath.split(/[\\/]/).pop();
-                this.applyDisplaySettings();
-                this.playSound('select');
-            }
+            
+            this.openGallery('wallpaper');
         },
         async changeStage() {
-            const app = Alpine.store('app');
-            const filePath = await window.electronAPI.openImageFile();
-            if (filePath) {
-                await this._saveDisplaySetting('userStage', 'stagePath', filePath);
-                app.displaySettings.stagePath = filePath;
-                app.displaySettings.stageName = filePath.split(/[\\/]/).pop();
-                this.applyDisplaySettings();
-                this.playSound('select');
-            }
+            
+            this.openGallery('stage');
         },
         async changeFlourish() {
-            const app = Alpine.store('app');
-            const filePath = await window.electronAPI.openImageFile();
-            if (filePath) {
-                await this._saveDisplaySetting('userFlourish', 'flourishPath', filePath);
-                app.displaySettings.flourishPath = filePath;
-                app.displaySettings.flourishName = filePath.split(/[\\/]/).pop();
-                this.applyDisplaySettings();
-                this.playSound('select');
-            }
+            
+            this.openGallery('flourish');
         },
         async resetDisplaySettings() {
             const app = Alpine.store('app');
@@ -3408,7 +3525,6 @@ document.addEventListener('alpine:init', () => {
                 delete app.bladeBackgrounds[currentItem.id];
                 
                 
-                
                 const plainObj = JSON.parse(JSON.stringify(app.bladeBackgrounds));
                 app.bladeBackgrounds = plainObj; 
                 
@@ -3416,18 +3532,7 @@ document.addEventListener('alpine:init', () => {
                 await window.electronAPI.set('bladeBackgrounds', plainObj);
             } else {
                 
-                const filePath = await window.electronAPI.openImageFile();
-                if (filePath) {
-                    this.playSound('select');
-                    app.bladeBackgrounds[currentItem.id] = filePath;
-                    
-                    
-                    const plainObj = JSON.parse(JSON.stringify(app.bladeBackgrounds));
-                    app.bladeBackgrounds = plainObj; 
-                    
-                    
-                    await window.electronAPI.set('bladeBackgrounds', plainObj);
-                }
+                this.openGallery('bladeBg');
             }
         },
         async launchGame(game) {
@@ -4977,6 +5082,24 @@ document.addEventListener('alpine:init', () => {
             }
             return;
         }
+
+        if (app.isGalleryOpen) {
+            e.preventDefault();
+            if (key === 'Escape' || key === 'Backspace' || key === 'b' || key === 'B') {
+                app.isGalleryOpen = false;
+                if (app.galleryType === 'profile') app.isProfileSelectorOpen = true; 
+                actions.playSound('back');
+                return;
+            }
+            if (key === 'ArrowUp')    { actions.moveGalleryGrid(-1, 0); return; }
+            if (key === 'ArrowDown')  { actions.moveGalleryGrid(1, 0); return; }
+            if (key === 'ArrowLeft')  { actions.moveGalleryGrid(0, -1); return; }
+            if (key === 'ArrowRight') { actions.moveGalleryGrid(0, 1); return; }
+            if (key === 'Enter') { actions.selectGalleryImage(); return; }
+            
+            if (key === 'y' || key === 'Y' || key === 'Delete') { actions.deleteGalleryImage(); return; }
+            return; 
+        }
         
         
         if (key === 'Tab') { 
@@ -5942,6 +6065,39 @@ document.addEventListener('alpine:init', () => {
                 } 
                 else if (message.event === 'button_b' && message.value === 1) {
                     actions.closeThemeStore();
+                }
+                return; 
+            }
+            if (app.isGalleryOpen) {
+                if (message.event === 'button_b' && message.value === 1) {
+                    app.isGalleryOpen = false;
+                    if (app.galleryType === 'profile') app.isProfileSelectorOpen = true;
+                    actions.playSound('back');
+                }
+                if (message.event === 'dpad_y' && message.value !== 0) {
+                    actions.moveGalleryGrid(message.value, 0);
+                }
+                if (message.event === 'dpad_x' && message.value !== 0) {
+                    actions.moveGalleryGrid(0, message.value);
+                }
+                if (message.event === 'left_stick_y' && Math.abs(message.value) > 0.5) {
+                    if(!app.stick_lock_gal) {
+                        actions.moveGalleryGrid(message.value > 0 ? 1 : -1, 0);
+                        app.stick_lock_gal = true; setTimeout(() => app.stick_lock_gal = false, 150);
+                    }
+                }
+                if (message.event === 'left_stick_x' && Math.abs(message.value) > 0.5) {
+                    if(!app.stick_lock_gal) {
+                        actions.moveGalleryGrid(0, message.value > 0 ? 1 : -1);
+                        app.stick_lock_gal = true; setTimeout(() => app.stick_lock_gal = false, 150);
+                    }
+                }
+                if (message.event === 'button_a' && message.value === 1) {
+                    actions.selectGalleryImage();
+                }
+                
+                if (message.event === 'button_y' && message.value === 1) {
+                    actions.deleteGalleryImage();
                 }
                 return; 
             }

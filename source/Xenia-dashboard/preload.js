@@ -115,6 +115,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     
     checkThemeUpdate: (repoUrl, folderName) => ipcRenderer.invoke('check-theme-update', repoUrl, folderName),
     downloadTheme: (repoUrl, folderName, assetName) => ipcRenderer.invoke('download-theme', repoUrl, folderName, assetName),
+    getGalleryImages: (type) => ipcRenderer.invoke('get-gallery-images', type),
+    deleteGalleryImage: (path) => ipcRenderer.invoke('delete-gallery-image', path),
     
     quitApp: () => ipcRenderer.invoke('quit-app')
 });

@@ -190,8 +190,183 @@
         </div>
     </div>
 </div>
+<div class="gallery-overlay" x-show="$store.app.isGalleryOpen" x-transition.opacity x-cloak>
+    <div class="gallery-modal" @click.away="$store.app.isGalleryOpen = false">
+        
+        <div class="gallery-header">
+            
+            <h2 x-text="$store.app.galleryType === 'profile' ? ($store.app.t('gallery.title_profile') || 'Select Profile Picture') : ($store.app.t('gallery.title_background') || 'Select Background Image')"></h2>
+            
+            <p x-text="'Custom-BG-PF/' + ($store.app.galleryType === 'profile' ? ($store.app.t('gallery.path_profile') || 'Profile') : ($store.app.t('gallery.path_background') || 'Background'))"></p>
+        </div>
+
+        <template x-if="$store.app.galleryLoading">
+            
+            <div style="text-align: center; padding: 50px; color: #555; font-weight: bold; font-size: 1.2rem;" x-text="$store.app.t('gallery.loading') || 'Loading images...'"></div>
+        </template>
+
+        <template x-if="!$store.app.galleryLoading">
+            <div class="gallery-scroll-area">
+                <div class="gallery-grid-container">
+                    <template x-for="(img, index) in $store.app.galleryImages" :key="index">
+                        <div :id="'gallery-item-' + index" 
+                             class="gallery-item"
+                             :class="{'focused': $store.app.galleryIndex === index}"
+                             @click="$store.app.galleryIndex = index; $store.actions.selectGalleryImage()">
+                            
+                            <img :src="img.url" loading="lazy" decoding="async" :class="{'is-browse-btn': img.id === 'browse'}">
+                            
+                            <template x-if="img.id === 'browse'">
+                                <div class="gallery-browse-text" x-text="img.name"></div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </template>
+
+        <div class="modal-footer">
+            
+            <div class="footer-button"><span class="button-icon a">A</span> <span x-text="$store.app.t('generic.select') || 'Select'"></span></div>
+            <div class="footer-button" x-show="$store.app.galleryImages[$store.app.galleryIndex]?.id !== 'browse'">
+                <span class="button-icon y" style="background: #f2c40e; color: #fff; text-shadow: none;">Y</span> 
+                <span x-text="$store.app.t('generic.delete') || 'Delete'"></span>
+            </div>
+            <div class="footer-button"><span class="button-icon b">B</span> <span x-text="$store.app.t('generic.cancel') || 'Cancel'"></span></div>
+        </div>
+    </div>
+</div>
 
 <style>
+    
+    .gallery-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px);
+        display: flex; align-items: center; justify-content: center;
+        z-index: 10005; 
+    }
+
+    
+    .gallery-modal {
+        background: linear-gradient(145deg, #ffffffeb, #e6e6e6eb);
+        width: 80%; height: 80%;
+        border-radius: 16px; 
+        border: 2px solid #ffffff; 
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
+        display: flex; flex-direction: column; overflow: hidden;
+        position: relative;
+    }
+
+    
+    .gallery-modal::before {
+        content: ""; position: absolute; top: 0; left: 0; right: 0; height: 45%;
+        background: linear-gradient(180deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 100%);
+        pointer-events: none; z-index: 1;
+    }
+
+    
+    .gallery-header {
+        padding: 30px 30px 10px 30px; 
+        border-bottom: none;
+        background: transparent;
+        text-align: center;
+        position: relative; z-index: 2;
+    }
+    .gallery-header h2 { margin: 0; color: #000000; font-size: 28px; font-weight: 800; text-shadow: 0 1px 0 rgba(255, 255, 255, 1); }
+    .gallery-header p { margin: 5px 0 0 0; color: #ffffff; font-family: monospace; font-size: 13px; font-weight: bold; }
+
+    .gallery-scroll-area {
+        flex: 1; overflow-y: auto; padding: 20px 40px; position: relative; z-index: 2;
+    }
+
+    .gallery-grid-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 20px;
+    }
+
+    
+    .gallery-item {
+        aspect-ratio: 1 / 1; 
+        background: linear-gradient(180deg, #ffffff 0%, #e0e0e0 100%);
+        border-radius: 12px;
+        border: 1px solid #bbbbbb; border-bottom: 3px solid #999999;
+        overflow: hidden; padding: 8px; 
+        position: relative; cursor: pointer;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+        
+        
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        
+        content-visibility: auto;
+        contain-intrinsic-size: 200px;
+        will-change: transform, border-color, box-shadow;
+        transform: translateZ(0); 
+    }
+
+    .gallery-item img {
+        width: 100%; height: 100%; 
+        object-fit: cover; 
+        object-position: center; 
+        border-radius: 6px;
+        transition: filter 0.2s ease;
+    }
+
+    
+    .gallery-item.focused {
+        background: #ffffff;
+        border-color: #000000 !important;
+        border-bottom: 3px solid #000000 !important;
+        transform: scale(1.05);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        z-index: 5;
+    }
+
+    
+    .is-browse-btn {
+        object-fit: contain !important;
+        width: 50% !important;  
+        height: 50% !important;
+        margin-bottom: 20px; 
+        background: transparent;
+    }
+    
+    .gallery-browse-text {
+        position: absolute; bottom: 15px; left: 0; width: 100%;
+        text-align: center; color: #111; font-weight: 800; font-size: 14px;
+        text-shadow: 0 1px 0 rgba(255,255,255,1);
+    }
+
+    
+    .gallery-modal .modal-footer {
+        margin: 10px 40px 25px 40px; 
+        padding-top: 20px;
+        border-top: 1px solid #bbbbbb;
+        background: transparent;
+        display: flex; justify-content: center; gap: 20px;
+        position: relative; z-index: 2;
+    }
+
+    .gallery-modal .footer-button {
+        display: flex; align-items: center; gap: 8px;
+        font-size: 14px; color: #111; font-weight: 800;
+        text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+    }
+
+    .gallery-modal .button-icon {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 24px; height: 24px; border-radius: 50%;
+        font-size: 12px; font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        margin: 0; text-shadow: none;
+    }
+
+    .gallery-modal .button-icon.a { background: #59c853; color: #fff; }
+    .gallery-modal .button-icon.b { background: #e5443a; color: #fff; }
     
     .disc-selector-overlay {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
