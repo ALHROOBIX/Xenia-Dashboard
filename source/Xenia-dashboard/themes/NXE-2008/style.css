@@ -601,7 +601,8 @@ html[dir="ltr"] .nxe-settings-container { display: flex; width: 1250px; height: 
 @keyframes floatingView { 0%, 100% { transform: translateY(0) translateZ(0); } 50% { transform: translateY(-10px) translateZ(0); } }
 .nxe-view-container .nxe-header-panel { margin-bottom: 40px; }
 .nxe-header-text h1 { font-size: 14px; letter-spacing: 4px; color: var(--nxe-brand-light); text-transform: uppercase; margin: 0 0 5px 0; opacity: 0.8; }
-.nxe-header-text h2 { font-size: 48px; font-weight: 900; margin: 0; background: linear-gradient(to bottom, #ffffff 40%, #aaaaaa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.8)); transform: translateZ(0); }
+.nxe-header-text h2 { font-size: 48px; font-weight: 900; margin: 0; color: #ffffff; filter: drop-shadow(0 2px 4px rgba(255,255,255,0.4)); transform: translateZ(0); 
+}
 .nxe-main-layout { display: flex; gap: 50px; flex: 1; align-items: flex-start; }
 .nxe-list-panel { width: 320px; display: flex; flex-direction: column; gap: 12px; }
 .nxe-list-item { background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0.4) 100%); border: 1px solid rgba(255,255,255,0.1); padding: 16px 20px; border-radius: 6px 25px 25px 6px; display: flex; align-items: center; gap: 15px; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.4s; cursor: pointer; backdrop-filter: blur(10px); content-visibility: auto; contain-intrinsic-size: auto 60px; transform: translateZ(0); }
