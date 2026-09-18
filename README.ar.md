@@ -90,6 +90,24 @@
 
 ---
 
+<div dir="rtl">
+
+###  ملاحظة لمستخدمي Linux (أجهزة Handheld)
+
+عند إضافة التطبيق كـ **Non-Steam App** في Steam (مثل Bazzite OS أو SteamOS)، يجب إضافة الأمر التالي داخل خانة **Launch Options** لضمان التشغيل دون مشاكل:
+
+</div>
+
+<div dir="ltr">
+
+```bash
+LD_PRELOAD="" LC_ALL=C.UTF-8 %command% --no-sandbox
+```
+
+</div>
+
+---
+
 <div align="center">
   <h2>⚠️ إخلاء مسؤولية</h2>
   <p><strong>هذا المشروع عبارة عن واجهة أمامية من طرف ثالث وليس له أي صلة بمشروع Xenia الرسمي أو شركة Microsoft.</strong></p>
