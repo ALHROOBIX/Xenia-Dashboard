@@ -75,6 +75,16 @@ This project stands on the shoulders of giants. Special thanks to these incredib
 
 ---
 
+###  Note for Linux Users (Handheld Devices)
+
+When adding this application as a **Non-Steam App** in Steam (e.g., on Bazzite OS or SteamOS), you must add the following parameter to the **Launch Options** to ensure proper execution:
+
+```bash
+LD_PRELOAD="" LC_ALL=C.UTF-8 %command% --no-sandbox
+```
+
+---
+
 <div align="center">
   <h2>⚠️ Disclaimer</h2>
   <p><strong>This project is a third-party frontend and is not affiliated with the official Xenia Project or Microsoft.</strong></p>
