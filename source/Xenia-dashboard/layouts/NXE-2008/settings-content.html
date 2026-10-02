@@ -28,9 +28,9 @@
 
                     
                     <div class="download-status" x-show="$store.app.xboxInstallDownloadState !== 'idle'">
-                        <span x-show="$store.app.xboxInstallDownloadState === 'downloading'" style="color: var(--nxe-brand-light); font-size: 1.2rem; font-weight: bold;" x-text="$store.app.t('install_tool.downloading') || 'Downloading & Installing...'"></span>
-                        <span x-show="$store.app.xboxInstallDownloadState === 'success'" style="color: var(--nxe-btn-a); font-size: 1.2rem; font-weight: bold;" x-text="$store.app.t('install_tool.success') || 'Successfully Installed!'"></span>
-                        <span x-show="$store.app.xboxInstallDownloadState === 'error'" style="color: var(--nxe-alert-color); font-size: 1.2rem; font-weight: bold;" x-text="$store.app.t('install_tool.error') || 'Download Failed.'"></span>
+                        <span x-show="$store.app.xboxInstallDownloadState === 'downloading'" style="color: #555555; font-size: 1.2rem; font-weight: bold;" x-text="$store.app.t('install_tool.downloading') || 'Downloading & Installing...'"></span>
+                        <span x-show="$store.app.xboxInstallDownloadState === 'success'" style="color: #333333; font-size: 1.2rem; font-weight: bold;" x-text="$store.app.t('install_tool.success') || 'Successfully Installed!'"></span>
+                        <span x-show="$store.app.xboxInstallDownloadState === 'error'" style="color: #888888; font-size: 1.2rem; font-weight: bold;" x-text="$store.app.t('install_tool.error') || 'Download Failed.'"></span>
                     </div>
 
                     
@@ -162,61 +162,89 @@
 
     
     .nxe-tool-download-card {
-        background: linear-gradient(145deg, #2a2a2a, #151515); 
-        border: 2px solid var(--nxe-brand-primary, #90c31d); 
+        background: linear-gradient(145deg, #ffffff, #e0e0e0); 
+        border: 2px solid #999999; 
         border-radius: 12px;
         padding: 35px 40px;
         width: 80%;
         max-width: 550px;
         text-align: center;
-        box-shadow: 0 15px 35px rgba(0,0,0,0.8), inset 0 0 25px rgba(144, 195, 29, 0.1);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.4), inset 0 0 25px rgba(200, 200, 200, 0.3);
         display: flex;
         flex-direction: column;
+        color: #ffffff !important;
         align-items: center;
+        text-shadow:
+        1px 1px 0 #000000,
+        -1px -1px 0 #000000,
+        1px -1px 0 #000000,
+        -1px 1px 0 #000000,
+        0 4px 6px rgba(0,0,0,0.9) !important;
     }
 
     .nxe-tool-download-card h2 {
-        color: #ffffff;
+        color: #ffffff !important;
         margin: 0 0 20px 0;
         font-size: 1.8rem;
         font-weight: 700;
-        text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        text-shadow:
+            1px 1px 0 #000000,
+            -1px -1px 0 #000000,
+            1px -1px 0 #000000,
+            -1px 1px 0 #000000,
+            0 4px 6px rgba(0,0,0,0.9) !important;
     }
 
     .tool-icon-glow {
         width: 85px;
         height: 85px;
-        filter: drop-shadow(0 0 15px var(--nxe-brand-primary, #90c31d));
         margin-bottom: 20px;
         object-fit: contain;
     }
 
     .desc-text {
-        color: #cccccc;
+        color: #ffffff !important;
         font-size: 1.1rem;
         line-height: 1.5;
         margin: 0 0 15px 0;
+        text-shadow:
+            1px 1px 0 #000000,
+            -1px -1px 0 #000000,
+            1px -1px 0 #000000,
+            -1px 1px 0 #000000,
+            0 4px 6px rgba(0,0,0,0.9) !important;
     }
 
     .update-msg {
-        color: var(--nxe-brand-primary, #90c31d) !important;
+        color: #ffffff !important;
         font-weight: 700;
         font-size: 1.2rem !important;
         margin-bottom: 20px !important;
+        text-shadow:
+            1px 1px 0 #000000,
+            -1px -1px 0 #000000,
+            1px -1px 0 #000000,
+            -1px 1px 0 #000000,
+            0 4px 6px rgba(0,0,0,0.9) !important;
     }
 
-    
     .version-box {
         display: flex;
         justify-content: center;
         align-items: center;
         gap: 15px;
-        background: rgba(0, 0, 0, 0.4);
-        border: 1px solid rgba(255, 255, 255, 0.15);
+        background: rgba(0, 0, 0, 0.15);
+        border: 1px solid #bbbbbb;
         padding: 12px 25px;
         border-radius: 8px;
         width: 100%;
         margin-bottom: 25px;
+        text-shadow:
+            1px 1px 0 #000000,
+            -1px -1px 0 #000000,
+            1px -1px 0 #000000,
+            -1px 1px 0 #000000,
+            0 4px 6px rgba(0,0,0,0.9) !important;
     }
 
     .v-part {
@@ -225,15 +253,41 @@
         font-size: 1.1rem;
     }
 
-    .v-lbl { color: #aaaaaa; }
-    .v-val.local { color: #ffffff; font-weight: bold; }
-    .v-val.remote { color: var(--nxe-brand-primary, #90c31d); font-weight: bold; }
+    .v-lbl {
+        color: #ffffff !important;
+        text-shadow:
+            1px 1px 0 #000000,
+            -1px -1px 0 #000000,
+            1px -1px 0 #000000,
+            -1px 1px 0 #000000,
+            0 4px 6px rgba(0,0,0,0.9) !important;
+    }
+    .v-val.local {
+        color: #ffffff !important;
+        font-weight: bold;
+        text-shadow:
+            1px 1px 0 #000000,
+            -1px -1px 0 #000000,
+            1px -1px 0 #000000,
+            -1px 1px 0 #000000,
+            0 4px 6px rgba(0,0,0,0.9) !important;
+    }
+    .v-val.remote {
+        color: #ffffff !important;
+        font-weight: bold;
+        text-shadow:
+            1px 1px 0 #000000,
+            -1px -1px 0 #000000,
+            1px -1px 0 #000000,
+            -1px 1px 0 #000000,
+            0 4px 6px rgba(0,0,0,0.9) !important;
+    }
 
     
     .v-line {
         width: 1px;
         height: 20px;
-        background: rgba(255, 255, 255, 0.2);
+        background: #bbbbbb;
     }
 
     
@@ -249,9 +303,15 @@
         display: flex;
         align-items: center;
         gap: 10px;
-        color: #ffffff;
+        color: #ffffff !important;
         font-size: 1.1rem;
         font-weight: 600;
+        text-shadow:
+            1px 1px 0 #000000,
+            -1px -1px 0 #000000,
+            1px -1px 0 #000000,
+            -1px 1px 0 #000000,
+            0 4px 6px rgba(0,0,0,0.9) !important;
     }
 
     
