@@ -416,6 +416,7 @@
                 <template x-for="(file, index) in $store.app.patchSelectorFiles" :key="index">
                     <div 
                         class="patch-file-item" 
+                        :id="'patch-file-' + index"
                         :class="{'focused': $store.app.patchSelectorIndex === index}"
                         @click="$store.app.patchSelectorIndex = index; $store.actions.selectPatchFileAndOpen()"
                     >
@@ -511,32 +512,6 @@
                 </div>
             </div>
 
-        </div>
-    </div>
-    
-    <div class="disc-selector-overlay" x-show="$store.app.isDiscSelectorOpen" x-transition.opacity style="display: none;">
-        <div class="disc-selector-box">
-            <div class="disc-selector-header">
-                <h3 x-text="$store.app.t('library.select_disc') || 'Select Disc'">Select Disc</h3>
-                <span x-text="$store.app.discSelectorGame?.discs?.length + ' Discs'"></span>
-            </div>
-            
-            <div class="disc-selector-list custom-scrollbar">
-                <template x-for="(disc, index) in $store.app.discSelectorGame?.discs" :key="index">
-                    <div 
-                        class="disc-file-item" 
-                        :class="{'focused': $store.app.discSelectorIndex === index}"
-                        @click="$store.app.discSelectorIndex = index; $store.actions.launchSelectedDisc()"
-                    >
-                        <span class="file-name" x-text="disc.fileName"></span>
-                    </div>
-                </template>
-            </div>
-
-            <div class="disc-selector-footer">
-                <div><span class="btn-icon a">A</span> <span x-text="$store.app.t('generic.select') || 'Launch'">Launch</span></div>
-                <div><span class="btn-icon b">B</span> <span x-text="$store.app.t('generic.cancel') || 'Cancel'">Cancel</span></div>
-            </div>
         </div>
     </div>
 

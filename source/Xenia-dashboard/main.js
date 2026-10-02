@@ -9,6 +9,7 @@ const { exec, spawn } = require('child_process');
 const sevenBin = require('7zip-bin');
 const Seven = require('node-7z');
 const crypto = require('crypto');
+const translationCache = {};
 
 
 app.commandLine.appendSwitch('force-device-scale-factor', '1');
@@ -3489,20 +3490,75 @@ ipcMain.handle('download-patches', async () => {
 
 
 
+
 ipcMain.handle('delete-game', async (event, gamePath) => {
     console.log(`[Delete Handler] Request to delete: ${gamePath}`);
     try {
         if (!gamePath) throw new Error("No file path provided");
-        
-        
-        if (fsSync.existsSync(gamePath)) {
+        if (!fsSync.existsSync(gamePath)) return { success: false, error: "File or directory not found" };
+
+        const gameFolderRoot = store.get('gameFolderPath');
+        let targetToDelete = gamePath;
+        const stat = await fs.stat(gamePath);
+
+        if (stat.isFile()) {
+            const ext = path.extname(gamePath).toLowerCase();
+            const fileName = path.basename(gamePath);
+
             
-            await fs.unlink(gamePath);
-            console.log(`[Delete Handler] Successfully deleted: ${gamePath}`);
-            return { success: true };
+            if (ext === '.iso' || ext === '.zar') {
+                targetToDelete = gamePath;
+            } 
+            
+            else if (ext === '.xex') {
+                targetToDelete = path.dirname(gamePath);
+            } 
+            
+            else if (!ext || fileName.length > 15) {
+                const parentDir = path.dirname(gamePath);
+                const parentName = path.basename(parentDir);
+                
+                
+                const contentTypes = ['00007000', '000D0000', '00004000'];
+                
+                if (contentTypes.includes(parentName)) {
+                    
+                    targetToDelete = path.dirname(parentDir);
+                    
+                    
+                    if (!/^[0-9A-Fa-f]{8}$/.test(path.basename(targetToDelete))) {
+                        targetToDelete = parentDir; 
+                    }
+                } else {
+                    targetToDelete = parentDir;
+                }
+            }
         } else {
-            return { success: false, error: "File not found" };
+            
+            targetToDelete = gamePath;
         }
+
+        
+        
+        if (gameFolderRoot && path.normalize(targetToDelete) === path.normalize(gameFolderRoot)) {
+            console.warn(`[Delete Handler] Safety Lock: Prevented deleting root game folder. Falling back to single file.`);
+            targetToDelete = gamePath;
+        }
+
+        console.log(`[Delete Handler] Smart Delete Target: ${targetToDelete}`);
+        
+        const targetStat = await fs.stat(targetToDelete);
+        if (targetStat.isDirectory()) {
+            
+            await fs.rm(targetToDelete, { recursive: true, force: true });
+        } else {
+            
+            await fs.unlink(targetToDelete);
+        }
+        
+        console.log(`[Delete Handler] Successfully deleted.`);
+        return { success: true };
+
     } catch (error) {
         console.error(`[Delete Handler] Error: ${error.message}`);
         return { success: false, error: error.message };
@@ -3556,18 +3612,73 @@ ipcMain.handle('update-local-db', async () => {
 
 ipcMain.handle('translate-text', async (event, text, targetLang) => {
     try {
-        
-        const lang = targetLang || 'en';
-        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${lang}&dt=t&q=${encodeURIComponent(text)}`;
-        
-        const response = await axios.get(url);
+        let lang = targetLang || 'en';
         
         
-        const translatedText = response.data[0].map(s => s[0]).join('');
-        return { success: true, translatedText };
+        if (lang === 'zh') lang = 'zh-CN';
+        if (lang === 'pt_BR') lang = 'pt';
+
+        
+        const cacheKey = crypto.createHash('md5').update(`${lang}_${text}`).digest('hex');
+        if (translationCache[cacheKey]) {
+            console.log("[Translate] Loaded from local cache");
+            return { success: true, translatedText: translationCache[cacheKey] };
+        }
+
+        let translatedText = "";
+
+        
+        try {
+            const url1 = `https://clients5.google.com/translate_a/t?client=dict-chrome-ex&sl=auto&tl=${lang}&q=${encodeURIComponent(text)}`;
+            const res1 = await axios.get(url1, { timeout: 8000 });
+            
+            
+            if (Array.isArray(res1.data)) {
+                translatedText = res1.data.join(' ');
+            } else if (typeof res1.data === 'string') {
+                translatedText = res1.data;
+            } else {
+                throw new Error("Invalid format from clients5");
+            }
+        } catch (err1) {
+            console.warn("[Translate] Chrome Endpoint failed, trying Lingva API...");
+            
+            
+            try {
+                const url2 = `https://lingva.ml/api/v1/auto/${lang}/${encodeURIComponent(text)}`;
+                const res2 = await axios.get(url2, { timeout: 8000 });
+                
+                if (res2.data && res2.data.translation) {
+                    translatedText = res2.data.translation;
+                } else {
+                    throw new Error("Invalid Lingva response");
+                }
+            } catch (err2) {
+                console.warn("[Translate] Lingva failed, trying MyMemory API...");
+                
+                
+                const url3 = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${lang}`;
+                const res3 = await axios.get(url3, { timeout: 8000 });
+                
+                if (res3.data && res3.data.responseData && res3.data.responseData.translatedText) {
+                    translatedText = res3.data.responseData.translatedText;
+                } else {
+                    throw new Error("All translation APIs failed.");
+                }
+            }
+        }
+
+        
+        if (translatedText && translatedText.trim() !== "") {
+            translationCache[cacheKey] = translatedText;
+            return { success: true, translatedText };
+        }
+
+        return { success: false, error: "Received empty translation." };
+
     } catch (error) {
-        console.error("Translation Error:", error);
-        return { success: false, error: error.message };
+        console.error("Translation Error:", error.message);
+        return { success: false, error: "Translation servers are currently unavailable. Please try again later." };
     }
 });
 

@@ -175,7 +175,8 @@
         <div class="disc-selector-list custom-scrollbar">
             <template x-for="(disc, index) in $store.app.discSelectorGame?.discs" :key="index">
                 <div 
-                    class="disc-file-item" 
+                    class="disc-file-item"
+                    :id="'disc-item-' + index"
                     :class="{'focused': $store.app.discSelectorIndex === index}"
                     @click="$store.app.discSelectorIndex = index; $store.actions.launchSelectedDisc()"
                 >

@@ -414,7 +414,7 @@ document.addEventListener('alpine:init', () => {
         focusedFriendIndex: 0,
         appUpdateInfo: {
             status: 'idle', 
-            currentVer: '1.3.4',
+            currentVer: '1.3.5',
             remoteVer: '---',
             message: 'Press (Y) to check for updates',
             percentage: 0,
@@ -1708,14 +1708,6 @@ document.addEventListener('alpine:init', () => {
         },
 
         
-        scrollToFocusedElement(elementId) {
-            const el = document.getElementById(elementId);
-            if (el) {
-                el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-            }
-        },
-
-        
         moveProfileFocus(direction) {
             const app = Alpine.store('app');
             let newIndex = app.focusedProfileIndex + direction;
@@ -1870,15 +1862,24 @@ document.addEventListener('alpine:init', () => {
             this.playSound('focus');
             info.isTranslating = true;
 
-            
-            const result = await window.electronAPI.translateText(info.originalDescription, app.language);
+            try {
+                const result = await window.electronAPI.translateText(info.originalDescription, app.language);
 
-            if (result.success) {
-                info.translatedDescription = result.translatedText;
-                info.description = result.translatedText; 
-                this.playSound('select');
+                if (result.success) {
+                    info.translatedDescription = result.translatedText;
+                    info.description = result.translatedText; 
+                    this.playSound('select');
+                } else {
+                    console.error("Translation failed:", result.error);
+                    
+                    alert("Translation Error: Could not reach translation servers.");
+                }
+            } catch (e) {
+                console.error("Translation request error:", e);
+            } finally {
+                
+                info.isTranslating = false;
             }
-            info.isTranslating = false;
         },
 
         handleTranslationClick() {
@@ -3215,7 +3216,11 @@ document.addEventListener('alpine:init', () => {
         },
         setFocusContext(viewName) {
             const app = Alpine.store('app');
-            app.focusedList = null; 
+            app.focusedList = null;
+            
+            if (viewName !== 'game-library' && app.showGameInfoOverlay) {
+                app.showGameInfoOverlay = false;
+            }
             switch (viewName) {
 
             case 'achievements':
@@ -3872,7 +3877,16 @@ document.addEventListener('alpine:init', () => {
                 app.focusedGamePatchInfo = null;
                 app.gameDetails = { title: '', logoUrl: '', heroUrl: 'none' };
                 
-                app.gameExtendedInfo = { description: '', developer: '', genre: '', screenshots: [], loading: false };
+                app.gameExtendedInfo = { 
+                    description: '', 
+                    originalDescription: '', 
+                    translatedDescription: '', 
+                    isTranslating: false, 
+                    developer: '', 
+                    genre: '', 
+                    screenshots: [], 
+                    loading: false 
+                };
                 return;
             }
 
@@ -3893,12 +3907,14 @@ document.addEventListener('alpine:init', () => {
                     if (result.found && result.metadata) {
                         app.gameExtendedInfo = {
                             description: result.metadata.description || 'No description available.',
+                            originalDescription: '',        
+                            translatedDescription: '',      
+                            isTranslating: false,           
                             developer: result.metadata.developer || 'Unknown',
                             publisher: result.metadata.publisher || 'Unknown',
                             genre: result.metadata.genre || 'Unknown',
                             releaseDate: result.metadata.releaseDate || '',
                             rating: result.metadata.rating || '',
-                            
                             screenshots: result.metadata.assets.screenshots || [],
                             loading: false
                         };
@@ -3906,7 +3922,10 @@ document.addEventListener('alpine:init', () => {
                         
                         app.gameExtendedInfo = { 
                             description: 'No details found in Local Database for this Title ID.', 
-                            developer: '', publisher: '', genre: '', rating: '',
+                            originalDescription: '',
+                            translatedDescription: '',
+                            isTranslating: false,
+                            developer: '', publisher: '', genre: '', rating: '', releaseDate: '',
                             screenshots: [], 
                             loading: false 
                         };
@@ -4045,14 +4064,15 @@ document.addEventListener('alpine:init', () => {
         },
         scrollToFocusedElement(elementId) {
             setTimeout(() => {
-                const element = document.getElementById(elementId);
-                if (element) {
+                
+                const elements = document.querySelectorAll(`[id="${elementId}"]`);
+                elements.forEach(element => {
                     element.scrollIntoView({
                         behavior: 'smooth',
                         block: 'nearest',
                         inline: 'nearest'
                     });
-                }
+                });
             }, 0); 
         },
         async loadXeniaConfig() {
@@ -5043,9 +5063,17 @@ document.addEventListener('alpine:init', () => {
             e.preventDefault(); 
             
             if (key === 'ArrowUp') {
-                if (app.discSelectorIndex > 0) { app.discSelectorIndex--; actions.playSound('focus'); }
+                if (app.discSelectorIndex > 0) { 
+                    app.discSelectorIndex--; 
+                    actions.playSound('focus'); 
+                    actions.scrollToFocusedElement('disc-item-' + app.discSelectorIndex); 
+                }
             } else if (key === 'ArrowDown') {
-                if (app.discSelectorIndex < app.discSelectorGame.discs.length - 1) { app.discSelectorIndex++; actions.playSound('focus'); }
+                if (app.discSelectorIndex < app.discSelectorGame.discs.length - 1) { 
+                    app.discSelectorIndex++; 
+                    actions.playSound('focus'); 
+                    actions.scrollToFocusedElement('disc-item-' + app.discSelectorIndex); 
+                }
             } else if (key === 'Enter') {
                 actions.launchSelectedDisc();
             } else if (key === 'Escape' || key === 'Backspace' || key === 'b' || key === 'B') {
@@ -5053,6 +5081,31 @@ document.addEventListener('alpine:init', () => {
                 actions.playSound('back');
             }
             return; 
+        }
+        
+        
+        
+        if (app.isPatchSelectorOpen) {
+            e.preventDefault();
+            if (key === 'ArrowUp') {
+                if (app.patchSelectorIndex > 0) { 
+                    app.patchSelectorIndex--; 
+                    actions.playSound('focus'); 
+                    actions.scrollToFocusedElement('patch-file-' + app.patchSelectorIndex); 
+                }
+            } else if (key === 'ArrowDown') {
+                if (app.patchSelectorIndex < app.patchSelectorFiles.length - 1) { 
+                    app.patchSelectorIndex++; 
+                    actions.playSound('focus'); 
+                    actions.scrollToFocusedElement('patch-file-' + app.patchSelectorIndex); 
+                }
+            } else if (key === 'Enter') {
+                actions.selectPatchFileAndOpen();
+            } else if (key === 'Escape' || key === 'Backspace' || key === 'b' || key === 'B') {
+                app.isPatchSelectorOpen = false;
+                actions.playSound('back');
+            }
+            return;
         }
         if (app.showAppUpdateNotify) {
             e.preventDefault();
@@ -6552,16 +6605,17 @@ document.addEventListener('alpine:init', () => {
             
             
             if (app.isDiscSelectorOpen && !app.isKeyboardOpen) {
-                
                 if (message.event === 'dpad_y') {
                     if (message.value === -1 && app.discSelectorIndex > 0) { 
                         app.discSelectorIndex--;
                         actions.playSound('focus');
+                        actions.scrollToFocusedElement('disc-item-' + app.discSelectorIndex); 
                     } else if (message.value === 1 && app.discSelectorIndex < app.discSelectorGame.discs.length - 1) { 
                         app.discSelectorIndex++;
                         actions.playSound('focus');
+                        actions.scrollToFocusedElement('disc-item-' + app.discSelectorIndex); 
                     }
-                } 
+                }
                 
                 else if (message.event === 'button_a' && message.value === 1) {
                     actions.launchSelectedDisc();
@@ -6583,11 +6637,13 @@ document.addEventListener('alpine:init', () => {
                     if (message.value === -1 && app.patchSelectorIndex > 0) { 
                         app.patchSelectorIndex--;
                         actions.playSound('focus');
+                        actions.scrollToFocusedElement('patch-file-' + app.patchSelectorIndex); 
                     } else if (message.value === 1 && app.patchSelectorIndex < app.patchSelectorFiles.length - 1) { 
                         app.patchSelectorIndex++;
                         actions.playSound('focus');
+                        actions.scrollToFocusedElement('patch-file-' + app.patchSelectorIndex); 
                     }
-                } 
+                }
                 
                 else if (message.event === 'button_a') {
                     actions.selectPatchFileAndOpen();
