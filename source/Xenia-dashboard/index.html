@@ -669,37 +669,36 @@
     }
 </style>
 
-
 <div x-data x-show="$store.app.showX360tidNotify" 
      class="nxe-global-overlay" 
      style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 999999; width: auto; height: auto;">
     
     <div class="nxe-alert-box" 
          :dir="$store.app.language === 'ar' ? 'rtl' : 'ltr'"
-         style="background: #111; border: 2px solid #ff4444; width: 600px; padding: 30px; border-radius: 20px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.85), 0 0 50px rgba(0, 0, 0, 1); animation: nxe-page-slide-in 0.3s; color: white; position: relative;">
+         style="background: linear-gradient(145deg, #ffffff, #e0e0e0); border: 2px solid #999999; width: 600px; padding: 30px; border-radius: 20px; animation: nxe-page-slide-in 0.3s; color: #222222; position: relative;">
         
-        <h2 style="color: #ff4444; margin-top: 0; display: flex; align-items: center; gap: 12px; justify-content: center;">
+        <h2 style="color: #ffffff; margin-top: 0; display: flex; align-items: center; gap: 12px; justify-content: center;">
             <span style="font-size: 2rem;">⚠</span>
             <span x-html="$store.app.t('scan_tool.title')"></span>
         </h2>
         
-        <div style="background: rgba(255, 68, 58, 0.1); border-radius: 10px; padding: 15px; margin-bottom: 20px; border: 1px dashed #ff4444;">
-            <p style="margin: 0; font-weight: bold; color: #ff8c00; font-size: 1.1rem; text-align: center;" 
+        <div style="background: rgba(160, 160, 160, 0.15); border-radius: 10px; padding: 15px; margin-bottom: 20px; border: 1px dashed #999999;">
+            <p style="margin: 0; font-weight: bold; color: #d2d2d2; font-size: 1.1rem; text-align: center;" 
                x-html="$store.app.t('scan_tool.missing')"></p>
-            <p style="margin: 10px 0 0 0; font-size: 0.9rem; color: #ccc; text-align: center; line-height: 1.6;"
+            <p style="margin: 10px 0 0 0; font-size: 0.9rem; color: #cecece; text-align: center; line-height: 1.6;"
                x-html="$store.app.t('scan_tool.desc')"></p>
         </div>
 
         
-        <div style="margin: 15px 0; background: #080808; padding: 25px 20px; border-radius: 8px; border: 1px solid #222; text-align: center;">
+        <div style="margin: 15px 0; background: #f5f5f5; padding: 25px 20px; border-radius: 8px; border: 1px solid #cccccc; text-align: center;">
             
             
             <template x-if="$store.app.x360tidDownloadState === 'idle' || $store.app.x360tidDownloadState === 'error'">
                 <div>
-                    <div x-show="$store.app.x360tidDownloadState === 'error'" style="color: #e5443a; margin-bottom: 15px; font-weight: bold;" x-html="$store.app.t('scan_tool.fail')"></div>
+                    <div x-show="$store.app.x360tidDownloadState === 'error'" style="color: #888888; margin-bottom: 15px; font-weight: bold;" x-html="$store.app.t('scan_tool.fail')"></div>
                     
                     <button @click="$store.actions.downloadX360tid()" 
-                            style="background: #90c31d; color: black; border: none; padding: 12px 30px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(144, 195, 29, 0.3); display: flex; align-items: center; justify-content: center; gap: 12px; margin: 0 auto; transition: transform 0.1s;">
+                            style="background: #e0e0e0; color: #222222; border: 2px solid #999999; padding: 12px 30px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15); display: flex; align-items: center; justify-content: center; gap: 12px; margin: 0 auto; transition: transform 0.1s;">
                         <span style="background: #f2c40e; color: black; border-radius: 50%; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: bold; box-shadow: inset 0 -2px 5px rgba(0,0,0,0.3);">Y</span>
                         <span x-html="$store.app.t('scan_tool.auto_btn')"></span>
                     </button>
@@ -708,7 +707,7 @@
 
             
             <template x-if="$store.app.x360tidDownloadState === 'downloading'">
-                <div style="color: #3a82e5; font-weight: bold; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; gap: 10px; animation: blink-cursor 1s infinite;">
+                <div style="color: #555555; font-weight: bold; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; gap: 10px; animation: blink-cursor 1s infinite;">
                     <span style="font-size: 1.5rem;">⬇️</span>
                     <span x-html="$store.app.t('scan_tool.downloading')"></span>
                 </div>
@@ -716,7 +715,7 @@
 
             
             <template x-if="$store.app.x360tidDownloadState === 'success'">
-                <div style="color: #59c853; font-weight: bold; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                <div style="color: #444444; font-weight: bold; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; gap: 10px;">
                     <span style="font-size: 1.5rem;">✅</span>
                     <span x-html="$store.app.t('scan_tool.success')"></span>
                 </div>
@@ -725,7 +724,7 @@
 
         <div style="display: flex; justify-content: center; margin-top: 20px;">
             <button @click="$store.app.showX360tidNotify = false" 
-                    style="background: transparent; color: #888; border: 1px solid #444; padding: 10px 30px; border-radius: 8px; cursor: pointer; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; font-weight: bold; transition: all 0.2s;">
+                    style="background: transparent; color: #666666; border: 1px solid #aaaaaa; padding: 10px 30px; border-radius: 8px; cursor: pointer; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; font-weight: bold; transition: all 0.2s;">
                 <span style="background: #e5443a; color: white; border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem; box-shadow: inset 0 -2px 5px rgba(0,0,0,0.3);">B</span>
                 <span x-html="$store.app.t('generic.cancel')"></span>
             </button>
@@ -739,41 +738,41 @@
     
     <div class="nxe-alert-box" 
          :dir="$store.app.language === 'ar' ? 'rtl' : 'ltr'"
-         style="background: #111; border: 2px solid #3a82e5; width: 600px; padding: 30px; border-radius: 20px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.85), 0 0 50px rgba(0, 0, 0, 1); animation: nxe-page-slide-in 0.3s; color: white; position: relative;">
+         style="background: linear-gradient(145deg, #ffffff, #e0e0e0); border: 2px solid #999999; width: 600px; padding: 30px; border-radius: 20px; animation: nxe-page-slide-in 0.3s; color: #222222; position: relative;">
         
-        <h2 style="color: #3a82e5; margin-top: 0; display: flex; align-items: center; gap: 12px; justify-content: center;">
+        <h2 style="color: #ffffff; margin-top: 0; display: flex; align-items: center; gap: 12px; justify-content: center;">
             <span style="font-size: 2rem;">🔄</span>
             <span x-text="$store.app.t('app_update.title')"></span>
         </h2>
         
-        <div style="background: rgba(58, 130, 229, 0.1); border-radius: 10px; padding: 15px; margin-bottom: 20px; border: 1px dashed #3a82e5;">
-            <p style="margin: 0; font-weight: bold; color: #fff; font-size: 1.1rem; text-align: center;">
+        <div style="background: rgba(160, 160, 160, 0.15); border-radius: 10px; padding: 15px; margin-bottom: 20px; border: 1px dashed #999999;">
+            <p style="margin: 0; font-weight: bold; color: #ffffff; font-size: 1.1rem; text-align: center;">
                 <span x-text="$store.app.t('app_update.version_prefix')"></span>
-                <span style="color: #90c31d;" x-text="$store.app.newAppVersionFound"></span>
+                <span style="color: #0cac11;" x-text="$store.app.newAppVersionFound"></span>
                 <span x-text="$store.app.t('app_update.version_suffix')"></span>
             </p>
             
             
             <div x-show="$store.app.appUpdateInfo.releaseNotes"
                  class="nxe-markdown-body"
-                 style="margin-top: 15px; padding: 15px; background: rgba(0, 0, 0, 0.5); border-radius: 8px; border: 1px solid rgba(0,0,0,0.8); box-shadow: inset 0 2px 10px rgba(0,0,0,0.5); max-height: 180px; overflow-y: auto;"
+                 style="margin-top: 15px; padding: 15px; background: rgba(255, 255, 255, 0.6); border-radius: 8px; border: 1px solid #cccccc; box-shadow: inset 0 2px 10px rgba(0,0,0,0.08); max-height: 180px; overflow-y: auto;"
                  x-html="$store.app.parseMarkdown($store.app.appUpdateInfo.releaseNotes)">
             </div>
 
             
-            <p x-show="!$store.app.appUpdateInfo.releaseNotes" style="margin: 10px 0 0 0; font-size: 0.9rem; color: #ccc; text-align: center; line-height: 1.6;" 
+            <p x-show="!$store.app.appUpdateInfo.releaseNotes" style="margin: 10px 0 0 0; font-size: 0.9rem; color: #666666; text-align: center; line-height: 1.6;" 
                x-text="$store.app.t('app_update.description')">
             </p>
         </div>
 
-        <div style="margin: 15px 0; background: #080808; padding: 25px 20px; border-radius: 8px; border: 1px solid #222; text-align: center;">
+        <div style="margin: 15px 0; background: #f5f5f5; padding: 25px 20px; border-radius: 8px; border: 1px solid #cccccc; text-align: center;">
             
             <template x-if="$store.app.appUpdateDownloadState === 'idle' || $store.app.appUpdateDownloadState === 'error'">
                 <div>
-                    <div x-show="$store.app.appUpdateDownloadState === 'error'" style="color: #e5443a; margin-bottom: 15px; font-weight: bold;" x-text="$store.app.t('app_update.failed')"></div>
+                    <div x-show="$store.app.appUpdateDownloadState === 'error'" style="color: #888888; margin-bottom: 15px; font-weight: bold;" x-text="$store.app.t('app_update.failed')"></div>
                     
                     <button @click="$store.actions.startAutoAppUpdate()" 
-                            style="background: #3a82e5; color: white; border: none; padding: 12px 30px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(58, 130, 229, 0.3); display: flex; align-items: center; justify-content: center; gap: 12px; margin: 0 auto; transition: transform 0.1s;">
+                            style="background: #e0e0e0; color: #222222; border: 2px solid #999999; padding: 12px 30px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15); display: flex; align-items: center; justify-content: center; gap: 12px; margin: 0 auto; transition: transform 0.1s;">
                         <span style="background: #f2c40e; color: black; border-radius: 50%; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: bold; box-shadow: inset 0 -2px 5px rgba(0,0,0,0.3);">Y</span>
                         <span x-text="$store.app.t('app_update.update_now')"></span>
                     </button>
@@ -782,18 +781,18 @@
 
             <template x-if="$store.app.appUpdateDownloadState === 'downloading'">
                 <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
-                    <div style="color: #90c31d; font-weight: bold; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; gap: 10px; animation: blink-cursor 1s infinite;">
+                    <div style="color: #555555; font-weight: bold; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; gap: 10px; animation: blink-cursor 1s infinite;">
                         <span style="font-size: 1.5rem;">⬇️</span>
                         <span x-text="$store.app.t('app_update.downloading')"></span>
                     </div>
-                    <div style="font-size: 1.5rem; font-weight: bold; color: white;" x-text="$store.app.appUpdateInfo.percentage + '%'"></div>
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #333333;" x-text="$store.app.appUpdateInfo.percentage + '%'"></div>
                 </div>
             </template>
         </div>
 
         <div style="display: flex; justify-content: center; margin-top: 20px;">
             <button @click="$store.app.showAppUpdateNotify = false; $store.actions.playSound('back');" 
-                    style="background: transparent; color: #888; border: 1px solid #444; padding: 10px 30px; border-radius: 8px; cursor: pointer; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; font-weight: bold; transition: all 0.2s;">
+                    style="background: transparent; color: #666666; border: 1px solid #aaaaaa; padding: 10px 30px; border-radius: 8px; cursor: pointer; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; font-weight: bold; transition: all 0.2s;">
                 <span style="background: #e5443a; color: white; border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem; box-shadow: inset 0 -2px 5px rgba(0,0,0,0.3);">B</span>
                 <span x-text="$store.app.t('app_update.ask_later')"></span>
             </button>
