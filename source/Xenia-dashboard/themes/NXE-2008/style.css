@@ -86,8 +86,42 @@ body {
 @keyframes nxeUnblurIn { from { opacity: 1; transform: var(--nxe-swoosh-scale); filter: var(--nxe-swoosh-blur); } to { opacity: 1; transform: scale(1); filter: blur(0px); } }
 #view-host.nxe-page-unblur-in { animation: nxeUnblurIn var(--nxe-swoosh-duration) ease-out forwards; }
 
-body::after { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; background-image: var(--nxe-user-wallpaper); background-size: cover; background-position: center; opacity: 0.8; filter: brightness(1) contrast(1.1); mix-blend-mode: overlay; transition: background-image 0.6s ease-in-out, opacity 0.6s ease; transform: translateZ(0); }
-body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -3; background-image: var(--nxe-user-stage); background-size: cover; background-position: center; opacity: 1; filter: brightness(1) contrast(1.2) saturate(0.8); background-color: rgba(0, 0, 0, 0.4); background-blend-mode: multiply; transition: background-image 0.6s ease-in-out; transform: translateZ(0); }
+body::after { 
+    content: ''; 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    z-index: -3; 
+    background-image: var(--nxe-user-wallpaper); 
+    background-size: cover; 
+    background-position: center; 
+    opacity: 1; 
+    filter: brightness(1) contrast(1.1); 
+    
+    transition: background-image 0.6s ease-in-out, opacity 0.6s ease; 
+    transform: translateZ(0); 
+}
+
+body::before { 
+    content: ''; 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    z-index: -2; 
+    background-image: var(--nxe-user-stage); 
+    background-size: cover; 
+    background-position: center; 
+    opacity: 1; 
+    filter: brightness(1) contrast(1.2) saturate(0.8); 
+    background-color: rgba(0, 0, 0, 0.4); 
+    
+    transition: background-image 0.6s ease-in-out; 
+    transform: translateZ(0); 
+}
 
 
 
@@ -173,16 +207,15 @@ body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; heigh
 
 
 .nxe-blade { 
-    width: 34vw;        
-    height: 39vh;       
+    width: 29vw;        
+    height: 40vh;       
     position: fixed; 
     top: 60vh; 
     left: 40vw; 
     background-image: var(--nxe-user-flourish); 
     background-size: cover; 
     background-position: center; 
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    border-radius: 10px;
     overflow: visible !important;
     transform-style: preserve-3d; 
     
@@ -190,12 +223,22 @@ body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; heigh
     will-change: transform, opacity; 
     
     --offset: calc(var(--index) - var(--active-index)); 
+    --offset-sq: calc(var(--offset) * var(--offset));   
     opacity: calc(min(1, max(0, var(--offset) + 1))); 
     
-    transform: translate(-50%, -50%) translateX(calc(var(--offset) * 22vw + -20vw)) scale(calc(1 - 0.15 * var(--offset))); 
     
+    transform: translate(-50%, -50%) 
+        translateX(calc(
+            var(--offset) * 25vw 
+            - var(--offset-sq) * 2vw 
+            - 20vw
+        )) 
+        scale(calc(1 - 0.1 * var(--offset)));
     
-    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s ease, filter 0.4s ease, box-shadow 0.4s ease; 
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                opacity 0.4s ease, 
+                filter 0.4s ease, 
+                box-shadow 0.4s ease; 
     z-index: calc(100 - var(--offset)); 
     backface-visibility: hidden;
 }
@@ -207,9 +250,9 @@ body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; heigh
     left: 0; 
     transform: translateX(0%) scaleY(-1) translateZ(0);
     transform-origin: top;
-    border-radius: 30px;
-    width: 34vw;
-    height: 39vh;
+    border-radius: 10px;
+    width: 29vw;
+    height: 40vh;
     background-image: var(--blade-img, var(--nxe-user-flourish));
     background-size: 100% 100%;
     background-position: center bottom;
@@ -499,7 +542,7 @@ html[dir="rtl"] .nxe-settings-item.focused::after {
 
 
 .guide-header-profile { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 25px; padding: 0 20px; box-sizing: border-box; }
-.guide-title, .guide-clock, .guide-gamerscore { color: #ffffff !important; font-size: 20px; font-family: 'Segoe UI', Tahoma, sans-serif !important; font-weight: 900 !important; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9) !important; letter-spacing: 1px; }
+.guide-title, .guide-clock, .guide-gamerscore { font-size: 20px; font-family: 'Segoe UI', Tahoma, sans-serif !important; font-weight: 900 !important; letter-spacing: 1px; }
 .guide-gamerpic { width: 85px; height: 85px; background: #e0e0e0; border: 3px solid #ffffff; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; overflow: hidden; transform: translateZ(0); }
 .guide-gamerpic img { width: 100%; height: 100%; object-fit: cover; }
 
@@ -508,7 +551,7 @@ html[dir="rtl"] .nxe-settings-item.focused::after {
 .guide-blade { display: flex; flex-direction: row; flex: 0 0 65px; transition: flex 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.4s; overflow: hidden !important; will-change: flex; }
 .guide-blade.is-right { flex-direction: row-reverse; }
 
-.guide-blade.active { flex: 1 1 auto; background: linear-gradient(145deg, #f8f8f8, #d8d8d8) !important; border: 2px solid #ffffff !important; box-shadow: 0 30px 80px rgba(0,0,0,0.6) !important; z-index: 5; transform: scale(1.03) translateZ(0); border-radius: 16px; overflow: hidden !important; }
+.guide-blade.active { flex: 1 1 auto; background: linear-gradient(145deg, #f8f8f8, #d8d8d8) !important; box-shadow: 0 30px 80px rgba(0,0,0,0.6) !important; z-index: 5; transform: scale(1.03) translateZ(0); border-radius: 16px; overflow: hidden !important; }
 
 .guide-blade:not(.active) { background: linear-gradient(145deg, rgba(255,255,255,0.7), rgba(220,220,220,0.5)); border: 1px solid rgba(255,255,255,0.5); box-shadow: inset 0 0 10px rgba(0,0,0,0.05); backdrop-filter: blur(4px); margin: 0; border-radius: 0; }
 
@@ -519,8 +562,8 @@ html[dir="rtl"] .nxe-settings-item.focused::after {
 .guide-blade:not(.is-right) .blade-spine { transform: rotate(180deg) translateZ(0); border-right: 1px solid rgba(0,0,0,0.1); }
 .guide-blade.is-right .blade-spine { transform: rotate(180deg) translateZ(0); border-left: 1px solid rgba(0,0,0,0.1); }
 
-.guide-blade:not(.active) .blade-spine { background: transparent; color: #444444; text-shadow: 0 1px 0 rgba(255,255,255,0.8); }
-.guide-blade.active .blade-spine { background: linear-gradient(to right, rgba(255,255,255,0.8), rgba(220,220,220,0.5)) !important; color: #000000 !important; text-shadow: 0 1px 0 rgba(255,255,255,0.9) !important; border-right: 1px solid #bbbbbb !important; border-left: 1px solid #bbbbbb !important; }
+.guide-blade:not(.active) .blade-spine { background: transparent; font-weight: 900; }
+.guide-blade.active .blade-spine { background: linear-gradient(to right, rgba(255,255,255,0.9), rgba(240,240,240,0.7)) !important; font-weight: 900; border-right: 1px solid #bbbbbb !important; border-left: 1px solid #bbbbbb !important; }
 
 .blade-content { flex: 1; min-width: 430px; background: transparent; color: #111; display: flex; flex-direction: column; padding-top: 15px; opacity: 0; transition: opacity 0.3s ease; }
 .guide-blade.active .blade-content { opacity: 1; transition-delay: 0.15s; }
@@ -532,12 +575,12 @@ html[dir="rtl"] .nxe-settings-item.focused::after {
 .guide-menu.scrollable::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 4px; }
 .guide-menu.scrollable::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 4px; }
 
-.guide-menu li { height: 65px; padding: 0 25px; display: flex; align-items: center; font-size: 19px; color: #444444 !important; font-family: 'Segoe UI', Tahoma, sans-serif !important; font-weight: 800; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.2s ease; cursor: pointer; border: 2px solid transparent; margin: 0 15px 6px 15px; border-radius: 8px; content-visibility: auto; contain-intrinsic-size: auto 65px; }
+.guide-menu li { height: 65px; padding: 0 25px; display: flex; align-items: center; font-size: 19px; font-family: 'Segoe UI', Tahoma, sans-serif !important; font-weight: 900; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.2s ease; cursor: pointer; border: 2px solid transparent; margin: 0 15px 6px 15px; border-radius: 8px; content-visibility: auto; contain-intrinsic-size: auto 65px; }
 
 .guide-menu li.selected {
     position: relative; overflow: hidden; 
     background: linear-gradient( 180deg, color-mix(in srgb, var(--nxe-brand-light), white 15%) 0%, var(--nxe-brand-primary) 48%, var(--nxe-brand-dark) 50%, color-mix(in srgb, var(--nxe-brand-primary), black 10%) 100% ) !important; 
-    color: #ffffff !important; text-shadow: 1px 1px 0 rgba(0,0,0,0.8) !important; border-color: #ffffff !important;
+    border-color: #ffffff !important;
     box-shadow: 0 5px 15px rgba(0,0,0,0.3), 0 0 15px var(--nxe-brand-light) !important; 
     transform: scale(1.02) translateZ(0); padding-left: 25px; z-index: 10;
 }
@@ -557,29 +600,29 @@ html[dir="rtl"] .guide-menu li.selected::after { animation: nxe2008ShineSweep_RT
 .guide-menu li.selected img:not(.guide-game-logo) { filter: brightness(1) drop-shadow(0 2px 4px rgba(0,0,0,0.5)) !important; opacity: 1 !important; transform: translateZ(0); }
 
 .guide-menu li .label { flex: 1; }
-.guide-menu li .hint { font-size: 12px; opacity: 0.8; font-weight: bold; margin-left: auto; color: #555; text-shadow: 0 1px 0 rgba(255,255,255,0.7); }
-.guide-menu li.selected .hint { opacity: 1; color: #fff; text-shadow: 1px 1px 0 rgba(0,0,0,0.5); }
+.guide-menu li .hint { font-size: 12px; opacity: 0.8; font-weight: bold; margin-left: auto; }
+.guide-menu li.selected .hint { opacity: 1; }
 
 .guide-game-logo-container { width: 100%; height: 100%; display: flex; align-items: center; justify-content: flex-start; }
 .guide-game-logo { max-width: 200px; max-height: 50px; object-fit: contain; object-position: left center; transform: translateZ(0); }
-.empty-msg { justify-content: center; border: none !important; color: #888 !important; text-shadow: 0 1px 0 rgba(255,255,255,0.7) !important; background: transparent !important; box-shadow: none !important; }
+.empty-msg { justify-content: center; border: none !important; background: transparent !important; box-shadow: none !important; }
 
 .guide-menu li.selected .guide-game-logo { transform: scale(1.05) translateZ(0); filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)) brightness(1.1) !important; transition: transform 0.2s, filter 0.2s; }
 .guide-game-text-fallback { font-size: 16px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .guide-settings-description { background: linear-gradient(180deg, #e8e8e8 0%, #cccccc 100%); border-top: 1px solid #ffffff; padding: 15px 30px; min-height: 65px; margin-top: auto; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); font-family: 'Segoe UI', Tahoma, sans-serif !important; transform: translateZ(0); }
-.guide-settings-description h3 { margin: 0 0 5px 0; font-size: 16px; color: #000000; font-weight: 900; text-shadow: 0 1px 0 rgba(255,255,255,0.9); }
-.guide-settings-description p { margin: 0; font-size: 14px; color: #333333; font-weight: 700; line-height: 1.4; text-shadow: 0 1px 0 rgba(255,255,255,0.7); }
+.guide-settings-description h3 { margin: 0 0 5px 0; font-size: 16px; font-weight: 900; }
+.guide-settings-description p { margin: 0; font-size: 14px; font-weight: 700; line-height: 1.4; }
 
 
 .guide-footer { display: flex !important; flex-direction: row !important; justify-content: center !important; align-items: center !important; gap: 70px !important; margin-top: 35px; width: 100%; transform: translateZ(0); }
-.guide-footer .footer-btn { display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: center !important; gap: 10px !important; color: #ffffff !important; font-weight: 900 !important; font-size: 16px !important; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 0 4px 6px rgba(0,0,0,0.9) !important; }
+.guide-footer .footer-btn { display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: center !important; gap: 10px !important; font-weight: 900 !important; font-size: 16px !important; }
 .guide-footer .icon-a, .guide-footer .icon-b, .guide-footer .icon-x { display: flex !important; align-items: center !important; justify-content: center !important; width: 24px !important; height: 24px !important; border-radius: 50% !important; font-size: 13px !important; font-weight: bold !important; box-shadow: 0 4px 8px rgba(0,0,0,0.6) !important; text-shadow: none !important; margin: 0 !important; }
 .guide-footer .icon-a { background: #59c853 !important; color: #000 !important; }
 .guide-footer .icon-b { background: #e5443a !important; color: #fff !important; }
 .guide-footer .icon-x { background: #3a82e5 !important; color: #fff !important; }
-.guide-lang-badge { font-size: 13px; background: rgba(0, 0, 0, 0.05) !important; border: 1px solid rgba(0, 0, 0, 0.1) !important; padding: 3px 8px; border-radius: 4px; margin-inline-start: auto; color: #333 !important; font-weight: 900 !important; text-shadow: 0 1px 0 rgba(255,255,255,0.7) !important; }
-.guide-menu li.selected .guide-lang-badge { background: #ffffff !important; color: var(--nxe-brand-dark, #61920c) !important; text-shadow: none !important; border: none !important;}
+.guide-lang-badge { font-size: 13px; background: rgba(0, 0, 0, 0.05) !important; border: 1px solid rgba(0, 0, 0, 0.1) !important; padding: 3px 8px; border-radius: 4px; margin-inline-start: auto; font-weight: 900 !important; }
+.guide-menu li.selected .guide-lang-badge { background: #ffffff !important; border: none !important; }
 
 html[dir="rtl"] .nxe-settings-title { position: absolute; top: calc(46% - 300px); left: 50%; transform: translateX(-50%) translateZ(0); font-size: 2.6rem; color: var(--nxe-text-primary); font-weight: 300; text-shadow: 0 2px 6px rgba(0,0,0,0.6); letter-spacing: 0.5px; margin: 0; white-space: nowrap; }
 html[dir="rtl"] .nxe-settings-wrapper { position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%) translateZ(0); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: right; direction: rtl; width: 100%; padding: 0; }
@@ -635,6 +678,39 @@ html[dir="ltr"] .nxe-settings-container { display: flex; width: 1250px; height: 
 .step-text code { background: rgba(0,0,0,0.5); padding: 2px 6px; border-radius: 4px; color: var(--nxe-brand-light); font-family: 'Consolas', monospace; font-size: 13px; }
 .nxe-footer-guide { position: fixed; bottom: 40px; left: 80px; display: flex; gap: 30px; background: rgba(0,0,0,0.4); padding: 12px 30px; border-radius: 50px; backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.15); transform: translateZ(0); }
 .guide-item { display: flex; align-items: center; gap: 12px; color: #fff; font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+
+
+.guide-overlay .guide-blade .blade-spine,
+.guide-overlay .guide-blade.blade-home .blade-spine,
+.guide-overlay .guide-blade.blade-games .blade-spine,
+.guide-overlay .guide-blade.blade-settings .blade-spine,
+.guide-overlay .guide-blade.blade-home.active .blade-spine,
+.guide-overlay .guide-blade.blade-games.active .blade-spine,
+.guide-overlay .guide-blade.blade-settings.active .blade-spine,
+.guide-overlay .guide-menu li,
+.guide-overlay .guide-menu li .label,
+.guide-overlay .guide-menu li .hint,
+.guide-overlay .guide-menu li.selected,
+.guide-overlay .guide-menu li.selected .label,
+.guide-overlay .guide-menu li.selected .hint,
+.guide-overlay .guide-game-text-fallback,
+.guide-overlay .guide-settings-description h3,
+.guide-overlay .guide-settings-description p,
+.guide-overlay .guide-title,
+.guide-overlay .guide-clock,
+.guide-overlay .guide-gamerscore,
+.guide-overlay .guide-footer .footer-btn,
+.guide-overlay .guide-lang-badge,
+.guide-overlay .empty-msg {
+    color: #ffffff !important;
+    text-shadow: 
+        1px 1px 0 #000,
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px 1px 0 #000,
+        0 0 4px #000,
+        0 3px 8px rgba(0,0,0,1) !important;
+}
 
 
 html[dir="rtl"] .nxe-list-item { border-radius: 25px 6px 6px 25px; }

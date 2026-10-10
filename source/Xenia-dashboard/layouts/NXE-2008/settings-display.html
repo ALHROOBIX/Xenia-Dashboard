@@ -6,27 +6,40 @@
         
         <div class="nxe-settings-container">
             
-            <nav class="nxe-settings-menu" style="width: 42%;">
-                
-                <div 
-                    class="nxe-settings-item"
-                    id="display-item-0"
-                    :class="{'focused': $store.app.focusedIndex === 0}"
-                    @click.prevent="$store.actions.selectFocusedItem()"
-                >
-                    <img class="nxe-settings-icon" src="assets/icons/image.png" alt="">
-                    <span x-text="$store.app.t('display.wall_bg')">Background Wallpaper</span>
-                </div>
-
-                <div 
-                    class="nxe-settings-item"
-                    id="display-item-1"
-                    :class="{'focused': $store.app.focusedIndex === 1}"
-                    @click.prevent="$store.actions.selectFocusedItem()"
-                >
-                    <img class="nxe-settings-icon" src="assets/icons/layers.png" alt="">
-                    <span x-text="$store.app.t('display.wall_stage')">Background Stage</span>
-                </div>
+            <nav class="nxe-settings-menu" style="width: 40%;">
+                <template x-for="(item, index) in $store.app.displayMenuItems" :key="item.id">
+                    <div 
+                        class="nxe-settings-item"
+                        :id="'display-item-' + index"
+                        :class="{
+                            'focused': $store.app.focusedIndex === index && 
+                                       !(index === 2 && $store.app.bladeListFocused) &&
+                                       !(index === 3 && $store.app.guideListFocused) &&
+                                       !(index === 4 && $store.app.iconListFocused)
+                        }"
+                        @click.prevent="
+                            $store.app.focusedIndex = index;
+                            if (item.id === 'wallpaper' || item.id === 'stage') {
+                                $store.actions.handleDisplaySelect();
+                            } else if (item.id === 'blade') {
+                                $store.app.bladeFocusIndex = 0;
+                                $store.actions.buildDisplayBladesList();
+                                $store.actions.playSound('focus');
+                            } else if (item.id === 'guide') {
+                                $store.app.guideFocusIndex = 0;
+                                $store.actions.buildDisplayGuideList();
+                                $store.actions.playSound('focus');
+                            } else if (item.id === 'icons') {
+                                $store.app.iconFocusIndex = 0;
+                                $store.actions.buildDisplayIconsList();
+                                $store.actions.playSound('focus');
+                            }
+                        "
+                    >
+                        <img class="nxe-settings-icon" :src="item.icon" alt="">
+                        <span x-text="$store.app.t(item.tKey) !== item.tKey ? $store.app.t(item.tKey) : item.name"></span>
+                    </div>
+                </template>
             </nav>
             
             <div class="nxe-settings-description">
@@ -54,23 +67,183 @@
                            x-text="$store.app.displaySettings.stageName === 'Default' ? $store.app.t('generic.default') : $store.app.displaySettings.stageName"></p>
                     </div>
                 </template>   
+
+                
+                <template x-if="$store.app.focusedIndex === 2">
+                    <div>
+                        <h3 x-text="$store.app.t('display.blade_bg') || 'Dashboard Blade Backgrounds'">Dashboard Blade Backgrounds</h3>
+                        <p x-text="$store.app.t('display.blade_bg_desc') || 'Customize the background image of each dashboard blade individually.'"></p>
+                        
+                        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 15px 0;">
+                        
+                        <div class="blade-bg-list">
+                            <template x-for="(blade, index) in $store.app.displayBladesList" :key="blade.id">
+                                <div 
+                                    class="blade-bg-item"
+                                    :id="'blade-bg-item-' + index"
+                                    :class="{
+                                        'focused': $store.app.bladeListFocused && $store.app.bladeFocusIndex === index,
+                                        'has-custom': $store.app.bladeBackgrounds[blade.id]
+                                    }"
+                                    @click="$store.app.bladeFocusIndex = index; $store.actions.selectBladeBgItem()"
+                                >
+                                    <div class="blade-bg-thumb">
+                                        
+                                        <template x-if="$store.app.bladeBackgrounds[blade.id]">
+                                            <img :src="'file://' + $store.app.bladeBackgrounds[blade.id].replace(/\\/g, '/')" class="custom-bg-img">
+                                        </template>
+                                        
+                                        
+                                        <template x-if="!$store.app.bladeBackgrounds[blade.id]">
+                                            <div class="blade-preview-default">
+                                                <img :src="blade.icon" class="blade-preview-icon">
+                                            </div>
+                                        </template>
+                                    </div>
+                                    <div class="blade-bg-info">
+                                        <span class="blade-bg-name" x-text="blade.name"></span>
+                                        <span class="blade-bg-status" x-text="$store.actions.getBladeStatus(blade.id)"></span>
+                                    </div>
+                                </div>
+                            </template>
+                            
+                            
+                            <template x-if="$store.app.displayBladesList.length === 0">
+                                <p class="blade-bg-empty" x-text="$store.app.t('display.no_blades') || 'No dashboard blades found.'"></p>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+                
+                
+                <template x-if="$store.app.focusedIndex === 3">
+                    <div>
+                        <h3 x-text="$store.app.t('display.guide_bg') || 'Guide Backgrounds'">Guide Blade Backgrounds</h3>
+                        <p x-text="$store.app.t('display.guide_bg_desc') || 'Customize the background images for the Xbox Guide blades (spines) and their content areas.'"></p>
+                        
+                        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 15px 0;">
+                        
+                        <div class="guide-bg-list">
+                            <template x-for="(item, index) in $store.app.displayGuideList" :key="item.id">
+                                <div 
+                                    class="guide-bg-item"
+                                    :id="'guide-bg-item-' + index"
+                                    :class="{
+                                        'focused': $store.app.guideListFocused && $store.app.guideFocusIndex === index,
+                                        'has-custom': $store.app.guideBackgrounds[item.id]
+                                    }"
+                                    @click="$store.app.guideFocusIndex = index; $store.actions.selectGuideBgItem()"
+                                >
+                                    <div class="guide-bg-thumb" :class="'thumb-' + item.type">
+                                        <template x-if="$store.app.guideBackgrounds[item.id]">
+                                            <img :src="'file://' + $store.app.guideBackgrounds[item.id].replace(/\\/g, '/')" class="custom-bg-img">
+                                        </template>
+                                        <template x-if="!$store.app.guideBackgrounds[item.id]">
+                                            <span class="guide-bg-placeholder" x-text="item.type === 'spine' ? '▐' : '▬'"></span>
+                                        </template>
+                                    </div>
+                                    <div class="guide-bg-info">
+                                        <span class="guide-bg-name" x-text="item.name"></span>
+                                        <span class="guide-bg-status" x-text="$store.actions.getGuideStatus(item.id)"></span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+                                
+                <template x-if="$store.app.focusedIndex === 4">
+                    <div>
+                        <h3 x-text="$store.app.t('display.icons') || 'Icon Customization'">Icon Customization</h3>
+                        <p x-text="$store.app.t('display.icons_desc') || 'Replace menu icons with your own custom images.'"></p>
+                        
+                        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 15px 0;">
+                        
+                        <div class="icon-bg-list">
+                            <template x-for="(item, index) in $store.app.displayIconsList" :key="item.key">
+                                <div 
+                                    class="icon-bg-item"
+                                    :id="'icon-item-' + index"
+                                    :class="{
+                                        'focused': $store.app.iconListFocused && $store.app.iconFocusIndex === index,
+                                        'has-custom': $store.app.customIcons[item.key]
+                                    }"
+                                    @click="$store.app.iconFocusIndex = index; $store.actions.selectIconItem()"
+                                >
+                                    <div class="icon-bg-thumb">
+                                        <template x-if="$store.app.customIcons[item.key]">
+                                            <img :src="'file://' + $store.app.customIcons[item.key].replace(/\\/g, '/')" class="custom-icon-img">
+                                        </template>
+                                        <template x-if="!$store.app.customIcons[item.key]">
+                                            <img :src="item.icon" class="default-icon-img">
+                                        </template>
+                                    </div>
+                                    <div class="icon-bg-info">
+                                        <span class="icon-bg-name" x-text="item.name"></span>
+                                        <span class="icon-bg-category" x-text="item.category"></span>
+                                        <span class="icon-bg-status" x-text="$store.actions.getIconStatus(item.key)"></span>
+                                    </div>
+                                </div>
+                            </template>
+                            
+                            <template x-if="$store.app.displayIconsList.length === 0">
+                                <p class="icon-bg-empty" x-text="$store.app.t('display.no_icons') || 'No icons available.'"></p>
+                            </template>
+                        </div>
+                    </div>
+                </template>
             </div>
             
         </div>
     </div>
 
     <footer class="nxe-footer-left">
-        <div class="footer-button" id="btn-a">
+        <div class="footer-button" id="btn-a" @click.prevent="$store.actions.handleDisplaySelect()">
             <span class="button-icon a">A</span> 
-            <span x-text="$store.app.t('generic.select')">Change</span>
+            <span x-text="
+                ($store.app.focusedIndex === 2 && $store.app.bladeListFocused) ||
+                ($store.app.focusedIndex === 3 && $store.app.guideListFocused) ||
+                ($store.app.focusedIndex === 4 && $store.app.iconListFocused)
+                    ? ($store.app.t('display.set_image') || 'Set Image') 
+                    : $store.app.t('generic.select')
+            ">Change</span>
         </div>
         <div class="footer-button" id="btn-b" @click.prevent="$store.actions.goBack()">
             <span class="button-icon b">B</span> 
             <span x-text="$store.app.t('generic.back')">Back</span>
         </div>
-        <div class="footer-button" id="btn-y" @click.prevent="$store.actions.resetDisplaySettings()">
+        <div class="footer-button" id="btn-y" 
+            @click.prevent="
+                $store.app.focusedIndex === 2 
+                    ? ($store.app.bladeListFocused 
+                        ? $store.actions.resetFocusedBladeBg() 
+                        : $store.actions.resetAllBladeBackgrounds())
+                : $store.app.focusedIndex === 3 
+                    ? ($store.app.guideListFocused 
+                        ? $store.actions.resetFocusedGuideBg() 
+                        : $store.actions.resetAllGuideBackgrounds())
+                : $store.app.focusedIndex === 4
+                    ? ($store.app.iconListFocused 
+                        ? $store.actions.resetFocusedIcon() 
+                        : $store.actions.resetAllIcons())
+                : $store.actions.resetDisplaySettings()
+            ">
             <span class="button-icon" style="background-color: #e6b92e; color: #222; border:none;">Y</span> 
-            <span x-text="$store.app.t('generic.default')">Default</span>
+            <span x-text="
+                $store.app.focusedIndex === 2 
+                    ? ($store.app.bladeListFocused 
+                        ? ($store.app.t('display.reset_blade') || 'Reset Blade') 
+                        : ($store.app.t('display.reset_all_blades') || 'Reset All Blades'))
+                : $store.app.focusedIndex === 3 
+                    ? ($store.app.guideListFocused 
+                        ? ($store.app.t('display.reset_guide') || 'Reset Guide') 
+                        : ($store.app.t('display.reset_all_guide') || 'Reset All Guide'))
+                : $store.app.focusedIndex === 4
+                    ? ($store.app.iconListFocused 
+                        ? ($store.app.t('display.reset_icon') || 'Reset Icon') 
+                        : ($store.app.t('display.reset_all_icons') || 'Reset All Icons'))
+                : $store.app.t('generic.default')
+            ">Default</span>
         </div>
     </footer>
     
@@ -93,4 +266,412 @@
             </div>
         </div>
         </footer>
+
+    <style>
+    
+    #settings-display .nxe-settings-container {
+        overflow: hidden;
+        max-height: calc(100vh - 200px);
+    }
+
+    #settings-display .nxe-settings-menu {
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-right: 8px;
+    }
+
+    #settings-display .nxe-settings-description {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        min-height: 0;
+        max-height: 100%;
+    }
+
+    #settings-display .nxe-settings-description > template > div,
+    #settings-display .nxe-settings-description > div {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        max-height: 100%;
+        overflow: hidden;
+    }
+
+    
+    #settings-display .nxe-settings-description h3 {
+        font-size: 1.3rem;
+        margin: 0 0 8px 0;
+        color: #ffffff;
+        text-shadow: 
+            1px 1px 0 rgba(0, 0, 0, 0.9),
+            -1px -1px 0 rgba(0, 0, 0, 0.9),
+            1px -1px 0 rgba(0, 0, 0, 0.9),
+            -1px 1px 0 rgba(0, 0, 0, 0.9),
+            0 2px 6px rgba(0, 0, 0, 0.8);
+        letter-spacing: 0.3px;
+    }
+
+    #settings-display .nxe-settings-description > template > div > p,
+    #settings-display .nxe-settings-description > div > p {
+        font-size: 0.9rem;
+        color: #e8e8e8;
+        margin: 0 0 12px 0;
+        line-height: 1.4;
+        text-shadow: 
+            1px 1px 2px rgba(0, 0, 0, 0.9),
+            -1px -1px 2px rgba(0, 0, 0, 0.7),
+            0 2px 4px rgba(0, 0, 0, 0.8);
+    }
+
+    #settings-display .nxe-settings-description hr {
+        margin: 12px 0 !important;
+        flex-shrink: 0;
+    }
+
+    
+    .blade-bg-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 4px 8px 20px 4px;
+    }
+
+    
+    .blade-bg-list::-webkit-scrollbar {
+        width: 6px;
+    }
+    .blade-bg-list::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 3px;
+    }
+    .blade-bg-list::-webkit-scrollbar-thumb {
+        background: var(--nxe-brand-primary, #90c31d);
+        border-radius: 3px;
+    }
+    .blade-bg-list::-webkit-scrollbar-thumb:hover {
+        background: var(--nxe-brand-light, #d0e4a1);
+    }
+
+    
+    .blade-bg-item {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 12px 16px;
+        border-radius: 12px;
+        background: linear-gradient(180deg, 
+            rgba(255, 255, 255, 0.85) 0%, 
+            rgba(255, 255, 255, 0.65) 100%);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        position: relative;
+        flex-shrink: 0;
+        min-height: 80px;
+    }
+
+    .blade-bg-item:hover {
+        background: linear-gradient(180deg, 
+            rgba(255, 255, 255, 0.95) 0%, 
+            rgba(255, 255, 255, 0.75) 100%);
+        border-color: rgba(0, 0, 0, 0.15);
+        transform: translateX(2px);
+    }
+
+    
+    .blade-bg-item.focused {
+        background: linear-gradient(90deg, 
+            #A8D14B 0%, 
+            #C8E37A 50%,
+            #E8F4C0 100%);
+        border: 1px solid #6B9319;
+        box-shadow: 
+            0 4px 12px rgba(0, 0, 0, 0.25),
+            inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        transform: translateX(4px);
+    }
+
+    
+    .blade-bg-thumb {
+        width: 60px;
+        height: 60px;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #0a0a0a;
+        border: 2px solid rgba(0, 0, 0, 0.3);
+        flex-shrink: 0;
+        position: relative;
+        transition: all 0.25s ease;
+    }
+
+    .blade-bg-item.focused .blade-bg-thumb {
+        border-color: rgba(0, 0, 0, 0.5);
+        box-shadow: 
+            0 4px 12px rgba(0, 0, 0, 0.5),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        transform: scale(1.05);
+    }
+
+    .blade-bg-item.has-custom .blade-bg-thumb {
+        border-color: #6B9319;
+    }
+
+    
+    .blade-bg-thumb img.custom-bg-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    
+    .blade-preview-default {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        
+        
+        background-image: 
+            var(--nxe-default-flourish),
+            linear-gradient(135deg, #4a7a08 0%, #9BCC23 50%, #E8F4A8 100%);
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
+    
+    .blade-preview-icon {
+        position: absolute;
+        bottom: 3px;
+        right: 3px;
+        width: 22px;
+        height: 22px;
+        object-fit: contain;
+        
+        filter: 
+            brightness(0) 
+            invert(1) 
+            drop-shadow(0 1px 2px rgba(0, 0, 0, 0.7))
+            drop-shadow(0 0 3px rgba(0, 0, 0, 0.5));
+        z-index: 3;
+        opacity: 0.98;
+    }
+
+    
+    .blade-bg-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    .blade-bg-name {
+        font-size: 1rem;
+        font-weight: 800;
+        color: #ffffff;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.2;
+        text-shadow: 
+            1px 1px 0 rgba(0, 0, 0, 0.95),
+            -1px -1px 0 rgba(0, 0, 0, 0.95),
+            1px -1px 0 rgba(0, 0, 0, 0.95),
+            -1px 1px 0 rgba(0, 0, 0, 0.95),
+            0 2px 4px rgba(0, 0, 0, 0.9),
+            0 3px 8px rgba(0, 0, 0, 0.7);
+    }
+
+    .blade-bg-item.focused .blade-bg-name {
+        text-shadow: 
+            1px 1px 0 rgba(0, 0, 0, 0.95),
+            -1px -1px 0 rgba(0, 0, 0, 0.95),
+            1px -1px 0 rgba(0, 0, 0, 0.95),
+            -1px 1px 0 rgba(0, 0, 0, 0.95),
+            0 2px 5px rgba(0, 0, 0, 1);
+    }
+
+    .blade-bg-status {
+        font-size: 0.8rem;
+        color: #e0e0e0;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        line-height: 1.2;
+        text-shadow: 
+            1px 1px 0 rgba(0, 0, 0, 0.9),
+            -1px -1px 0 rgba(0, 0, 0, 0.9),
+            1px -1px 0 rgba(0, 0, 0, 0.9),
+            -1px 1px 0 rgba(0, 0, 0, 0.9),
+            0 2px 3px rgba(0, 0, 0, 0.8);
+    }
+
+    .blade-bg-item.has-custom .blade-bg-status {
+        color: #F4FFC5;
+        font-weight: 700;
+    }
+
+    .blade-bg-item.focused .blade-bg-status {
+        color: #ffffff;
+    }
+
+    
+    .blade-bg-empty {
+        color: #e0e0e0;
+        text-align: center;
+        padding: 40px 20px;
+        font-size: 0.95rem;
+        font-style: italic;
+        text-shadow: 
+            1px 1px 0 rgba(0, 0, 0, 0.9),
+            -1px -1px 0 rgba(0, 0, 0, 0.9),
+            0 2px 4px rgba(0, 0, 0, 0.8);
+    }
+    
+    .icon-bg-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 4px 8px 20px 4px;
+    }
+    .icon-bg-list::-webkit-scrollbar { width: 6px; }
+    .icon-bg-list::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); border-radius: 3px; }
+    .icon-bg-list::-webkit-scrollbar-thumb { background: var(--nxe-brand-primary, #90c31d); border-radius: 3px; }
+    .icon-bg-list::-webkit-scrollbar-thumb:hover { background: var(--nxe-brand-light, #d0e4a1); }
+
+    .icon-bg-item {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 12px 16px;
+        border-radius: 12px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.65) 100%);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        position: relative;
+        flex-shrink: 0;
+        min-height: 80px;
+    }
+    .icon-bg-item:hover {
+        background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.75) 100%);
+        border-color: rgba(0, 0, 0, 0.15);
+        transform: translateX(2px);
+    }
+    .icon-bg-item.focused {
+        background: linear-gradient(90deg, #A8D14B 0%, #C8E37A 50%, #E8F4C0 100%);
+        border: 1px solid #6B9319;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        transform: translateX(4px);
+    }
+    .icon-bg-item.has-custom .icon-bg-thumb { border-color: #6B9319; }
+
+    
+    .icon-bg-thumb {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        overflow: hidden;
+        background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+        border: 2px solid rgba(0, 0, 0, 0.3);
+        flex-shrink: 0;
+        position: relative;
+        transition: all 0.25s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .icon-bg-item.focused .icon-bg-thumb {
+        border-color: rgba(0, 0, 0, 0.5);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        transform: scale(1.05);
+    }
+
+    .icon-bg-thumb img.custom-icon-img,
+    .icon-bg-thumb img.default-icon-img {
+        width: 70%;
+        height: 70%;
+        object-fit: contain;
+        display: block;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+    }
+    
+    .icon-bg-thumb img.custom-icon-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 10px;
+    }
+
+    
+    .icon-bg-info {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+    }
+    .icon-bg-name {
+        font-size: 1rem;
+        font-weight: 800;
+        color: #ffffff;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.2;
+        text-shadow:
+            1px 1px 0 rgba(0, 0, 0, 0.95), -1px -1px 0 rgba(0, 0, 0, 0.95),
+            1px -1px 0 rgba(0, 0, 0, 0.95), -1px 1px 0 rgba(0, 0, 0, 0.95),
+            0 2px 4px rgba(0, 0, 0, 0.9);
+    }
+    .icon-bg-category {
+        font-size: 0.72rem;
+        color: #c8c8c8;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        text-shadow:
+            1px 1px 0 rgba(0, 0, 0, 0.9), -1px -1px 0 rgba(0, 0, 0, 0.9),
+            0 1px 2px rgba(0, 0, 0, 0.8);
+    }
+    .icon-bg-status {
+        font-size: 0.8rem;
+        color: #e0e0e0;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        text-shadow:
+            1px 1px 0 rgba(0, 0, 0, 0.9), -1px -1px 0 rgba(0, 0, 0, 0.9),
+            0 2px 3px rgba(0, 0, 0, 0.8);
+    }
+    .icon-bg-item.has-custom .icon-bg-status { color: #F4FFC5; font-weight: 700; }
+    .icon-bg-item.focused .icon-bg-status { color: #ffffff; }
+
+    .icon-bg-empty {
+        color: #e0e0e0;
+        text-align: center;
+        padding: 40px 20px;
+        font-size: 0.95rem;
+        font-style: italic;
+        text-shadow:
+            1px 1px 0 rgba(0, 0, 0, 0.9), -1px -1px 0 rgba(0, 0, 0, 0.9),
+            0 2px 4px rgba(0, 0, 0, 0.8);
+    }
+    
+</style>
 </section>

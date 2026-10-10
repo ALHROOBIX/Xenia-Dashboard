@@ -15,7 +15,9 @@
             @click="$store.actions.toggleKeyboard()"
             :class="{'active': $store.app.librarySearch && $store.app.librarySearch.length > 0}">
             
-            <div class="search-icon-glass"><img src="assets/icons/search.webp" alt="Search"></div>
+            <div class="search-icon-glass">
+                <img :src="$store.app.customIcons['pageicon_search'] || 'assets/icons/search.webp'" alt="Search">
+            </div>
             
             <div class="search-text-content">
                 <span class="placeholder" x-show="!$store.app.librarySearch" x-text="$store.app.t('library.search_placeholder')"></span>

@@ -64,6 +64,7 @@ const SYSTEMS_DIR = path.join(CONFIG_DIR, 'systems');
 const CUSTOM_BG_PF_DIR = path.join(CONFIG_DIR, 'Custom-BG-PF');
 const CUSTOM_BG_DIR = path.join(CUSTOM_BG_PF_DIR, 'Background');
 const CUSTOM_PF_DIR = path.join(CUSTOM_BG_PF_DIR, 'Profile');
+const CUSTOM_ICONS_DIR = path.join(CUSTOM_BG_PF_DIR, 'Icons');
 
 
 
@@ -366,6 +367,7 @@ async function ensureCacheDirs() {
         if (!fsSync.existsSync(CUSTOM_BG_PF_DIR)) fsSync.mkdirSync(CUSTOM_BG_PF_DIR, { recursive: true });
         if (!fsSync.existsSync(CUSTOM_BG_DIR)) fsSync.mkdirSync(CUSTOM_BG_DIR, { recursive: true });
         if (!fsSync.existsSync(CUSTOM_PF_DIR)) fsSync.mkdirSync(CUSTOM_PF_DIR, { recursive: true });
+        if (!fsSync.existsSync(CUSTOM_ICONS_DIR)) fsSync.mkdirSync(CUSTOM_ICONS_DIR, { recursive: true });
 
         
         
@@ -837,7 +839,15 @@ function registerIpcHandlers() {
 
     ipcMain.handle('get-gallery-images', async (event, type) => {
         try {
-            const targetDir = type === 'profile' ? CUSTOM_PF_DIR : CUSTOM_BG_DIR;
+            
+            let targetDir;
+            if (type === 'profile') {
+                targetDir = CUSTOM_PF_DIR;
+            } else if (type === 'icons') {
+                targetDir = CUSTOM_ICONS_DIR;
+            } else {
+                targetDir = CUSTOM_BG_DIR;
+            }
             if (!fsSync.existsSync(targetDir)) return { success: true, images: [] };
 
             const files = await fsSync.promises.readdir(targetDir);
@@ -848,11 +858,12 @@ function registerIpcHandlers() {
 
             const imageUrls = imageFiles.map(file => {
                 const fullPath = path.join(targetDir, file);
+                const safePath = fullPath.replace(/\\/g, '/');
                 return {
                     name: file,
                     path: fullPath, 
                     
-                    url: `app-thumb:///${fullPath.replace(/\\/g, '/')}`
+                    url: `app-thumb:///${safePath.split('/').map(s => encodeURIComponent(s)).join('/')}`
                 };
             });
 
@@ -3557,6 +3568,9 @@ ipcMain.handle('delete-game', async (event, gamePath) => {
         }
         
         console.log(`[Delete Handler] Successfully deleted.`);
+        
+        const cleanup = await removeGameFromCache(gamePath);
+        console.log(`[Delete Handler] 🧹 Cleanup: ${cleanup.removed} entries, ${cleanup.images} images`);
         return { success: true };
 
     } catch (error) {
@@ -3682,7 +3696,6 @@ ipcMain.handle('translate-text', async (event, text, targetLang) => {
     }
 });
 
-
 ipcMain.handle('get-user-gamerpic', async (event, xuid, slot) => {
     const xeniaPath = store.get('xeniaPath');
     
@@ -3692,7 +3705,12 @@ ipcMain.handle('get-user-gamerpic', async (event, xuid, slot) => {
         if (customPic && fsSync.existsSync(customPic)) {
             
             const normalizedPath = customPic.replace(/\\/g, '/');
-            return { success: true, url: `app-art:///${normalizedPath}` }; 
+            const encoded = normalizedPath.split('/')
+                .map(seg => encodeURIComponent(seg))
+                .join('/');
+            
+            
+            return { success: true, url: `app-art://${encoded}` };
         }
     }
 
@@ -3700,13 +3718,7 @@ ipcMain.handle('get-user-gamerpic', async (event, xuid, slot) => {
     const launchMethod = store.get('linuxLaunchMethod') || 'native';
     if (!xeniaPath || !xuid) return { success: false };
 
-    let contentRoot;
-    if (process.platform === 'linux' && launchMethod === 'native') {
-        contentRoot = path.join(path.dirname(xeniaPath), 'content');
-    } else {
-        contentRoot = path.join(path.dirname(xeniaPath), 'content');
-    }
-
+    const contentRoot = path.join(path.dirname(xeniaPath), 'content');
     const gpdPath = await findProfileGPD(path.join(contentRoot, xuid));
     if (!gpdPath) return { success: false };
 
@@ -3779,41 +3791,151 @@ ipcMain.handle('search-steamgriddb-assets', async (event, { gameName, type }) =>
     }
 });
 
-
 ipcMain.handle('update-game-art', async (event, { gameName, type, url, isLocal }) => {
     try {
         const cache = await loadCache();
-        
-        
         if (!cache[gameName]) cache[gameName] = {};
 
-        let finalUrl = url;
+        const urlKeyMap = { cover: 'coverUrl', hero: 'heroUrl', logo: 'logoUrl', icon: 'iconUrl' };
+        const urlKey = urlKeyMap[type];
 
-        if (!isLocal && url.startsWith('http')) {
-            
-            const safeNameForFile = gameName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-            const ext = type === 'icon' ? '.png' : '.jpg';
-            const destPath = path.join(ART_DIR, `${safeNameForFile}-${type}-${Date.now()}${ext}`);
-            
-            const response = await axios({ url, method: 'GET', responseType: 'stream' });
-            const writer = fsSync.createWriteStream(destPath);
-            response.data.pipe(writer);
-            
-            await new Promise((resolve, reject) => {
-                writer.on('finish', resolve);
-                writer.on('error', reject);
-            });
-            
-            finalUrl = `app-art://${path.basename(destPath)}`;
+        if (!urlKey) {
+            return { success: false, error: `Invalid art type: ${type}` };
         }
 
         
-        if (type === 'cover') cache[gameName].coverUrl = finalUrl;
-        if (type === 'hero') cache[gameName].heroUrl = finalUrl;
-        if (type === 'logo') cache[gameName].logoUrl = finalUrl;
-        if (type === 'icon') cache[gameName].iconUrl = finalUrl;
+        const oldUrl = cache[gameName][urlKey] || null;
 
-        await saveCache(cache); 
+        let finalUrl = url;
+
+        
+        
+        
+        if (!isLocal && url.startsWith('http')) {
+            const safeName = gameName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            const ext = type === 'icon' ? '.png' : '.jpg';
+            const destFileName = `${safeName}-${type}-${Date.now()}${ext}`;
+            const destPath = path.join(ART_DIR, destFileName);
+
+            try {
+                const response = await axios({
+                    url,
+                    method: 'GET',
+                    responseType: 'stream',
+                    timeout: 30000
+                });
+
+                const writer = fsSync.createWriteStream(destPath);
+                response.data.pipe(writer);
+
+                await new Promise((resolve, reject) => {
+                    writer.on('finish', resolve);
+                    writer.on('error', reject);
+                });
+
+                finalUrl = `app-art://${destFileName}`;
+                console.log(`[Art Manager] ⬇️ Downloaded from web → ${destFileName}`);
+
+            } catch (downloadError) {
+                
+                console.error('[Art Manager] Download failed, keeping old image:', downloadError.message);
+                return {
+                    success: false,
+                    error: "Download failed: " + downloadError.message
+                };
+            }
+        }
+
+        
+        
+        
+        else if (isLocal && url.startsWith('file://')) {
+            try {
+                
+                let sourcePath = decodeURIComponent(url.replace('file://', '').split('?')[0]);
+
+                
+                if (process.platform === 'win32') {
+                    
+                    if (/^\/[a-zA-Z]:/.test(sourcePath)) {
+                        sourcePath = sourcePath.substring(1);
+                    }
+                }
+                
+
+                sourcePath = path.normalize(sourcePath);
+
+                
+                if (!fsSync.existsSync(sourcePath)) {
+                    return {
+                        success: false,
+                        error: "Source file not found: " + sourcePath
+                    };
+                }
+
+                
+                const stats = await fs.stat(sourcePath);
+                const MAX_LOCAL_SIZE = 20 * 1024 * 1024; 
+
+                if (stats.size > MAX_LOCAL_SIZE) {
+                    console.warn(`[Art Manager] ⚠️ Large file (${(stats.size / 1024 / 1024).toFixed(1)}MB), using direct reference`);
+                    finalUrl = url; 
+                } else {
+                    
+                    const safeName = gameName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                    const ext = path.extname(sourcePath).toLowerCase() || '.png';
+                    const destFileName = `${safeName}-${type}-${Date.now()}${ext}`;
+                    const destPath = path.join(ART_DIR, destFileName);
+
+                    
+                    await fs.copyFile(sourcePath, destPath);
+
+                    finalUrl = `app-art://${destFileName}`;
+                    console.log(`[Art Manager] 📋 Copied local file → ${destFileName}`);
+                }
+
+            } catch (copyError) {
+                console.error('[Art Manager] Local copy failed:', copyError.message);
+                return {
+                    success: false,
+                    error: "Failed to copy local file: " + copyError.message
+                };
+            }
+        }
+
+        
+        
+        
+        if (oldUrl && typeof oldUrl === 'string' && oldUrl.startsWith('app-art://')) {
+            const oldFn = oldUrl.replace('app-art://', '').split('?')[0].trim();
+            const oldPath = path.join(ART_DIR, oldFn);
+
+            
+            const artRoot = path.resolve(ART_DIR);
+            const resolvedOldPath = path.resolve(oldPath);
+
+            if (resolvedOldPath.startsWith(artRoot + path.sep)) {
+                try {
+                    if (fsSync.existsSync(oldPath)) {
+                        await fs.unlink(oldPath);
+                        console.log(`[Art Manager] 🗑️ Replaced old ${type}: ${oldFn}`);
+                    }
+                } catch (e) {
+                    
+                    console.warn(`[Art Manager] Failed to delete old image: ${e.message}`);
+                }
+            } else {
+                console.warn(`[Art Manager] Security block: outside ART_DIR: ${oldFn}`);
+            }
+        }
+
+        
+        
+        
+        cache[gameName][urlKey] = finalUrl;
+        await saveCache(cache);
+
+        console.log(`[Art Manager] ✅ Updated ${type} for "${gameName}"`);
         return { success: true, path: finalUrl };
 
     } catch (error) {
@@ -4221,47 +4343,168 @@ ipcMain.handle('deep-scan-game', async (event, gamePath) => {
 
 
 
+
+
+async function deleteGameArtFiles(gameData) {
+    if (!gameData || !fsSync.existsSync(ART_DIR)) return 0;
+    
+    let deletedCount = 0;
+    const artRoot = path.resolve(ART_DIR);
+    const imageKeys = ['coverUrl', 'heroUrl', 'logoUrl', 'iconUrl'];
+
+    for (const key of imageKeys) {
+        const url = gameData[key];
+        if (!url || typeof url !== 'string' || !url.startsWith('app-art://')) continue;
+
+        const fileName = url.replace('app-art://', '').split('?')[0].trim();
+        if (!fileName) continue;
+
+        const filePath = path.join(ART_DIR, fileName);
+        const resolved = path.resolve(filePath);
+
+        
+        if (!resolved.startsWith(artRoot + path.sep)) {
+            console.warn(`[Cleanup] Security block: ${fileName}`);
+            continue;
+        }
+
+        try {
+            if (fsSync.existsSync(filePath)) {
+                await fs.unlink(filePath);
+                deletedCount++;
+            }
+        } catch (e) {
+            console.warn(`[Cleanup] Failed to delete ${fileName}: ${e.message}`);
+        }
+    }
+    return deletedCount;
+}
+
+async function removeGameFromCache(fileNameOrPath) {
+    try {
+        const cache = await loadCache();
+        const baseName = path.basename(fileNameOrPath);
+        const isWindows = process.platform === 'win32';
+
+        
+        const normalize = (s) => isWindows ? s.toLowerCase() : s;
+        const targetName = normalize(baseName);
+        const targetPath = normalize(fileNameOrPath);
+
+        const keysToRemove = Object.keys(cache).filter(k => {
+            const nk = normalize(k);
+            return nk === targetName || nk === targetPath;
+        });
+
+        if (keysToRemove.length === 0) return { success: true, removed: 0, images: 0 };
+
+        let totalDeletedImages = 0;
+        for (const key of keysToRemove) {
+            totalDeletedImages += await deleteGameArtFiles(cache[key]);
+            delete cache[key];
+        }
+
+        await saveCache(cache);
+        console.log(`[Cleanup] 🗑️ Removed ${keysToRemove.length} entries + ${totalDeletedImages} images`);
+        return { success: true, removed: keysToRemove.length, images: totalDeletedImages };
+    } catch (e) {
+        console.error('[Cleanup] removeGameFromCache failed:', e);
+        return { success: false, error: e.message };
+    }
+}
+
+
 async function autoCleanupArt() {
     try {
-        console.log('[Auto-Cleanup] Checking for orphaned images...');
-        
-        
-        if (!fsSync.existsSync(CACHE_FILE)) return;
-        if (!fsSync.existsSync(ART_DIR)) return;
+        console.log('[Auto-Cleanup] 🚀 Starting smart cleanup...');
+
+        if (!fsSync.existsSync(CACHE_FILE) || !fsSync.existsSync(ART_DIR)) {
+            console.log('[Auto-Cleanup] Cache or Art dir missing. Skipped.');
+            return;
+        }
+
+        const cache = await loadCache();
+        const gameFolder = store ? store.get('gameFolderPath') : null;
+        let cacheModified = false;
 
         
-        const data = await fs.readFile(CACHE_FILE, 'utf-8');
-        const cache = JSON.parse(data);
+        const isWindows = process.platform === 'win32';
+        const normalizeKey = (s) => isWindows ? s.toLowerCase() : s;
+
+        
+        const existingGameFiles = new Set();
+        if (gameFolder && fsSync.existsSync(gameFolder)) {
+            try {
+                const entries = await fs.readdir(gameFolder, { recursive: true, withFileTypes: true });
+                for (const entry of entries) {
+                    if (entry.isFile()) {
+                        existingGameFiles.add(normalizeKey(entry.name));
+                        existingGameFiles.add(normalizeKey(path.basename(entry.parentPath)));
+                    }
+                }
+                console.log(`[Auto-Cleanup] 📂 Found ${existingGameFiles.size} items on disk`);
+            } catch (e) {
+                console.warn('[Auto-Cleanup] Cannot scan game folder:', e.message);
+            }
+        }
+
+        
         const validFiles = new Set();
+        const orphanEntries = [];
+        const scanAvailable = existingGameFiles.size > 0;
 
-        
-        Object.values(cache).forEach(gameData => {
-            ['coverUrl', 'heroUrl', 'logoUrl', 'iconUrl'].forEach(key => {
-                const url = gameData[key];
+        for (const [key, gameData] of Object.entries(cache)) {
+            const normalizedKey = normalizeKey(key);
+
+            
+            if (scanAvailable && !existingGameFiles.has(normalizedKey)) {
+                const deletedImgs = await deleteGameArtFiles(gameData);
+                console.log(`[Auto-Cleanup] ❌ "${key}" not on disk → removed entry + ${deletedImgs} images`);
+                orphanEntries.push(key);
+                cacheModified = true;
+                continue;
+            }
+
+            
+            ['coverUrl', 'heroUrl', 'logoUrl', 'iconUrl'].forEach(k => {
+                const url = gameData[k];
                 if (url && typeof url === 'string' && url.startsWith('app-art://')) {
-                    const fileName = url.replace('app-art://', '').split('?')[0];
-                    validFiles.add(fileName);
+                    const fn = url.replace('app-art://', '').split('?')[0].trim();
+                    if (fn) validFiles.add(fn);
                 }
             });
-        });
+        }
+
+        
+        for (const key of orphanEntries) delete cache[key];
 
         
         const filesOnDisk = await fs.readdir(ART_DIR);
-        let deletedCount = 0;
+        let deletedCount = 0, keptCount = 0;
+        const allowedExts = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp'];
 
         for (const file of filesOnDisk) {
-            
             if (file.startsWith('.') || file === 'db.json') continue;
 
+            
+            const ext = path.extname(file).toLowerCase();
+            if (!allowedExts.includes(ext)) continue;
+
             if (!validFiles.has(file)) {
-                await fs.unlink(path.join(ART_DIR, file));
-                deletedCount++;
+                try {
+                    await fs.unlink(path.join(ART_DIR, file));
+                    deletedCount++;
+                } catch (e) {
+                    console.warn(`[Auto-Cleanup] Cannot delete ${file}: ${e.message}`);
+                }
+            } else {
+                keptCount++;
             }
         }
-        
-        if (deletedCount > 0) {
-            console.log(`[Auto-Cleanup] Successfully deleted ${deletedCount} unused images.`);
-        }
+
+        if (cacheModified) await saveCache(cache);
+
+        console.log(`[Auto-Cleanup] ✅ Done | Images: -${deletedCount} +${keptCount} kept | Entries removed: ${orphanEntries.length}`);
     } catch (error) {
         console.error('[Auto-Cleanup] Error:', error.message);
     }

@@ -103,9 +103,7 @@ document.addEventListener('alpine:init', () => {
         focusedList: 'master', 
         masterMenu: [], masterIndex: 1, detailMenu: [], detailIndex: 0,        
         selectedGame: null,
-        originalOpenTray: null, 
-        gamesList: [],
-        filteredLibraryGames: [],
+        originalOpenTray: null,
         gameDetails: { title: '', logoUrl: '', heroUrl: '' },
         gameExtendedInfo: { 
             description: '',
@@ -204,7 +202,20 @@ document.addEventListener('alpine:init', () => {
             stagePath: null, stageName: 'Default',
             flourishPath: null, flourishName: 'Default'
         },
-        displayItems: ['wallpaper', 'stage'],
+        displayItems: ['wallpaper', 'stage', 'blade', 'guide', 'icons'],
+                displayMenuItems: [
+            { id: 'wallpaper', name: 'Background Wallpaper', tKey: 'display.wall_bg',    icon: 'assets/icons/image.png' },
+            { id: 'stage',     name: 'Background Stage',     tKey: 'display.wall_stage', icon: 'assets/icons/layers.png' },
+            { id: 'blade',     name: 'Blade Backgrounds',    tKey: 'display.blade_bg',   icon: 'assets/icons/Blade-card.webp' },
+            { id: 'guide',     name: 'Guide Backgrounds',    tKey: 'display.guide_bg',   icon: 'assets/icons/Guide.webp' },
+            { id: 'icons',     name: 'Icon Customization',   tKey: 'display.icons',      icon: 'assets/icons/Icons.webp' }
+        ],
+
+        
+        displayBladesList: [],
+        bladeFocusIndex: 0,
+        bladeListFocused: false,
+        galleryTargetBladeId: null,
 
         coreSettingsItems: [
             { id: 'config-file', name: 'xenia canary config', icon: 'assets/icons/xenia canary.png', view: 'settings-config' },
@@ -267,9 +278,26 @@ document.addEventListener('alpine:init', () => {
         patchSaveStatus: 'idle',
         isLbPressed: false,
         bladeBackgrounds: {},
-
-
+        
+        guideBackgrounds: {
+            homeSpine: null,
+            gamesSpine: null,
+            settingsSpine: null,
+            homeContent: null,
+            gamesContent: null,
+            settingsContent: null
+        },
+        displayGuideList: [],
+        guideFocusIndex: 0,
+        guideListFocused: false,
+        galleryTargetGuideKey: null,
         librarySearch: '', 
+        
+        displayIconsList: [],
+        iconFocusIndex: 0,
+        iconListFocused: false,
+        galleryTargetIconId: null,
+        customIcons: {}, 
 
         isKeyboardOpen: false,
         keyboardRow: 1, 
@@ -278,6 +306,10 @@ document.addEventListener('alpine:init', () => {
         isSymbols: false,
         isAccents: false,
         searchCursorPos: 0,
+        isExternalTheme() {
+            const t = this.themesList.find(th => th.name === this.currentTheme);
+            return t && t.type === 'external';
+        },
         
         
         keyboardLayouts: {
@@ -414,7 +446,7 @@ document.addEventListener('alpine:init', () => {
         focusedFriendIndex: 0,
         appUpdateInfo: {
             status: 'idle', 
-            currentVer: '1.3.5',
+            currentVer: '1.3.6',
             remoteVer: '---',
             message: 'Press (Y) to check for updates',
             percentage: 0,
@@ -522,9 +554,9 @@ document.addEventListener('alpine:init', () => {
 
         
         contentCategories: [
-            { id: 'tu', name: 'Title Updates', icon: 'assets/icons/xenia canary.png' },
-            { id: 'dlc', name: 'Game DLCs', icon: 'assets/icons/xbox 360-gamepad.png' },
-            { id: 'saves', name: 'Saved Games', icon: 'assets/icons/database.png' }
+            { id: 'tu', name: 'Title Updates', icon: 'assets/icons/Game-Update.webp' },
+            { id: 'dlc', name: 'Game DLCs', icon: 'assets/icons/DLC.webp' },
+            { id: 'saves', name: 'Saved Games', icon: 'assets/icons/Game-Save.webp' }
         ],
         focusedContentCategoryIndex: 0,
         contentItems: [],
@@ -598,7 +630,7 @@ document.addEventListener('alpine:init', () => {
             app.isGalleryOpen = true;
             app.galleryIndex = 0;
 
-            const folderType = type === 'profile' ? 'profile' : 'background';
+            const folderType = type === 'profile' ? 'profile' : (type === 'customIcon' ? 'icons' : 'background');
             const result = await window.electronAPI.getGalleryImages(folderType);
             
             if (result.success) {
@@ -715,22 +747,510 @@ document.addEventListener('alpine:init', () => {
             }
             
             else if (app.galleryType === 'bladeBg') {
-                const currentItem = app.detailMenu[app.detailIndex];
-                if (currentItem) {
-                    app.bladeBackgrounds[currentItem.id] = filePath;
+                
+                let targetId = app.galleryTargetBladeId;
+                
+                
+                if (!targetId && app.detailMenu && app.detailMenu[app.detailIndex]) {
+                    const currentItem = app.detailMenu[app.detailIndex];
+                    if (currentItem && !currentItem.isGame && !currentItem.isGameIcon) {
+                        targetId = currentItem.id;
+                    }
+                }
+                
+                if (targetId) {
+                    app.bladeBackgrounds[targetId] = filePath;
                     
                     
                     const plainObj = JSON.parse(JSON.stringify(app.bladeBackgrounds));
-                    app.bladeBackgrounds = plainObj; 
-                    
+                    app.bladeBackgrounds = plainObj;
                     
                     await window.electronAPI.set('bladeBackgrounds', plainObj);
                 }
+                
+                
+                app.galleryTargetBladeId = null;
+            }
+            else if (app.galleryType === 'guideBg') {
+                const targetKey = app.galleryTargetGuideKey;
+                if (targetKey) {
+                    await this._saveGuideBackground(targetKey, filePath);
+                }
+                app.galleryTargetGuideKey = null;
+            }
+                        
+            else if (app.galleryType === 'customIcon') {
+                if (app.galleryTargetIconId) {
+                    
+                    const plainObj = JSON.parse(JSON.stringify(app.customIcons || {}));
+                    plainObj[app.galleryTargetIconId] = filePath;
+                    app.customIcons = plainObj;
+
+                    await window.electronAPI.set('customIcons', plainObj);
+
+                    
+                    this.applyCustomIconsToMenus();
+                }
+                app.galleryTargetIconId = null;
             }
 
             app.isGalleryOpen = false; 
         },
+        buildDisplayBladesList() {
+            const app = Alpine.store('app');
+            const blades = [];
+            
+            if (app.masterMenu && app.masterMenu.length > 0) {
+                app.masterMenu.forEach(master => {
+                    if (master.detailMenu && Array.isArray(master.detailMenu)) {
+                        master.detailMenu.forEach(detail => {
+                            
+                            blades.push({
+                                id: detail.id,
+                                name: detail.name,
+                                icon: detail.icon || 'assets/icons/placeholder.png'
+                            });
+                        });
+                    }
+                });
+            }
+            
+            app.displayBladesList = blades;
+            console.log(`[Display] Built blade list with ${blades.length} blades.`);
+        },
 
+        
+        selectBladeBgItem() {
+            const app = Alpine.store('app');
+            const blade = app.displayBladesList[app.bladeFocusIndex];
+            if (!blade) return;
+            
+            
+            app.galleryTargetBladeId = blade.id;
+            this.openGallery('bladeBg');
+        },
+
+        
+        async resetFocusedBladeBg() {
+            const app = Alpine.store('app');
+            const blade = app.displayBladesList[app.bladeFocusIndex];
+            if (!blade) return;
+            
+            if (!app.bladeBackgrounds || !app.bladeBackgrounds[blade.id]) {
+                this.playSound('back');
+                return;
+            }
+            
+            this.playSound('back');
+            delete app.bladeBackgrounds[blade.id];
+            
+            
+            const plainObj = JSON.parse(JSON.stringify(app.bladeBackgrounds));
+            app.bladeBackgrounds = plainObj;
+            
+            await window.electronAPI.set('bladeBackgrounds', plainObj);
+        },
+        
+        async resetAllBladeBackgrounds() {
+            const app = Alpine.store('app');
+            this.playSound('back');
+
+            const themeData = app.themesList.find(t => t.name === app.currentTheme);
+
+            
+            if (themeData && themeData.type === 'external') {
+                return;
+            }
+
+            const emptyBlades = {};
+            app.bladeBackgrounds = emptyBlades;
+
+            await window.electronAPI.set('bladeBackgrounds', emptyBlades);
+            console.log('[Blades] All blade backgrounds reset.');
+        },
+        
+            getBladeStatus(bladeId) {
+                const app = Alpine.store('app');
+                if (app.bladeBackgrounds && app.bladeBackgrounds[bladeId]) {
+                    const custom = app.t('display.custom');
+                    return '✓ ' + (custom === 'display.custom' ? 'Custom' : custom);
+                }
+                const def = app.t('display.default');
+                return def === 'display.default' ? 'Default' : def;
+            },
+        
+
+        buildDisplayGuideList() {
+            const app = Alpine.store('app');
+            app.displayGuideList = [
+                { id: 'homeSpine',     name: 'Home Spine (Vertical)',       type: 'spine',   blade: 'home' },
+                { id: 'gamesSpine',    name: 'Games Spine (Vertical)',      type: 'spine',   blade: 'games' },
+                { id: 'settingsSpine', name: 'Settings Spine (Vertical)',   type: 'spine',   blade: 'settings' },
+                { id: 'homeContent',     name: 'Home Content (Wide)',       type: 'content', blade: 'home' },
+                { id: 'gamesContent',    name: 'Games Content (Wide)',      type: 'content', blade: 'games' },
+                { id: 'settingsContent', name: 'Settings Content (Wide)',   type: 'content', blade: 'settings' }
+            ];
+        },
+
+        selectGuideBgItem() {
+            const app = Alpine.store('app');
+            const item = app.displayGuideList[app.guideFocusIndex];
+            if (!item) return;
+            
+            app.galleryTargetGuideKey = item.id;
+            this.openGallery('guideBg');
+        },
+
+        async resetFocusedGuideBg() {
+            const app = Alpine.store('app');
+            const item = app.displayGuideList[app.guideFocusIndex];
+            if (!item) return;
+            
+            if (!app.guideBackgrounds[item.id]) {
+                this.playSound('back');
+                return;
+            }
+            
+            this.playSound('back');
+            
+            
+            await this._saveGuideBackground(item.id, null);
+        },
+
+        async resetAllGuideBackgrounds() {
+            const app = Alpine.store('app');
+            this.playSound('back');
+            await this._resetGuideBackgrounds();
+            this.applyGuideBackgrounds();  
+        },
+
+        applyGuideBackgrounds() {
+            const app = Alpine.store('app');
+            const root = document.documentElement;
+
+            const toSafeFileUrl = (filePath) => {
+                if (!filePath) return null;
+                const normalized = filePath.replace(/\\/g, '/');
+                const encoded = normalized.split('/')
+                    .map(segment => encodeURIComponent(segment))
+                    .join('/');
+                return `url('file://${encoded}')`;
+            };
+
+            const map = {
+                'homeSpine':         '--guide-home-spine',
+                'gamesSpine':        '--guide-games-spine',
+                'settingsSpine':     '--guide-settings-spine',
+                'homeContent':       '--guide-home-content',
+                'gamesContent':      '--guide-games-content',
+                'settingsContent':   '--guide-settings-content'
+            };
+
+            for (const [key, cssVar] of Object.entries(map)) {
+                const url = toSafeFileUrl(app.guideBackgrounds[key]);
+                if (url) {
+                    root.style.setProperty(cssVar, url);
+                } else {
+                    root.style.removeProperty(cssVar);
+                }
+            }
+        },
+
+        getGuideStatus(key) {
+            const app = Alpine.store('app');
+            if (app.guideBackgrounds[key]) {
+                const custom = app.t('display.custom');
+                return '✓ ' + (custom === 'display.custom' ? 'Custom' : custom);
+            }
+            const def = app.t('display.default');
+            return def === 'display.default' ? 'Default' : def;
+        },
+        
+
+        buildDisplayIconsList() {
+            const app = Alpine.store('app');
+            const icons = [];
+
+            
+            const getBaseIcon = (item) => item.originalIcon || item.icon || 'assets/icons/placeholder.png';
+
+            
+            if (app.settingsMenu && Array.isArray(app.settingsMenu)) {
+                app.settingsMenu.forEach(item => {
+                    icons.push({
+                        key: 'settings_' + item.id,
+                        name: item.name || item.id,
+                        category: 'Settings',
+                        icon: getBaseIcon(item)
+                    });
+                });
+            }
+
+            
+            if (app.coreSettingsItems && Array.isArray(app.coreSettingsItems)) {
+                app.coreSettingsItems.forEach(item => {
+                    icons.push({
+                        key: 'core_' + item.id,
+                        name: item.name || item.id,
+                        category: 'Core',
+                        icon: getBaseIcon(item)
+                    });
+                });
+            }
+
+            
+            if (app.aboutMenu && Array.isArray(app.aboutMenu)) {
+                app.aboutMenu.forEach(item => {
+                    icons.push({
+                        key: 'about_' + item.id,
+                        name: item.name || item.id,
+                        category: 'About',
+                        icon: getBaseIcon(item)
+                    });
+                });
+            }
+
+            
+            if (app.contentCategories && Array.isArray(app.contentCategories)) {
+                app.contentCategories.forEach(item => {
+                    icons.push({
+                        key: 'content_' + item.id,
+                        name: item.name || item.id,
+                        category: 'Content',
+                        icon: getBaseIcon(item)
+                    });
+                });
+            }
+
+            
+            if (app.masterMenu && app.masterMenu.length > 0) {
+                app.masterMenu.forEach(master => {
+                    if (master.detailMenu && Array.isArray(master.detailMenu)) {
+                        master.detailMenu.forEach(detail => {
+                            if (!detail.isGame && !detail.isGameIcon) {
+                                icons.push({
+                                    key: 'blade_' + detail.id,
+                                    name: detail.name || detail.id,
+                                    category: 'Dashboard',
+                                    icon: getBaseIcon(detail)
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+            
+            if (app.displayMenuItems && Array.isArray(app.displayMenuItems)) {
+                app.displayMenuItems.forEach(item => {
+                    
+                    const translatedName = app.t(item.tKey);
+                    const displayName = (translatedName && translatedName !== item.tKey) 
+                        ? translatedName 
+                        : item.name;
+
+                    icons.push({
+                        key: 'displaymenu_' + item.id,
+                        name: displayName,
+                        category: 'Display',
+                        icon: getBaseIcon(item)
+                    });
+                });
+            }
+
+            
+            const libraryPageIcons = [
+                { key: 'pageicon_search', name: 'Search Icon',     icon: 'assets/icons/search.webp' }
+            ];
+            libraryPageIcons.forEach(item => {
+                icons.push({
+                    key: item.key,
+                    name: item.name,
+                    category: 'Library',
+                    icon: item.icon
+                });
+            });
+            
+            
+            if (app.themesList && Array.isArray(app.themesList)) {
+                app.themesList.forEach(theme => {
+                    icons.push({
+                        key: 'theme_' + theme.name,
+                        name: theme.name,
+                        category: 'Themes',
+                        icon: theme.icon || 'assets/icons/icon-theme.png'
+                    });
+                });
+            }
+
+            app.displayIconsList = icons;
+            console.log(`[Icons] Built icon list with ${icons.length} items.`);
+        },
+
+        selectIconItem() {
+            const app = Alpine.store('app');
+            const item = app.displayIconsList[app.iconFocusIndex];
+            if (!item) return;
+
+            app.galleryTargetIconId = item.key;
+            this.openGallery('customIcon');
+        },
+
+        async resetFocusedIcon() {
+            const app = Alpine.store('app');
+            const item = app.displayIconsList[app.iconFocusIndex];
+            if (!item) return;
+
+            if (!app.customIcons || !app.customIcons[item.key]) {
+                this.playSound('back');
+                return;
+            }
+
+            this.playSound('back');
+            delete app.customIcons[item.key];
+
+            
+            const plainObj = JSON.parse(JSON.stringify(app.customIcons));
+            app.customIcons = plainObj;
+
+            await window.electronAPI.set('customIcons', plainObj);
+
+            
+            this.applyCustomIconsToMenus();
+        },
+
+        async resetAllIcons() {
+            const app = Alpine.store('app');
+            this.playSound('back');
+
+            
+            const themeData = app.themesList.find(t => t.name === app.currentTheme);
+            if (themeData && themeData.type === 'external') {
+                return;
+            }
+
+            app.customIcons = {};
+            await window.electronAPI.set('customIcons', {});
+
+            this.applyCustomIconsToMenus();
+            console.log('[Icons] All custom icons reset.');
+        },
+
+        getIconStatus(iconKey) {
+            const app = Alpine.store('app');
+            if (app.customIcons && app.customIcons[iconKey]) {
+                const custom = app.t('display.custom');
+                return '✓ ' + (custom === 'display.custom' ? 'Custom' : custom);
+            }
+            const def = app.t('display.default');
+            return def === 'display.default' ? 'Default' : def;
+        },
+
+        
+        applyCustomIconsToMenus() {
+            const app = Alpine.store('app');
+
+            
+            const themeData = app.themesList.find(t => t.name === app.currentTheme);
+            if (themeData && themeData.type === 'external') {
+                return;
+            }
+
+            const custom = app.customIcons || {};
+            const hasCustom = Object.keys(custom).length > 0;
+
+            
+            const applyIcon = (item, prefix) => {
+                const key = prefix + item.id;
+
+                if (hasCustom && custom[key]) {
+                    return {
+                        ...item,
+                        originalIcon: item.originalIcon || item.icon,
+                        icon: custom[key]
+                    };
+                }
+
+                
+                if (item.originalIcon) {
+                    return { ...item, icon: item.originalIcon };
+                }
+                return item;
+            };
+
+            
+            if (app.settingsMenu && app.settingsMenu.length > 0) {
+                app.settingsMenu = app.settingsMenu.map(item => applyIcon(item, 'settings_'));
+            }
+            if (app.aboutMenu && app.aboutMenu.length > 0) {
+                app.aboutMenu = app.aboutMenu.map(item => applyIcon(item, 'about_'));
+            }
+            if (app.coreSettingsItems && app.coreSettingsItems.length > 0) {
+                app.coreSettingsItems = app.coreSettingsItems.map(item => applyIcon(item, 'core_'));
+            }
+            if (app.contentCategories && app.contentCategories.length > 0) {
+                app.contentCategories = app.contentCategories.map(item => applyIcon(item, 'content_'));
+            }
+
+            
+            if (app.displayMenuItems && app.displayMenuItems.length > 0) {
+                app.displayMenuItems = app.displayMenuItems.map(item => applyIcon(item, 'displaymenu_'));
+            }
+                        
+            if (app.themesList && app.themesList.length > 0) {
+                app.themesList = app.themesList.map(theme => {
+                    const key = 'theme_' + theme.name;
+                    const defaultIcon = 'assets/icons/icon-theme.png';
+
+                    
+                    if (hasCustom && custom[key]) {
+                        return { ...theme, icon: custom[key] };
+                    }
+
+                    
+                    return { ...theme, icon: defaultIcon };
+                });
+            }
+
+            
+            if (app.masterMenu && app.masterMenu.length > 0) {
+                app.masterMenu = app.masterMenu.map(master => ({
+                    ...master,
+                    detailMenu: master.detailMenu.map(detail => applyIcon(detail, 'blade_'))
+                }));
+                this.updateDetailMenu();
+            }
+        },
+
+        async loadCustomIcons() {
+            const app = Alpine.store('app');
+            const themeData = app.themesList.find(t => t.name === app.currentTheme);
+            const isExternal = themeData && themeData.type === 'external';
+
+            
+            if (isExternal) {
+                app.customIcons = {};
+                return;
+            }
+
+            const saved = await window.electronAPI.get('customIcons') || {};
+
+            
+            const valid = {};
+            for (const [key, path] of Object.entries(saved)) {
+                if (path && await window.electronAPI.checkPathExists(path)) {
+                    valid[key] = path;
+                }
+            }
+
+            app.customIcons = valid;
+
+            
+            if (Object.keys(valid).length !== Object.keys(saved).length) {
+                await window.electronAPI.set('customIcons', valid);
+            }
+
+            this.applyCustomIconsToMenus();
+        }, 
         
         cycleCustomColor(direction, isJump = false) {
             const app = Alpine.store('app');
@@ -2152,13 +2672,18 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
-        
         async browseLocalArtAsset() {
             const app = Alpine.store('app');
             const filePath = await window.electronAPI.openImageFile();
+            
             if (filePath) {
                 
-                const artProtocolUrl = `file://${filePath.replace(/\\/g, '/')}`;
+                const normalized = filePath.replace(/\\/g, '/');
+                const encoded = normalized.split('/')
+                    .map(segment => encodeURIComponent(segment))
+                    .join('/');
+                const artProtocolUrl = `file://${encoded}`;
+                
                 await this.applyArtAsset(artProtocolUrl, true);
             }
         },
@@ -3093,6 +3618,99 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
+        
+        async _saveGuideBackground(guideKey, filePath) {
+            const app = Alpine.store('app');
+            const themeData = app.themesList.find(t => t.name === app.currentTheme);
+
+            
+            app.guideBackgrounds[guideKey] = filePath;
+            const plainObj = JSON.parse(JSON.stringify(app.guideBackgrounds));
+            app.guideBackgrounds = plainObj;
+
+            if (themeData && themeData.type === 'external') {
+                
+                let themeMods = await window.electronAPI.get('mods_' + app.currentTheme) || {};
+                themeMods.guideBackgrounds = plainObj;
+                await window.electronAPI.set('mods_' + app.currentTheme, themeMods);
+            } else {
+                
+                await window.electronAPI.set('guideBackgrounds', plainObj);
+            }
+
+            
+            this.applyGuideBackgrounds();
+        },
+        
+        async _resetGuideBackgrounds() {
+            const app = Alpine.store('app');
+            const themeData = app.themesList.find(t => t.name === app.currentTheme);
+
+            const emptyGuideBgs = {
+                homeSpine: null,
+                gamesSpine: null,
+                settingsSpine: null,
+                homeContent: null,
+                gamesContent: null,
+                settingsContent: null
+            };
+
+            if (themeData && themeData.type === 'external') {
+                let themeMods = await window.electronAPI.get('mods_' + app.currentTheme) || {};
+                themeMods.guideBackgrounds = emptyGuideBgs;
+                await window.electronAPI.set('mods_' + app.currentTheme, themeMods);
+            } else {
+                await window.electronAPI.set('guideBackgrounds', emptyGuideBgs);
+            }
+
+            app.guideBackgrounds = emptyGuideBgs;
+        },
+
+        handleDisplaySelect() {
+            const app = Alpine.store('app');
+            
+            
+            
+            
+            if (app.focusedIndex === 0) {
+                this.changeWallpaper();
+            } else if (app.focusedIndex === 1) {
+                this.changeStage();
+            } else if (app.focusedIndex === 2) {
+                
+                if (!app.bladeListFocused) {
+                    app.bladeListFocused = true;
+                    app.bladeFocusIndex = 0;
+                    this.playSound('select');
+                    this.scrollToFocusedElement('blade-bg-item-0');
+                } else {
+                    this.selectBladeBgItem();
+                }
+            }
+            
+            else if (app.focusedIndex === 3) {
+                if (!app.guideListFocused) {
+                    app.guideListFocused = true;
+                    app.guideFocusIndex = 0;
+                    this.playSound('select');
+                    this.scrollToFocusedElement('guide-bg-item-0');
+                } else {
+                    this.selectGuideBgItem();
+                }
+            }
+            
+            else if (app.focusedIndex === 4) {
+                if (!app.iconListFocused) {
+                    app.iconListFocused = true;
+                    app.iconFocusIndex = 0;
+                    this.playSound('select');
+                    this.scrollToFocusedElement('icon-item-0');
+                } else {
+                    this.selectIconItem();
+                }
+            }
+        },
+
         async changeWallpaper() {
             
             this.openGallery('wallpaper');
@@ -3118,27 +3736,57 @@ document.addEventListener('alpine:init', () => {
             app.displaySettings.flourishPath = null;
             app.displaySettings.flourishName = 'Default';
             
+            await this._resetGuideBackgrounds();
+            await this.resetAllBladeBackgrounds();
+            await this.resetAllIcons();   
+            
             this.applyDisplaySettings();
+            this.applyGuideBackgrounds();
             this.playSound('panelUnfold'); 
         },
         applyDisplaySettings() {
             const app = Alpine.store('app');
             const root = document.documentElement;
-            if (app.displaySettings.wallpaperPath) {
-                const cleanPath = app.displaySettings.wallpaperPath.replace(/\\/g, '/');
-                root.style.setProperty('--nxe-user-wallpaper', `url('file://${cleanPath}')`);
+
+            
+            const toSafeFileUrl = (filePath) => {
+                if (!filePath) return null;
+                
+                
+                const normalized = filePath.replace(/\\/g, '/');
+                
+                
+                
+                
+                const encoded = normalized
+                    .split('/')
+                    .map(segment => encodeURIComponent(segment))
+                    .join('/');
+                
+                
+                return `url('file://${encoded}')`;
+            };
+
+            
+            const wallpaperUrl = toSafeFileUrl(app.displaySettings.wallpaperPath);
+            if (wallpaperUrl) {
+                root.style.setProperty('--nxe-user-wallpaper', wallpaperUrl);
             } else {
                 root.style.removeProperty('--nxe-user-wallpaper');
             }
-            if (app.displaySettings.stagePath) {
-                const cleanPath = app.displaySettings.stagePath.replace(/\\/g, '/');
-                root.style.setProperty('--nxe-user-stage', `url('file://${cleanPath}')`);
+
+            
+            const stageUrl = toSafeFileUrl(app.displaySettings.stagePath);
+            if (stageUrl) {
+                root.style.setProperty('--nxe-user-stage', stageUrl);
             } else {
                 root.style.removeProperty('--nxe-user-stage');
             }
-            if (app.displaySettings.flourishPath) {
-                const cleanPath = app.displaySettings.flourishPath.replace(/\\/g, '/');
-                root.style.setProperty('--nxe-user-flourish', `url('file://${cleanPath}')`);
+
+            
+            const flourishUrl = toSafeFileUrl(app.displaySettings.flourishPath);
+            if (flourishUrl) {
+                root.style.setProperty('--nxe-user-flourish', flourishUrl);
             } else {
                 root.style.removeProperty('--nxe-user-flourish');
             }
@@ -3149,6 +3797,7 @@ document.addEventListener('alpine:init', () => {
             const isExternal = themeData && themeData.type === 'external';
 
             let savedWallpaper = null, savedStage = null, savedFlourish = null;
+            let savedGuideBgs = null;  
 
             if (isExternal) {
                 
@@ -3158,12 +3807,19 @@ document.addEventListener('alpine:init', () => {
                     savedStage = themeMods.displaySettings.stagePath;
                     savedFlourish = themeMods.displaySettings.flourishPath;
                 }
+                
+                savedGuideBgs = themeMods.guideBackgrounds || null;
             } else {
                 savedWallpaper = await window.electronAPI.get('userWallpaper');
                 savedStage = await window.electronAPI.get('userStage');
                 savedFlourish = await window.electronAPI.get('userFlourish');
+                
+                savedGuideBgs = await window.electronAPI.get('guideBackgrounds') || null;
             }
 
+            
+            
+            
             app.displaySettings.wallpaperPath = null;
             app.displaySettings.wallpaperName = 'Default';
             app.displaySettings.stagePath = null;
@@ -3171,6 +3827,19 @@ document.addEventListener('alpine:init', () => {
             app.displaySettings.flourishPath = null;
             app.displaySettings.flourishName = 'Default';
 
+            
+            app.guideBackgrounds = {
+                homeSpine: null,
+                gamesSpine: null,
+                settingsSpine: null,
+                homeContent: null,
+                gamesContent: null,
+                settingsContent: null
+            };
+
+            
+            
+            
             if (savedWallpaper && await window.electronAPI.checkPathExists(savedWallpaper)) {
                 app.displaySettings.wallpaperPath = savedWallpaper;
                 app.displaySettings.wallpaperName = savedWallpaper.split(/[\\/]/).pop();
@@ -3183,7 +3852,33 @@ document.addEventListener('alpine:init', () => {
                 app.displaySettings.flourishPath = savedFlourish;
                 app.displaySettings.flourishName = savedFlourish.split(/[\\/]/).pop();
             }
+
+            
+            if (savedGuideBgs) {
+                const validGuideBgs = {
+                    homeSpine: null,
+                    gamesSpine: null,
+                    settingsSpine: null,
+                    homeContent: null,
+                    gamesContent: null,
+                    settingsContent: null
+                };
+                
+                for (const key of Object.keys(validGuideBgs)) {
+                    const path = savedGuideBgs[key];
+                    if (path && await window.electronAPI.checkPathExists(path)) {
+                        validGuideBgs[key] = path;
+                    }
+                }
+                
+                app.guideBackgrounds = validGuideBgs;
+            }
+
+            
+            
+            
             this.applyDisplaySettings();
+            this.applyGuideBackgrounds();  
         },
 
         async applyTheme(themeName) {
@@ -3314,6 +4009,19 @@ document.addEventListener('alpine:init', () => {
                 case 'settings-display':
                     app.focusedCollection = 'displayItems'; 
                     app.focusedIndex = 0;
+                    
+                    
+                    if (!app.isExternalTheme()) {
+                        app.bladeFocusIndex = 0;
+                        app.bladeListFocused = false;
+                        app.guideFocusIndex = 0;
+                        app.guideListFocused = false;
+                        app.iconFocusIndex = 0;          
+                        app.iconListFocused = false;     
+                        this.buildDisplayBladesList();
+                        this.buildDisplayGuideList();
+                        this.buildDisplayIconsList();    
+                    }
                     break;
                 case 'dashboard':
                     app.focusedList = 'master'; 
@@ -3854,7 +4562,6 @@ document.addEventListener('alpine:init', () => {
         },
         async scanForThemes(force = false) {
             const app = Alpine.store('app');
-            
             if (!force && app.themesList.length > 0) return;
             
             const result = await window.electronAPI.scanForThemes();
@@ -3865,6 +4572,9 @@ document.addEventListener('alpine:init', () => {
                     customIcons: themeObj.customIcons || [],
                     icon: 'assets/icons/icon-theme.png' 
                 }));
+                
+                
+                this.applyCustomIconsToMenus();
             }
         },
         updateGameDetails() {
@@ -3991,18 +4701,6 @@ document.addEventListener('alpine:init', () => {
 
                         this.scrollToFocusedElement('ach-card-' + newIndex);
                     }
-                return;
-            }
-            
-            if (app.focusedCollection === 'displayItems') {
-                let newIndex = app.focusedIndex + direction;
-                if (newIndex < 0) newIndex = 0;
-                if (newIndex > 1) newIndex = 1; 
-                if (newIndex !== app.focusedIndex) {
-                    app.focusedIndex = newIndex;
-                    this.playSound('focus');
-                    this.scrollToFocusedElement('display-item-' + newIndex);
-                }
                 return;
             }
 
@@ -4320,15 +5018,6 @@ document.addEventListener('alpine:init', () => {
             const actions = Alpine.store('actions');
             
             if (app.isPageTransitioning) return;
-            
-            
-            if (app.focusedCollection === 'displayItems') {
-                this.playSound('select');
-                if (app.focusedIndex === 0) this.changeWallpaper();
-                else if (app.focusedIndex === 1) this.changeStage();
-                return;
-            }
-
             if (!app.focusedCollection) return;
             const collection = app[app.focusedCollection];
             const item = collection ? collection[app.focusedIndex] : null;
@@ -4942,37 +5631,45 @@ document.addEventListener('alpine:init', () => {
             const app = Alpine.store('app');
             
             
-            if (app.currentView !== 'game-library' || app.gamesList.length === 0) return;
-
-            const game = app.gamesList[app.focusedIndex];
+            if (app.currentView !== 'game-library') return;
+            
+            
+            const game = app.filteredLibraryGames[app.focusedIndex];
             if (!game) return;
 
             
             if (confirm(`Are you sure you want to delete "${game.name}" permanently?`)) {
                 try {
-                    
                     const result = await window.electronAPI.deleteGame(game.path);
                     
                     if (result.success) {
-                        this.playSound('back'); 
-                        
-                        
-                        app.gamesList.splice(app.focusedIndex, 1);
+                        this.playSound('back');
 
                         
-                        if (app.focusedIndex >= app.gamesList.length) {
-                            app.focusedIndex = Math.max(0, app.gamesList.length - 1);
+                        app.filteredLibraryGames.splice(app.focusedIndex, 1);
+                        
+                        
+                        app.gamesList = app.gamesList.filter(g => g.path !== game.path);
+
+                        
+                        if (app.focusedIndex >= app.filteredLibraryGames.length) {
+                            app.focusedIndex = Math.max(0, app.filteredLibraryGames.length - 1);
                         }
+                        
+                        
+                        app.libraryMemoryIndex = app.focusedIndex;
+
 
                         
-                        this.updateGameDetails(); 
+                        setTimeout(() => {
+                            this.updateGameDetails();
+                        }, 50);
                         
                     } else {
                         alert(`Failed to delete game: ${result.error}`);
                     }
                 } catch (e) {
                     console.error("Delete error:", e);
-
                     alert("Error calling delete handler.");
                 }
             }
@@ -5140,6 +5837,9 @@ document.addEventListener('alpine:init', () => {
             e.preventDefault();
             if (key === 'Escape' || key === 'Backspace' || key === 'b' || key === 'B') {
                 app.isGalleryOpen = false;
+                app.galleryTargetBladeId = null; 
+                app.galleryTargetGuideKey = null;
+                app.galleryTargetIconId = null;
                 if (app.galleryType === 'profile') app.isProfileSelectorOpen = true; 
                 actions.playSound('back');
                 return;
@@ -5690,6 +6390,164 @@ document.addEventListener('alpine:init', () => {
         
         
         
+        if (app.currentView === 'settings-display' && !app.isKeyboardOpen && !app.isGuideOpen) {
+            
+            const themeData = app.themesList.find(t => t.name === app.currentTheme);
+            const isExternalTheme = themeData && themeData.type === 'external';
+
+            
+            if (isExternalTheme) {
+                if (key === 'Enter' || key === 'a' || key === 'A') {
+                    e.preventDefault();
+                    actions.selectFocusedItem();   
+                    return;
+                }
+                if (key === 'y' || key === 'Y') {
+                    e.preventDefault();
+                    actions.resetDisplaySettings(); 
+                    return;
+                }
+                if (key === 'Escape' || key === 'Backspace' || key === 'b' || key === 'B') {
+                    e.preventDefault();
+                    actions.goBack();
+                    return;
+                }
+                
+                if (key === 'ArrowUp')    { e.preventDefault(); actions.moveFocus(-1); return; }
+                if (key === 'ArrowDown')  { e.preventDefault(); actions.moveFocus(1);  return; }
+                if (key === 'ArrowLeft')  { e.preventDefault(); return; }
+                if (key === 'ArrowRight') { e.preventDefault(); return; }
+                return;
+            }
+
+            
+            
+            
+            const isBladeMode = app.focusedIndex === 2;
+            const isGuideMode = app.focusedIndex === 3;
+            const isIconMode  = app.focusedIndex === 4;
+            const insideBladeList = app.bladeListFocused;
+            const insideGuideList = app.guideListFocused;
+            const insideIconList  = app.iconListFocused;
+
+            
+            if (key === 'ArrowUp') {
+                e.preventDefault();
+                if (isBladeMode && insideBladeList) {
+                    if (app.bladeFocusIndex > 0) {
+                        app.bladeFocusIndex--;
+                        actions.playSound('focus');
+                        actions.scrollToFocusedElement('blade-bg-item-' + app.bladeFocusIndex);
+                    } else actions.playSound('back');
+                } else if (isGuideMode && insideGuideList) {
+                    if (app.guideFocusIndex > 0) {
+                        app.guideFocusIndex--;
+                        actions.playSound('focus');
+                        actions.scrollToFocusedElement('guide-bg-item-' + app.guideFocusIndex);
+                    } else actions.playSound('back');
+                } else if (isIconMode && insideIconList) {
+                    if (app.iconFocusIndex > 0) {
+                        app.iconFocusIndex--;
+                        actions.playSound('focus');
+                        actions.scrollToFocusedElement('icon-item-' + app.iconFocusIndex);
+                    } else actions.playSound('back');
+                } else if (app.focusedIndex > 0) {
+                    app.focusedIndex--;
+                    if (app.focusedIndex === 2) {
+                        app.bladeFocusIndex = 0; app.bladeListFocused = false;
+                        actions.buildDisplayBladesList();
+                    }
+                    if (app.focusedIndex === 3) {
+                        app.guideFocusIndex = 0; app.guideListFocused = false;
+                        actions.buildDisplayGuideList();
+                    }
+                    if (app.focusedIndex === 4) {
+                        app.iconFocusIndex = 0; app.iconListFocused = false;
+                        actions.buildDisplayIconsList();
+                    }
+                    actions.playSound('focus');
+                    actions.scrollToFocusedElement('display-item-' + app.focusedIndex);
+                }
+                return;
+            }
+
+            
+            if (key === 'ArrowDown') {
+                e.preventDefault();
+                if (isBladeMode && insideBladeList) {
+                    if (app.bladeFocusIndex < app.displayBladesList.length - 1) {
+                        app.bladeFocusIndex++;
+                        actions.playSound('focus');
+                        actions.scrollToFocusedElement('blade-bg-item-' + app.bladeFocusIndex);
+                    }
+                } else if (isGuideMode && insideGuideList) {
+                    if (app.guideFocusIndex < app.displayGuideList.length - 1) {
+                        app.guideFocusIndex++;
+                        actions.playSound('focus');
+                        actions.scrollToFocusedElement('guide-bg-item-' + app.guideFocusIndex);
+                    }
+                } else if (isIconMode && insideIconList) {
+                    if (app.iconFocusIndex < app.displayIconsList.length - 1) {
+                        app.iconFocusIndex++;
+                        actions.playSound('focus');
+                        actions.scrollToFocusedElement('icon-item-' + app.iconFocusIndex);
+                    }
+                } else if (app.focusedIndex < 4) {
+                    app.focusedIndex++;
+                    if (app.focusedIndex === 2) {
+                        app.bladeFocusIndex = 0; app.bladeListFocused = false;
+                        actions.buildDisplayBladesList();
+                    }
+                    if (app.focusedIndex === 3) {
+                        app.guideFocusIndex = 0; app.guideListFocused = false;
+                        actions.buildDisplayGuideList();
+                    }
+                    if (app.focusedIndex === 4) {
+                        app.iconFocusIndex = 0; app.iconListFocused = false;
+                        actions.buildDisplayIconsList();
+                    }
+                    actions.playSound('focus');
+                    actions.scrollToFocusedElement('display-item-' + app.focusedIndex);
+                }
+                return;
+            }
+
+            if (key === 'Enter' || key === 'a' || key === 'A') {
+                e.preventDefault();
+                actions.handleDisplaySelect();
+                return;
+            }
+
+            if (key === 'y' || key === 'Y') {
+                e.preventDefault();
+                if (isBladeMode && insideBladeList) actions.resetFocusedBladeBg();
+                else if (isGuideMode && insideGuideList) actions.resetFocusedGuideBg();
+                else if (isIconMode && insideIconList) actions.resetFocusedIcon();
+                else actions.resetDisplaySettings();
+                return;
+            }
+
+            if (key === 'Escape' || key === 'Backspace' || key === 'b' || key === 'B') {
+                e.preventDefault();
+                if (insideBladeList) {
+                    app.bladeListFocused = false;
+                    actions.playSound('back');
+                } else if (insideGuideList) {
+                    app.guideListFocused = false;
+                    actions.playSound('back');
+                } else if (insideIconList) {
+                    app.iconListFocused = false;
+                    actions.playSound('back');
+                } else {
+                    actions.goBack();
+                }
+                return;
+            }
+            return;
+        }
+        
+        
+        
         
 
         
@@ -5714,7 +6572,6 @@ document.addEventListener('alpine:init', () => {
         
         if (key === 'y' || key === 'Y') {
             if (app.currentView === 'settings-system') { actions.openThemeStore(); e.preventDefault(); return; }
-            if (app.currentView === 'settings-display') { actions.resetDisplaySettings(); e.preventDefault(); return; }
             if (app.currentView === 'game-library') { actions.deleteFocusedGame(); e.preventDefault(); return; }
 
             if (app.currentView === 'settings-core') {
@@ -6124,6 +6981,9 @@ document.addEventListener('alpine:init', () => {
             if (app.isGalleryOpen) {
                 if (message.event === 'button_b' && message.value === 1) {
                     app.isGalleryOpen = false;
+                    app.galleryTargetBladeId = null; 
+                    app.galleryTargetGuideKey = null;
+                    app.galleryTargetIconId = null;
                     if (app.galleryType === 'profile') app.isProfileSelectorOpen = true;
                     actions.playSound('back');
                 }
@@ -6957,6 +7817,147 @@ document.addEventListener('alpine:init', () => {
             
             
             
+            if (app.currentView === 'settings-display' && !app.isKeyboardOpen && !app.isGuideOpen) {
+                
+                const themeData = app.themesList.find(t => t.name === app.currentTheme);
+                const isExternalTheme = themeData && themeData.type === 'external';
+
+                
+                if (isExternalTheme) {
+                    if (message.event === 'button_a' && message.value === 1) {
+                        actions.selectFocusedItem();   
+                        return;
+                    }
+                    if (message.event === 'button_y' && message.value === 1) {
+                        actions.resetDisplaySettings(); 
+                        return;
+                    }
+                    if (message.event === 'button_b' && message.value === 1) {
+                        actions.goBack();
+                        return;
+                    }
+                    
+                    if (message.event === 'dpad_y' && message.value !== 0) {
+                        actions.moveFocus(message.value);
+                        return;
+                    }
+                    
+                    if (message.event === 'dpad_x' && message.value !== 0) {
+                        return;
+                    }
+                    return;
+                }
+
+                
+                
+                
+                const isBladeMode = app.focusedIndex === 2;
+                const isGuideMode = app.focusedIndex === 3;
+                const isIconMode  = app.focusedIndex === 4;
+                const insideBladeList = app.bladeListFocused;
+                const insideGuideList = app.guideListFocused;
+                const insideIconList  = app.iconListFocused;
+
+                if (message.event === 'dpad_y' && message.value !== 0) {
+                    if (isBladeMode && insideBladeList) {
+                        if (message.value === -1) {
+                            if (app.bladeFocusIndex > 0) {
+                                app.bladeFocusIndex--;
+                                actions.playSound('focus');
+                                actions.scrollToFocusedElement('blade-bg-item-' + app.bladeFocusIndex);
+                            } else actions.playSound('back');
+                        } else {
+                            if (app.bladeFocusIndex < app.displayBladesList.length - 1) {
+                                app.bladeFocusIndex++;
+                                actions.playSound('focus');
+                                actions.scrollToFocusedElement('blade-bg-item-' + app.bladeFocusIndex);
+                            }
+                        }
+                    } else if (isGuideMode && insideGuideList) {
+                        if (message.value === -1) {
+                            if (app.guideFocusIndex > 0) {
+                                app.guideFocusIndex--;
+                                actions.playSound('focus');
+                                actions.scrollToFocusedElement('guide-bg-item-' + app.guideFocusIndex);
+                            } else actions.playSound('back');
+                        } else {
+                            if (app.guideFocusIndex < app.displayGuideList.length - 1) {
+                                app.guideFocusIndex++;
+                                actions.playSound('focus');
+                                actions.scrollToFocusedElement('guide-bg-item-' + app.guideFocusIndex);
+                            }
+                        }
+                    } else if (isIconMode && insideIconList) {
+                        if (message.value === -1) {
+                            if (app.iconFocusIndex > 0) {
+                                app.iconFocusIndex--;
+                                actions.playSound('focus');
+                                actions.scrollToFocusedElement('icon-item-' + app.iconFocusIndex);
+                            } else actions.playSound('back');
+                        } else {
+                            if (app.iconFocusIndex < app.displayIconsList.length - 1) {
+                                app.iconFocusIndex++;
+                                actions.playSound('focus');
+                                actions.scrollToFocusedElement('icon-item-' + app.iconFocusIndex);
+                            }
+                        }
+                    } else {
+                        const newIndex = app.focusedIndex + message.value;
+                        if (newIndex >= 0 && newIndex <= 4) {
+                            app.focusedIndex = newIndex;
+                            if (newIndex === 2) {
+                                app.bladeFocusIndex = 0; app.bladeListFocused = false;
+                                actions.buildDisplayBladesList();
+                            }
+                            if (newIndex === 3) {
+                                app.guideFocusIndex = 0; app.guideListFocused = false;
+                                actions.buildDisplayGuideList();
+                            }
+                            if (newIndex === 4) {
+                                app.iconFocusIndex = 0; app.iconListFocused = false;
+                                actions.buildDisplayIconsList();
+                            }
+                            actions.playSound('focus');
+                            actions.scrollToFocusedElement('display-item-' + newIndex);
+                        }
+                    }
+                    return;
+                }
+
+                if (message.event === 'button_a' && message.value === 1) {
+                    actions.handleDisplaySelect();
+                    return;
+                }
+
+                if (message.event === 'button_y' && message.value === 1) {
+                    if (isBladeMode && insideBladeList) actions.resetFocusedBladeBg();
+                    else if (isGuideMode && insideGuideList) actions.resetFocusedGuideBg();
+                    else if (isIconMode && insideIconList) actions.resetFocusedIcon();
+                    else actions.resetDisplaySettings();
+                    return;
+                }
+
+                if (message.event === 'button_b' && message.value === 1) {
+                    if (insideBladeList) {
+                        app.bladeListFocused = false;
+                        actions.playSound('back');
+                    } else if (insideGuideList) {
+                        app.guideListFocused = false;
+                        actions.playSound('back');
+                    } else if (insideIconList) {
+                        app.iconListFocused = false;
+                        actions.playSound('back');
+                    } else {
+                        actions.goBack();
+                    }
+                    return;
+                }
+
+                return;
+            }
+            
+            
+            
             switch(message.event) {
                 case 'dpad_x':
                 case 'dpad_y':
@@ -7047,9 +8048,6 @@ document.addEventListener('alpine:init', () => {
                     if (app.currentView === 'dashboard') {
                         actions.changeUserAvatar();
                     }
-                    else if (app.currentView === 'settings-display') {
-                        actions.resetDisplaySettings();
-                    }
                     else if (app.currentView === 'settings-system') {
                         actions.openThemeStore();
                     }
@@ -7077,6 +8075,7 @@ document.addEventListener('alpine:init', () => {
         const result = await window.electronAPI.loadLayout('dashboard');
         app.currentViewHTML = result.html;
         await Alpine.store('actions').loadDashboardData();
+        await Alpine.store('actions').loadCustomIcons();
         console.log('[Debug Core.js] 6. Initialization complete.');
 
         Alpine.store('hooks').emit('onAppReady', { theme: app.currentTheme });

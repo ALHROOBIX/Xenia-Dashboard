@@ -196,9 +196,24 @@
         
         <div class="gallery-header">
             
-            <h2 x-text="$store.app.galleryType === 'profile' ? ($store.app.t('gallery.title_profile') || 'Select Profile Picture') : ($store.app.t('gallery.title_background') || 'Select Background Image')"></h2>
+            <h2 x-text="
+                $store.app.galleryType === 'profile' 
+                    ? ($store.app.t('gallery.title_profile') || 'Select Profile Picture') 
+                    : $store.app.galleryType === 'customIcon'
+                        ? ($store.app.t('gallery.title_icons') || 'Select Custom Icon')
+                        : ($store.app.t('gallery.title_background') || 'Select Background Image')
+            "></h2>
             
-            <p x-text="'Custom-BG-PF/' + ($store.app.galleryType === 'profile' ? ($store.app.t('gallery.path_profile') || 'Profile') : ($store.app.t('gallery.path_background') || 'Background'))"></p>
+            
+            <p x-text="
+                'Custom-BG-PF/' + (
+                    $store.app.galleryType === 'profile' 
+                        ? ($store.app.t('gallery.path_profile') || 'Profile') 
+                        : $store.app.galleryType === 'customIcon'
+                            ? 'Icons'
+                            : ($store.app.t('gallery.path_background') || 'Background')
+                )
+            "></p>
         </div>
 
         <template x-if="$store.app.galleryLoading">
@@ -1121,6 +1136,197 @@
         .nxe-markdown-body::-webkit-scrollbar-thumb:hover {
             background: rgba(255, 255, 255, 0.4);
         }
+        
+
+        
+        .guide-blade.blade-home .blade-spine,
+        .guide-blade.blade-games .blade-spine,
+        .guide-blade.blade-settings .blade-spine {
+            background-image: none !important;
+            position: relative;
+            overflow: hidden;
+        }
+
+        
+        .guide-blade.blade-home .blade-spine::before,
+        .guide-blade.blade-games .blade-spine::before,
+        .guide-blade.blade-settings .blade-spine::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            transform: rotate(180deg);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .guide-blade.blade-home .blade-spine::before     { background-image: var(--guide-home-spine); }
+        .guide-blade.blade-games .blade-spine::before    { background-image: var(--guide-games-spine); }
+        .guide-blade.blade-settings .blade-spine::before { background-image: var(--guide-settings-spine); }
+
+        
+        .guide-blade .blade-spine > span {
+            position: relative;
+            z-index: 1;
+        }
+
+        
+        .guide-blade.blade-home.active .blade-spine,
+        .guide-blade.blade-games.active .blade-spine,
+        .guide-blade.blade-settings.active .blade-spine {
+            background: linear-gradient(to right, rgba(255,255,255,0.8), rgba(220,220,220,0.5)) !important;
+            border-right: 1px solid #bbbbbb !important;
+            border-left: 1px solid #bbbbbb !important;
+            color: #000000 !important;
+            text-shadow: 0 1px 0 rgba(255,255,255,0.9) !important;
+        }
+
+        
+        .guide-blade.blade-home.active .blade-spine::before     { background-image: var(--guide-home-spine); }
+        .guide-blade.blade-games.active .blade-spine::before    { background-image: var(--guide-games-spine); }
+        .guide-blade.blade-settings.active .blade-spine::before { background-image: var(--guide-settings-spine); }
+
+        .guide-blade.blade-home.active .blade-spine::before,
+        .guide-blade.blade-games.active .blade-spine::before,
+        .guide-blade.blade-settings.active .blade-spine::before {
+            background-size: cover !important;
+            background-position: center !important;
+        }
+
+        
+        .guide-blade.blade-home.active {
+            background: var(--guide-home-content, linear-gradient(145deg, #f8f8f8, #d8d8d8)) !important;
+            background-size: cover !important;
+            background-position: center !important;
+        }
+        .guide-blade.blade-games.active {
+            background: var(--guide-games-content, linear-gradient(145deg, #f8f8f8, #d8d8d8)) !important;
+            background-size: cover !important;
+            background-position: center !important;
+        }
+        .guide-blade.blade-settings.active {
+            background: var(--guide-settings-content, linear-gradient(145deg, #f8f8f8, #d8d8d8)) !important;
+            background-size: cover !important;
+            background-position: center !important;
+        }
+
+        
+        .guide-bg-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 4px 8px 20px 4px;
+        }
+        .guide-bg-list::-webkit-scrollbar { width: 6px; }
+        .guide-bg-list::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); border-radius: 3px; }
+        .guide-bg-list::-webkit-scrollbar-thumb { background: var(--nxe-brand-primary, #90c31d); border-radius: 3px; }
+        .guide-bg-list::-webkit-scrollbar-thumb:hover { background: var(--nxe-brand-light, #d0e4a1); }
+
+        .guide-bg-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.65) 100%);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            flex-shrink: 0;
+            min-height: 80px;
+        }
+        .guide-bg-item:hover {
+            background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.75) 100%);
+            border-color: rgba(0, 0, 0, 0.15);
+            transform: translateX(2px);
+        }
+        .guide-bg-item.focused {
+            background: linear-gradient(90deg, #A8D14B 0%, #C8E37A 50%, #E8F4C0 100%);
+            border: 1px solid #6B9319;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            transform: translateX(4px);
+        }
+
+        .guide-bg-thumb {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #0a0a0a;
+            border: 2px solid rgba(0, 0, 0, 0.3);
+            flex-shrink: 0;
+            position: relative;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .guide-bg-thumb.thumb-spine { width: 32px; border-radius: 6px; }
+        .guide-bg-thumb.thumb-content { width: 90px; }
+
+        .guide-bg-item.focused .guide-bg-thumb {
+            border-color: rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+        .guide-bg-item.has-custom .guide-bg-thumb { border-color: #6B9319; }
+
+        .guide-bg-thumb img.custom-bg-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .guide-bg-placeholder {
+            color: #666;
+            font-size: 28px;
+            line-height: 1;
+            opacity: 0.7;
+        }
+
+        .guide-bg-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .guide-bg-name {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.2;
+            text-shadow:
+                1px 1px 0 rgba(0, 0, 0, 0.95), -1px -1px 0 rgba(0, 0, 0, 0.95),
+                1px -1px 0 rgba(0, 0, 0, 0.95), -1px 1px 0 rgba(0, 0, 0, 0.95),
+                0 2px 4px rgba(0, 0, 0, 0.9);
+        }
+
+        .guide-bg-status {
+            font-size: 0.8rem;
+            color: #e0e0e0;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            text-shadow:
+                1px 1px 0 rgba(0, 0, 0, 0.9), -1px -1px 0 rgba(0, 0, 0, 0.9),
+                0 2px 3px rgba(0, 0, 0, 0.8);
+        }
+        .guide-bg-item.has-custom .guide-bg-status { color: #F4FFC5; font-weight: 700; }
+        .guide-bg-item.focused .guide-bg-status { color: #ffffff; }
     </style>
 
     <div class="friend-list-overlay" x-show="$store.app.isFriendsOverlayOpen" x-transition.opacity style="display: none;">
